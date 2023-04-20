@@ -142,7 +142,7 @@
                     <archive>
                         <manifest>
                             <addClasspath>true</addClasspath>
-                            <mainClass>org.rapaio.jupyter.java.RJKMain</mainClass>
+                            <mainClass>org.rapaio.jupyter.kernel.MainApp</mainClass>
                         </manifest>
                     </archive>
                 </configuration>
