@@ -34,11 +34,14 @@ import org.rapaio.jupyter.kernel.message.messages.CustomCommClose;
 import org.rapaio.jupyter.kernel.message.messages.CustomCommMsg;
 import org.rapaio.jupyter.kernel.message.messages.CustomCommOpen;
 import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
+import org.rapaio.jupyter.kernel.message.messages.IOPubDisplayData;
 import org.rapaio.jupyter.kernel.message.messages.IOPubError;
 import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteInput;
 import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteResult;
+import org.rapaio.jupyter.kernel.message.messages.IOPubUpdateDisplayData;
 import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellCompleteReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
@@ -52,6 +55,8 @@ import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
 
 public class RapaioKernel implements KernelMessageHandler {
 
+    public static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
+
     private static final Logger LOGGER = Logger.getLogger(RapaioKernel.class.getSimpleName());
     private static final AtomicInteger executionCount = new AtomicInteger(1);
 
@@ -62,12 +67,17 @@ public class RapaioKernel implements KernelMessageHandler {
     private final JavaEngine javaEngine;
     private final MagicEvaluator magicEvaluator;
 
+
+    private ReplyEnv currentReplyEnv;
+
     public RapaioKernel() {
 
         this.renderer = new DefaultRenderer();
         this.javaEngine = JavaEngine.builder()
+                .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
                 .withTimeoutMillis(-1L)
                 .build();
+        this.javaEngine.initialize();
         this.magicEvaluator = new MagicEvaluator(javaEngine);
     }
 
@@ -75,6 +85,30 @@ public class RapaioKernel implements KernelMessageHandler {
     @SuppressWarnings("unchecked")
     public <T> MessageHandler<T> getHandler(MessageType<T> type) {
         return messageHandlers.get(type);
+    }
+
+    public Renderer getRenderer() {
+        return renderer;
+    }
+
+    public void display(DisplayData dd) {
+        if (currentReplyEnv != null) {
+            currentReplyEnv.publish(new IOPubDisplayData(dd));
+        }
+    }
+
+    public void updateDisplay(String id, DisplayData dd) {
+        dd.setDisplayId(id);
+        updateDisplay(dd);
+    }
+
+    public void updateDisplay(DisplayData dd) {
+        if (currentReplyEnv != null) {
+            if(!dd.hasDisplayId()) {
+                throw new IllegalArgumentException("Cannot update a display without display_id.");
+            }
+            currentReplyEnv.publish(new IOPubUpdateDisplayData(dd));
+        }
     }
 
     private ShellKernelInfoReply getKernelInfo() {
@@ -203,6 +237,10 @@ public class RapaioKernel implements KernelMessageHandler {
         // hooke system io to allow execution to output into notebook
         env.interceptSystemIO(allowStdin);
 
+        currentReplyEnv = env;
+
+        env.defer(() -> currentReplyEnv = null);
+
         // push on stack restore streams
         env.defer(() -> {
             System.setOut(oldStdOut);
@@ -260,13 +298,31 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     private void handleCompleteRequest(ReplyEnv env, Message<ShellCompleteRequest> message) {
-        // TODO: not implemented yet
-        LOGGER.info("ShellCompleteRequest not yet implemented.");
+        ShellCompleteRequest request = message.content();
+        env.setBusyDeferIdle();
+        try {
+            ReplacementOptions options = javaEngine.complete(request.code(), request.cursorPos());
+            if (options == null) {
+                env.reply(new ShellCompleteReply(Collections.emptyList(), request.cursorPos(), request.cursorPos(),
+                        Collections.emptyMap()));
+            } else {
+                env.reply(new ShellCompleteReply(options.replacements(), options.start(), options.end(),
+                        Collections.emptyMap()));
+            }
+        } catch (Exception e) {
+            env.replyError(MessageType.SHELL_COMPLETE_REPLY.error(), ErrorReply.of(e, 0));
+        }
     }
 
     private void handleHistoryRequest(ReplyEnv env, Message<ShellHistoryRequest> message) {
-        // TODO: not implemented yet
-        LOGGER.info("ShellHistoryRequest not yet implemented.");
+        /*
+        Note from specifications:
+        Most of the history messaging options are not used by Jupyter frontends, and many kernels do not implement them.
+        If you’re implementing these messages in a kernel, the ‘tail’ request is the most useful;
+        this is used by the Qt console, for example.
+        The notebook interface does not use history messages at all.
+         */
+        LOGGER.info("ShellHistoryRequest not implemented.");
     }
 
     private void handleKernelInfoRequest(ReplyEnv env, Message<ShellKernelInfoRequest> ignored) {

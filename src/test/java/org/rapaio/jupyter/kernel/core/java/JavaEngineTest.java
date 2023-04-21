@@ -31,4 +31,13 @@ public class JavaEngineTest {
         assertTrue(result instanceof Integer);
         assertEquals(3, result);
     }
+
+    @Test
+    void completionTest() {
+        JavaEngine engine = JavaEngine.builder()
+                .withTimeoutMillis(-1L)
+                .build();
+        var replacements = engine.complete("Sys", 3);
+        System.out.println(replacements);
+    }
 }

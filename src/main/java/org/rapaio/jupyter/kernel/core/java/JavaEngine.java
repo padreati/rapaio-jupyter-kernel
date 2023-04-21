@@ -1,13 +1,21 @@
 package org.rapaio.jupyter.kernel.core.java;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 
 import jdk.jshell.EvalException;
@@ -23,12 +31,18 @@ public class JavaEngine {
     private final RapaioExecutionControlProvider controlProvider;
     private final JShell shell;
     private final SourceCodeAnalysis sourceAnalysis;
+    private final List<String> startupScripts;
 
-    protected JavaEngine(String executionId, RapaioExecutionControlProvider controlProvider, JShell shell) {
+    protected JavaEngine(String executionId, RapaioExecutionControlProvider controlProvider, JShell shell, List<String> startupScripts) {
         this.executionId = executionId;
         this.controlProvider = controlProvider;
         this.shell = shell;
         this.sourceAnalysis = shell.sourceCodeAnalysis();
+        this.startupScripts = startupScripts;
+    }
+
+    public void initialize() {
+        startupScripts.forEach(shell::eval);
     }
 
     /**
@@ -124,6 +138,24 @@ public class JavaEngine {
         };
     }
 
+    public ReplacementOptions complete(String code, int at) {
+        int[] anchor = new int[1];
+        List<SourceCodeAnalysis.Suggestion> suggestions = sourceAnalysis.completionSuggestions(code, at, anchor);
+        if (suggestions == null || suggestions.isEmpty()) {
+            return null;
+        }
+        suggestions = new ArrayList<>(suggestions);
+        suggestions.sort(Comparator.comparingInt(s -> s.continuation().length()));
+        suggestions.sort(Comparator.comparing(s -> s.matchesType() ? 0 : 1));
+
+        List<String> options = suggestions.stream()
+                .map(SourceCodeAnalysis.Suggestion::continuation)
+                .distinct()
+                .collect(Collectors.toList());
+
+        return new ReplacementOptions(options, anchor[0], at);
+    }
+
     public DisplayData inspect(String source, int pos, int detailLevel) {
 
         // Move the code position to the end of the identifier to make the inspection work at any
@@ -168,6 +200,8 @@ public class JavaEngine {
 
         private Long timeoutMillis = null;
         private final List<String> compilerOptions = new LinkedList<>();
+        private final List<String> startupScripts = new LinkedList<>();
+
 
         public Builder withTimeoutMillis(Long timeoutMillis) {
             this.timeoutMillis = timeoutMillis;
@@ -181,6 +215,31 @@ public class JavaEngine {
 
         public Builder withCompilerOptions(Collection<String> options) {
             this.compilerOptions.addAll(options);
+            return this;
+        }
+
+        public Builder withStartupScript(String script) {
+            if (script != null) {
+                this.startupScripts.add(script);
+            }
+            return this;
+        }
+
+        public Builder withStartupScript(InputStream in) {
+            StringBuilder sb = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new InputStreamReader(in))) {
+                while (true) {
+                    String line = reader.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    sb.append(line).append("\n");
+                }
+                this.startupScripts.add(sb.toString());
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+
             return this;
         }
 
@@ -206,7 +265,7 @@ public class JavaEngine {
                     .compilerOptions(compilerOptions.toArray(String[]::new))
                     .executionEngine(controlProvider, controlParameterMap)
                     .build();
-            return new JavaEngine(executionId, controlProvider, shell);
+            return new JavaEngine(executionId, controlProvider, shell, startupScripts);
         }
     }
 }

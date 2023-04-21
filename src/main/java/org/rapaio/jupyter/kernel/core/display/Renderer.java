@@ -2,5 +2,5 @@ package org.rapaio.jupyter.kernel.core.display;
 
 public interface Renderer {
 
-    DisplayData render(Object result);
+    DisplayData render(Object result, String...args);
 }
