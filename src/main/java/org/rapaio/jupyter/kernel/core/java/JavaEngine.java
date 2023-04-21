@@ -7,6 +7,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
 import jdk.jshell.JShellException;
@@ -40,10 +43,8 @@ public class JavaEngine {
     /**
      * Called to stop the execution.
      * If restart is true, then we can save some resources since it will start again.
-     *
-     * @param restart if a restart is planned
      */
-    public void shutdown(boolean restart) {
+    public void shutdown() {
         shell.close();
     }
 
@@ -80,8 +81,7 @@ public class JavaEngine {
 
             Snippet.SubKind subKind = event.snippet().subKind();
 
-            Object value = subKind.isExecutable() ? control.takeResult(key) : event.value();
-            result = value;
+            result = subKind.isExecutable() ? control.takeResult(key) : event.value();
         }
 
         for (SnippetEvent event : events) {
@@ -92,8 +92,7 @@ public class JavaEngine {
                         switch (((EvalException) e).getExceptionClassName()) {
                             case RapaioExecutionControl.TIMEOUT_MARKER ->
                                     throw new EvaluationTimeoutException(control.getTimeout(), code.trim());
-                            case RapaioExecutionControl.INTERRUPTED_MARKER ->
-                                    throw new EvaluationInterruptedException(code.trim());
+                            case RapaioExecutionControl.INTERRUPTED_MARKER -> throw new EvaluationInterruptedException(code.trim());
                             default -> throw e;
                         }
                     }
@@ -108,6 +107,57 @@ public class JavaEngine {
         }
 
         return result;
+    }
+
+    public String isComplete(String code) {
+        SourceCodeAnalysis.CompletionInfo info = sourceAnalysis.analyzeCompletion(code);
+        while (info.completeness().isComplete()) {
+            info = sourceAnalysis.analyzeCompletion(info.remaining());
+        }
+
+        return switch (info.completeness()) {
+            case COMPLETE, COMPLETE_WITH_SEMI, EMPTY -> RapaioKernel.IS_COMPLETE_STATUS_YES;
+            case UNKNOWN -> RapaioKernel.IS_COMPLETE_STATUS_BAD;
+            case CONSIDERED_INCOMPLETE, DEFINITELY_INCOMPLETE ->
+                // TODO: improvement on how to compute indentation on info.remaining()
+                    "0";
+        };
+    }
+
+    public DisplayData inspect(String source, int pos, int detailLevel) {
+
+        // Move the code position to the end of the identifier to make the inspection work at any
+        // point in the identifier. i.e "System.o|ut" or "System.out|" will return the same result.
+        while (pos + 1 < source.length() && Character.isJavaIdentifierPart(source.charAt(pos + 1))) {
+            pos++;
+        }
+
+        // If the next non-whitespace character is an opening paren '(' then this must be included
+        // in the documentation search to ensure it searches for a method call.
+        int parenIdx = pos;
+        while (parenIdx + 1 < source.length() && Character.isWhitespace(source.charAt(parenIdx + 1))) {
+            parenIdx++;
+        }
+        if (parenIdx + 1 < source.length() && source.charAt(parenIdx + 1) == '(') {
+            pos = parenIdx + 1;
+        }
+
+        List<SourceCodeAnalysis.Documentation> documentations = sourceAnalysis.documentation(source, pos + 1, true);
+        if (documentations == null || documentations.isEmpty()) {
+            return null;
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for (var doc : documentations) {
+            sb.append(doc.signature());
+
+            String javadoc = doc.javadoc();
+            if (javadoc != null) {
+                sb.append("\n").append(javadoc);
+            }
+            sb.append("\n\n");
+        }
+        return new DisplayData(sb.toString());
     }
 
     public static Builder builder() {

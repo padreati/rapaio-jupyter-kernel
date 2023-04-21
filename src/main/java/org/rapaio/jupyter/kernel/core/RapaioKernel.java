@@ -8,6 +8,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.channels.JupyterChannels;
 import org.rapaio.jupyter.kernel.channels.KernelMessageHandler;
@@ -38,16 +39,23 @@ import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteInput;
 import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteResult;
 import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellHistoryRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellInspectReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellInspectRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
 
 public class RapaioKernel implements KernelMessageHandler {
 
+    private static final Logger LOGGER = Logger.getLogger(RapaioKernel.class.getSimpleName());
     private static final AtomicInteger executionCount = new AtomicInteger(1);
 
-    private final Map<MessageType, MessageHandler> messageHandlers = new HashMap<>();
+    private final Map<MessageType<?>, MessageHandler> messageHandlers = new HashMap<>();
     private JupyterChannels channels;
 
     private final Renderer renderer;
@@ -85,11 +93,9 @@ public class RapaioKernel implements KernelMessageHandler {
 
     /**
      * Invoked on shutdown requests with messages, before shutting down the connection.
-     *
-     * @param restart if it will be followed by a restart
      */
-    public void onShutdown(boolean restart) {
-        javaEngine.shutdown(restart);
+    public void onShutdown() {
+        javaEngine.shutdown();
     }
 
     /**
@@ -165,10 +171,10 @@ public class RapaioKernel implements KernelMessageHandler {
     public void registerChannels(JupyterChannels channels) {
         this.channels = channels;
         messageHandlers.put(MessageType.SHELL_EXECUTE_REQUEST, this::handleExecuteRequest);
-//        messageHandlers.put(MessageType.SHELL_INSPECT_REQUEST, this::handleInspectRequest);
-//        messageHandlers.put(MessageType.SHELL_COMPLETE_REQUEST, this::handleCompleteRequest);
-//        messageHandlers.put(MessageType.SHELL_HISTORY_REQUEST, this::handleHistoryRequest);
-//        messageHandlers.put(MessageType.SHELL_IS_COMPLETE_REQUEST, this::handleIsCodeCompeteRequest);
+        messageHandlers.put(MessageType.SHELL_INSPECT_REQUEST, this::handleInspectRequest);
+        messageHandlers.put(MessageType.SHELL_COMPLETE_REQUEST, this::handleCompleteRequest);
+        messageHandlers.put(MessageType.SHELL_HISTORY_REQUEST, this::handleHistoryRequest);
+        messageHandlers.put(MessageType.SHELL_IS_COMPLETE_REQUEST, this::handleIsCompleteRequest);
         messageHandlers.put(MessageType.SHELL_KERNEL_INFO_REQUEST, this::handleKernelInfoRequest);
         messageHandlers.put(MessageType.CONTROL_SHUTDOWN_REQUEST, this::handleShutdownRequest);
         messageHandlers.put(MessageType.CONTROL_INTERRUPT_REQUEST, this::handleInterruptRequest);
@@ -222,6 +228,47 @@ public class RapaioKernel implements KernelMessageHandler {
         }
     }
 
+    public static final String IS_COMPLETE_STATUS_YES = "complete";
+    public static final String IS_COMPLETE_STATUS_BAD = "invalid";
+    public static final String IS_COMPLETE_STATUS_MAYBE = "unknown";
+
+    private void handleIsCompleteRequest(ReplyEnv env, Message<ShellIsCompleteRequest> message) {
+        ShellIsCompleteRequest request = message.content();
+        env.setBusyDeferIdle();
+
+        String result = javaEngine.isComplete(request.code());
+
+        ShellIsCompleteReply reply = switch (result) {
+            case IS_COMPLETE_STATUS_YES -> ShellIsCompleteReply.VALID_CODE;
+            case IS_COMPLETE_STATUS_BAD -> ShellIsCompleteReply.INVALID_CODE;
+            case IS_COMPLETE_STATUS_MAYBE -> ShellIsCompleteReply.UNKNOWN;
+            default -> ShellIsCompleteReply.getIncompleteReplyWithIndent(result);
+        };
+        env.reply(reply);
+
+    }
+
+    private void handleInspectRequest(ReplyEnv env, Message<ShellInspectRequest> message) {
+        ShellInspectRequest request = message.content();
+        env.setBusyDeferIdle();
+        try {
+            DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos(), request.detailLevel());
+            env.reply(new ShellInspectReply(inspection != null, DisplayData.emptyIfNull(inspection)));
+        } catch (Exception e) {
+            env.replyError(MessageType.SHELL_INSPECT_REPLY.error(), ErrorReply.of(e, 0));
+        }
+    }
+
+    private void handleCompleteRequest(ReplyEnv env, Message<ShellCompleteRequest> message) {
+        // TODO: not implemented yet
+        LOGGER.info("ShellCompleteRequest not yet implemented.");
+    }
+
+    private void handleHistoryRequest(ReplyEnv env, Message<ShellHistoryRequest> message) {
+        // TODO: not implemented yet
+        LOGGER.info("ShellHistoryRequest not yet implemented.");
+    }
+
     private void handleKernelInfoRequest(ReplyEnv env, Message<ShellKernelInfoRequest> ignored) {
         env.setBusyDeferIdle();
         env.reply(getKernelInfo());
@@ -233,7 +280,8 @@ public class RapaioKernel implements KernelMessageHandler {
 
         env.defer().reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN);
 
-        onShutdown(request.restart());
+        // request.restart() is no use for now, but might be used in the end
+        onShutdown();
         env.resolveDeferrals();
         // this will determine the connections to shut down
         env.markForShutdown();
