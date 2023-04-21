@@ -2,7 +2,7 @@ package org.rapaio.jupyter.kernel.message.messages;
 
 import java.util.Map;
 
-import org.rapaio.jupyter.java.core.ExpressionValue;
+import org.rapaio.jupyter.kernel.core.ExpressionValue;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 

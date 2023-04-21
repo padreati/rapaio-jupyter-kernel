@@ -1,5 +1,6 @@
 package org.rapaio.jupyter.kernel.channels;
 
+import java.io.PrintStream;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -38,30 +39,17 @@ public class ReplyEnv {
         this.context = context;
     }
 
-    /**
-     * Defer the next message send until {@link #resolveDeferrals()}. Deferrals
-     * are resolve in a Last In First Out (LIFO) order.
-     * <p>
-     * The use case that inspired this functionality is the busy-idle protocol
-     * component required by Jupyter.
-     *
-     * <pre>
-     *      ShellReplyEnvironment env = ...;
-     *
-     *      env.setStatusBusy();
-     *      env.defer().setStatusIdle(); //Push idle message to defer stack
-     *
-     *      env.defer().reply(new ExecuteReply(...)); //Push reply to stack
-     *
-     *      env.writeToStdOut("Test"); //Write "Test" to std out now
-     *
-     *      env.resolveDeferrals();
-     *      //Send the reply
-     *      //Send the idle message
-     * </pre>
-     *
-     * @return this instance for call chaining
-     */
+    public void interceptSystemIO(boolean stdinEnabled) {
+        System.setOut(new PrintStream(new EnvOutputStream(this::writeToStdOut)));
+        System.setErr(new PrintStream(new EnvOutputStream(this::writeToStdErr)));
+        System.setIn(new EnvInputStream(this, stdinEnabled));
+    }
+
+    public void flushSystemIO() {
+        System.out.flush();
+        System.err.flush();
+    }
+
     public ReplyEnv defer() {
         this.defer = true;
         return this;

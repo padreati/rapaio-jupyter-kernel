@@ -2,7 +2,7 @@ package org.rapaio.jupyter.kernel.message.adapters;
 
 import java.lang.reflect.Type;
 
-import org.rapaio.jupyter.java.core.ExpressionValue;
+import org.rapaio.jupyter.kernel.core.ExpressionValue;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 
 import com.google.gson.JsonDeserializationContext;

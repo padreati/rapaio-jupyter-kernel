@@ -57,9 +57,6 @@ public class DisplayData {
     /**
      * The transient dict contains runtime metadata that should not be persisted to document formats and is fully optional.
      * The only transient key currently defined in Jupyter is display_id.
-     *
-     * @param key   the data key
-     * @param value the data value
      */
     public void putTransient(String key, Object value) {
         transientData.put(key, value);
@@ -95,15 +92,15 @@ public class DisplayData {
     }
 
     public void putText(String text) {
-        this.putData("text/plain", text);
+        this.putData(MIMEType.TEXT, text);
     }
 
     public void putHTML(String html) {
-        this.putData("text/html", html);
+        this.putData(MIMEType.HTML, html);
     }
 
     public void putLatex(String latex) {
-        this.putData("text/latex", latex);
+        this.putData(MIMEType.LATEX, latex);
     }
 
     public void putMath(String math) {
@@ -111,15 +108,15 @@ public class DisplayData {
     }
 
     public void putMarkdown(String markdown) {
-        this.putData("text/markdown", markdown);
+        this.putData(MIMEType.MARKDOWN, markdown);
     }
 
     public void putJavaScript(String javascript) {
-        this.putData("application/javascript", javascript);
+        this.putData(MIMEType.JAVASCRIPT, javascript);
     }
 
     public void putJSON(String json) {
-        this.putData("application/json", json);
+        this.putData(MIMEType.JSON, json);
     }
 
     public void putJSON(String json, boolean expanded) {
@@ -127,7 +124,7 @@ public class DisplayData {
         this.putMetaData("expanded", expanded);
     }
 
-    public void putSVG(String svg) {
-        this.putData("image/svg+xml", svg);
+    public void putData(MIMEType mimeType, String data) {
+        this.putData(mimeType.toString(), data);
     }
 }

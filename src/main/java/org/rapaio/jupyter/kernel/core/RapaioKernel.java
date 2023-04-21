@@ -1,7 +1,10 @@
 package org.rapaio.jupyter.kernel.core;
 
+import java.io.InputStream;
+import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -13,12 +16,12 @@ import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
-import org.rapaio.jupyter.kernel.core.execution.CodeCategory;
 import org.rapaio.jupyter.kernel.core.java.CompileException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
@@ -26,10 +29,15 @@ import org.rapaio.jupyter.kernel.message.messages.ControlInterruptReply;
 import org.rapaio.jupyter.kernel.message.messages.ControlInterruptRequest;
 import org.rapaio.jupyter.kernel.message.messages.ControlShutdownReply;
 import org.rapaio.jupyter.kernel.message.messages.ControlShutdownRequest;
+import org.rapaio.jupyter.kernel.message.messages.CustomCommClose;
+import org.rapaio.jupyter.kernel.message.messages.CustomCommMsg;
+import org.rapaio.jupyter.kernel.message.messages.CustomCommOpen;
 import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
 import org.rapaio.jupyter.kernel.message.messages.IOPubError;
 import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteInput;
 import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteResult;
+import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
@@ -76,7 +84,7 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     /**
-     * Invoked on shutdown requests with messages. Before shutting down the connection.
+     * Invoked on shutdown requests with messages, before shutting down the connection.
      *
      * @param restart if it will be followed by a restart
      */
@@ -92,15 +100,23 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     public DisplayData eval(String expr) throws Exception {
-        Object result = switch (CodeCategory.findType(expr)) {
-            case MAGIC -> magicEvaluator.eval(expr);
-            case JAVA -> javaEngine.eval(expr);
-        };
 
+        // try first the magic
+        MagicEvaluator.MagicResult magicResult = magicEvaluator.eval(expr);
+        if (magicResult.handled()) {
+            return transformEval(magicResult.result());
+        }
+
+        // if not handled try the java engine
+        return transformEval(javaEngine.eval(expr));
+    }
+
+    private DisplayData transformEval(Object result) {
         if (result != null) {
-            return result instanceof DisplayData
-                    ? (DisplayData) result
-                    : renderer.render(result);
+            if (result instanceof DisplayData dd) {
+                return dd;
+            }
+            return renderer.render(result);
         }
         return null;
     }
@@ -114,6 +130,9 @@ public class RapaioKernel implements KernelMessageHandler {
         }
         if (e instanceof EvaluationTimeoutException te) {
             return formatTimeoutException(te);
+        }
+        if (e instanceof MagicParseException me) {
+            return formatMagicParseExpression(me);
         }
         return List.of(e.getMessage());
     }
@@ -133,10 +152,14 @@ public class RapaioKernel implements KernelMessageHandler {
         return List.of(e.getMessage());
     }
 
+    private List<String> formatMagicParseExpression(MagicParseException e) {
+        // todo: something better
+        return List.of(e.getMessage());
+    }
+
     //
     // MESSAGE HANDLERS
     //
-
 
     @Override
     public void registerChannels(JupyterChannels channels) {
@@ -150,39 +173,45 @@ public class RapaioKernel implements KernelMessageHandler {
         messageHandlers.put(MessageType.CONTROL_SHUTDOWN_REQUEST, this::handleShutdownRequest);
         messageHandlers.put(MessageType.CONTROL_INTERRUPT_REQUEST, this::handleInterruptRequest);
 
-//        this.commManager.setIOPubChannel(channels.iopub());
-//        messageHandlers.put(MessageType.CUSTOM_COMM_OPEN, commManager::handleCommOpenCommand);
-//        messageHandlers.put(MessageType.CUSTOM_COMM_MSG, commManager::handleCommMsgCommand);
-//        messageHandlers.put(MessageType.CUSTOM_COMM_CLOSE, commManager::handleCommCloseCommand);
-//        messageHandlers.put(MessageType.SHELL_COMM_INFO_REQUEST, commManager::handleCommInfoRequest);    }
+        messageHandlers.put(MessageType.CUSTOM_COMM_OPEN, this::handleCommOpenCommand);
+        messageHandlers.put(MessageType.CUSTOM_COMM_MSG, this::handleCommMsgCommand);
+        messageHandlers.put(MessageType.CUSTOM_COMM_CLOSE, this::handleCommCloseCommand);
+        messageHandlers.put(MessageType.SHELL_COMM_INFO_REQUEST, this::handleCommInfoRequest);
     }
 
     private void handleExecuteRequest(ReplyEnv env, Message<ShellExecuteRequest> executeRequestMessage) {
-//        this.commManager.setMessageContext(executeRequestMessage.getContext());
-
         ShellExecuteRequest request = executeRequestMessage.content();
 
         int count = executionCount.getAndIncrement();
 
         env.setBusyDeferIdle();
-
         env.publish(new IOPubExecuteInput(request.code(), count));
 
-//        if (this.shouldReplaceStdStreams()) {
-//            this.replaceOutputStreams(env);
-//        }
+        // collect old streams
+        PrintStream oldStdOut = System.out;
+        PrintStream oldStdErr = System.err;
+        InputStream oldStdIn = System.in;
 
-//        this.io.setEnv(env);
-//        env.defer(() -> this.io.retractEnv(env));
+        // some clients don't allow asking input
+        boolean allowStdin = executeRequestMessage.content().stdinEnabled();
+        // hooke system io to allow execution to output into notebook
+        env.interceptSystemIO(allowStdin);
 
-//        this.io.setJupyterInEnabled(request.stdinEnabled());
+        // push on stack restore streams
+        env.defer(() -> {
+            System.setOut(oldStdOut);
+            System.setErr(oldStdErr);
+            System.setIn(oldStdIn);
+        });
+
+        // flush before restoring
+        env.defer(env::flushSystemIO);
 
         try {
             DisplayData out = eval(request.code());
 
             if (out != null) {
-                IOPubExecuteResult result = new IOPubExecuteResult(count, out);
-                env.publish(result);
+                env.publish(new IOPubExecuteResult(count, out));
             }
 
             env.defer().reply(ShellExecuteReply.withOk(count, Collections.emptyMap()));
@@ -193,7 +222,7 @@ public class RapaioKernel implements KernelMessageHandler {
         }
     }
 
-    private void handleKernelInfoRequest(ReplyEnv env, Message<ShellKernelInfoRequest> kernelInfoRequestMessage) {
+    private void handleKernelInfoRequest(ReplyEnv env, Message<ShellKernelInfoRequest> ignored) {
         env.setBusyDeferIdle();
         env.reply(getKernelInfo());
     }
@@ -214,5 +243,28 @@ public class RapaioKernel implements KernelMessageHandler {
         env.setBusyDeferIdle();
         env.reply(new ControlInterruptReply());
         interrupt();
+    }
+
+    // custom communication is not implemented, however, we have to behave properly
+
+    private void handleCommOpenCommand(ReplyEnv env, Message<CustomCommOpen> message) {
+        CustomCommOpen openCommand = message.content();
+        env.setBusyDeferIdle();
+        CustomCommClose closeCommand = new CustomCommClose(openCommand.commId(), Transform.EMPTY_JSON_OBJ);
+        env.publish(closeCommand);
+    }
+
+    private void handleCommMsgCommand(ReplyEnv env, Message<CustomCommMsg> ignored) {
+        // no-op
+    }
+
+    private void handleCommCloseCommand(ReplyEnv env, Message<CustomCommClose> ignored) {
+        // no-op
+    }
+
+    private void handleCommInfoRequest(ReplyEnv env, Message<ShellCommInfoRequest> message) {
+        env.setBusyDeferIdle();
+        Map<String, ShellCommInfoReply.CommInfo> comms = new LinkedHashMap<>();
+        env.reply(new ShellCommInfoReply(comms));
     }
 }

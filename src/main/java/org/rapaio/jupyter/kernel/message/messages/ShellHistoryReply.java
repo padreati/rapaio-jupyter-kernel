@@ -2,7 +2,7 @@ package org.rapaio.jupyter.kernel.message.messages;
 
 import java.util.List;
 
-import org.rapaio.jupyter.java.core.history.HistoryEntry;
+import org.rapaio.jupyter.kernel.core.history.HistoryEntry;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 

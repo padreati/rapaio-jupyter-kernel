@@ -6,8 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.rapaio.jupyter.java.core.ExpressionValue;
-import org.rapaio.jupyter.java.core.history.HistoryEntry;
+import org.rapaio.jupyter.kernel.core.history.HistoryEntry;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.KernelTimestamp;
@@ -26,6 +25,7 @@ import org.rapaio.jupyter.kernel.message.messages.ShellHistoryRequest;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
@@ -33,10 +33,10 @@ public class Transform {
 
     public static final Charset ASCII = StandardCharsets.US_ASCII;
     public static final Charset UTF_8 = StandardCharsets.UTF_8;
-
     public static final byte[] IDENTITY_DELIMITER = "<IDS|MSG>".getBytes(ASCII);
+    public static final JsonObject EMPTY_JSON_OBJ = new JsonObject();
 
-    private static final byte[] EMPTY_JSON = "{}".getBytes(UTF_8);
+    private static final byte[] EMPTY_JSON_BYTES = "{}".getBytes(UTF_8);
     private static final Type JSON_OBJ_AS_MAP = new TypeToken<Map<String, Object>>() {
     }.getType();
 
@@ -95,7 +95,7 @@ public class Transform {
 
     public static byte[] toJsonBytes(Object object) {
         if (object == null) {
-            return EMPTY_JSON;
+            return EMPTY_JSON_BYTES;
         }
         return gson.toJson(object).getBytes(UTF_8);
     }
