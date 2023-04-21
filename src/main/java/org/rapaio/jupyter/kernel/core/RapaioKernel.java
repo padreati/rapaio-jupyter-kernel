@@ -6,14 +6,17 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.channels.JupyterChannels;
 import org.rapaio.jupyter.kernel.channels.KernelMessageHandler;
 import org.rapaio.jupyter.kernel.channels.MessageHandler;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
 import org.rapaio.jupyter.kernel.core.execution.CodeCategory;
+import org.rapaio.jupyter.kernel.core.java.CompileException;
+import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
+import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.message.Header;
@@ -99,10 +102,34 @@ public class RapaioKernel implements KernelMessageHandler {
                     ? (DisplayData) result
                     : renderer.render(result);
         }
-        throw new IllegalStateException("No evaluator found for expression: " + expr);
+        return null;
     }
 
-    public List<String> formatError(Exception e) {
+    public List<String> formatException(Exception e) {
+        if (e instanceof CompileException ce) {
+            return formatCompileException(ce);
+        }
+        if (e instanceof EvaluationInterruptedException ie) {
+            return formatInterruptedException(ie);
+        }
+        if (e instanceof EvaluationTimeoutException te) {
+            return formatTimeoutException(te);
+        }
+        return List.of(e.getMessage());
+    }
+
+    private List<String> formatCompileException(CompileException e) {
+        // todo: something nicer
+        return List.of("CompileExceptio:", e.getBadSnippetCompilation().toString());
+    }
+
+    private List<String> formatInterruptedException(EvaluationInterruptedException e) {
+        // todo: something better
+        return List.of("InterruptedException:", e.getSource());
+    }
+
+    private List<String> formatTimeoutException(EvaluationTimeoutException e) {
+        // todo: something better
         return List.of(e.getMessage());
     }
 
@@ -161,7 +188,7 @@ public class RapaioKernel implements KernelMessageHandler {
             env.defer().reply(ShellExecuteReply.withOk(count, Collections.emptyMap()));
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
-            env.publish(IOPubError.of(e, this::formatError));
+            env.publish(IOPubError.of(e, this::formatException));
             env.defer().replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error);
         }
     }

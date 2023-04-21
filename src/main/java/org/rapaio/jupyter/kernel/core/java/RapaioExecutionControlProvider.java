@@ -35,7 +35,7 @@ public class RapaioExecutionControlProvider implements ExecutionControlProvider 
         if (parameters != null && parameters.containsKey(EXECUTION_ID_KEY)) {
             String id = parameters.get(EXECUTION_ID_KEY);
             if (id != null) {
-                this.controllers.put(id, control);
+                controllers.put(id, control);
             }
         }
 

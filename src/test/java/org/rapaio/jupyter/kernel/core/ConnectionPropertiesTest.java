@@ -1,4 +1,4 @@
-package org.rapaio.jupyter.base.core;
+package org.rapaio.jupyter.kernel.core;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -7,8 +7,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 import org.junit.jupiter.api.Test;
-import org.rapaio.jupyter.kernel.core.ConnectionProperties;
-import org.rapaio.jupyter.kernel.core.Transform;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
 
 public class ConnectionPropertiesTest {
