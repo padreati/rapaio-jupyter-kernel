@@ -1,5 +1,13 @@
 package org.rapaio.jupyter.kernel.core.java;
 
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.iif;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -17,6 +25,7 @@ import java.util.stream.Collectors;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
@@ -39,6 +48,10 @@ public class JavaEngine {
         this.shell = shell;
         this.sourceAnalysis = shell.sourceCodeAnalysis();
         this.startupScripts = startupScripts;
+    }
+
+    public SourceCodeAnalysis getSourceAnalysis() {
+        return sourceAnalysis;
     }
 
     public void initialize() {
@@ -156,7 +169,7 @@ public class JavaEngine {
         return new ReplacementOptions(options, anchor[0], at);
     }
 
-    public DisplayData inspect(String source, int pos, int detailLevel) {
+    public DisplayData inspect(String source, int pos) {
 
         // Move the code position to the end of the identifier to make the inspection work at any
         // point in the identifier. i.e "System.o|ut" or "System.out|" will return the same result.
@@ -179,17 +192,19 @@ public class JavaEngine {
             return null;
         }
 
-        StringBuilder sb = new StringBuilder();
-        for (var doc : documentations) {
-            sb.append(doc.signature());
+        String html = join(
+                each(documentations, doc -> p(join(
+                        b(texts(doc.signature())),
+                        iif(doc.javadoc() != null,
+                                br(),
+                                texts(JavadocTools.javadocPreprocess(doc.javadoc()))
+                        )
+                )))
+        ).render();
 
-            String javadoc = doc.javadoc();
-            if (javadoc != null) {
-                sb.append("\n").append(javadoc);
-            }
-            sb.append("\n\n");
-        }
-        return new DisplayData(sb.toString());
+        DisplayData dd = new DisplayData();
+        dd.putHTML(html);
+        return dd;
     }
 
     public static Builder builder() {
