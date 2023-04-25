@@ -11,7 +11,9 @@ public class JavaEngineTest {
 
     @Test
     void validBuildTest() {
-        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JavaEngine.builder().build());
+        IllegalArgumentException e = assertThrows(IllegalArgumentException.class, () -> JavaEngine
+                .builder()
+                .build());
         assertEquals("Timeout must be specified.", e.getMessage());
     }
 

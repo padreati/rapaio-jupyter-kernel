@@ -8,14 +8,14 @@ import org.rapaio.jupyter.kernel.core.display.DisplayData;
 public final class Global {
 
     public static String display(Object o, String... args) {
-        DisplayData data = MainApp.kernel.getRenderer().render(o, args);
+        DisplayData displayData = (o instanceof DisplayData dd) ? dd : MainApp.kernel.getRenderer().render(o, args);
 
-        String id = data.getDisplayId();
+        String id = displayData.getDisplayId();
         if (id == null) {
             id = UUID.randomUUID().toString();
-            data.setDisplayId(id);
+            displayData.setDisplayId(id);
         }
-        MainApp.kernel.display(data);
+        MainApp.kernel.display(displayData);
         return id;
     }
 

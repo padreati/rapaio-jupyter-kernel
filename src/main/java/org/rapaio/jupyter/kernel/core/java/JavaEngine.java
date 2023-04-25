@@ -15,6 +15,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -35,6 +36,14 @@ import jdk.jshell.SnippetEvent;
 import jdk.jshell.SourceCodeAnalysis;
 
 public class JavaEngine {
+
+    private static final EnumSet<Snippet.SubKind> ALLOWED_LAST_OUTPUT = EnumSet.of(
+            Snippet.SubKind.VAR_DECLARATION_WITH_INITIALIZER_SUBKIND,
+            Snippet.SubKind.VAR_VALUE_SUBKIND,
+            Snippet.SubKind.OTHER_EXPRESSION_SUBKIND,
+            Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND,
+            Snippet.SubKind.ASSIGNMENT_SUBKIND);
+
 
     private final String executionId;
     private final RapaioExecutionControlProvider controlProvider;
@@ -105,10 +114,9 @@ public class JavaEngine {
             if (key == null) {
                 continue;
             }
-
             Snippet.SubKind subKind = event.snippet().subKind();
-
-            result = subKind.isExecutable() ? control.takeResult(key) : event.value();
+            Object value = subKind.isExecutable() ? control.takeResult(key) : event.value();
+            result = (ALLOWED_LAST_OUTPUT.contains(subKind)) ? value : null;
         }
 
         for (SnippetEvent event : events) {
@@ -213,6 +221,9 @@ public class JavaEngine {
 
     public static class Builder {
 
+        protected Builder() {
+        }
+
         private Long timeoutMillis = null;
         private final List<String> compilerOptions = new LinkedList<>();
         private final List<String> startupScripts = new LinkedList<>();
@@ -276,7 +287,6 @@ public class JavaEngine {
 
             RapaioExecutionControlProvider controlProvider = new RapaioExecutionControlProvider();
             JShell shell = JShell.builder()
-
                     .compilerOptions(compilerOptions.toArray(String[]::new))
                     .executionEngine(controlProvider, controlParameterMap)
                     .build();

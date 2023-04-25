@@ -1,6 +1,5 @@
 package org.rapaio.jupyter.kernel.channels;
 
-import java.io.PrintStream;
 import java.util.Deque;
 import java.util.LinkedList;
 
@@ -12,9 +11,9 @@ import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
 import org.rapaio.jupyter.kernel.message.messages.IOPubStatus;
 import org.rapaio.jupyter.kernel.message.messages.IOPubStream;
 
-public class ReplyEnv {
+@SuppressWarnings("rawtypes")
+public final class ReplyEnv {
 
-    private final AbstractChannel srcChannel;
     private final IOPubChannel iopub;
     private final ShellChannel shell;
     private final ControlChannel control;
@@ -27,9 +26,7 @@ public class ReplyEnv {
     private boolean requestShutdown = false;
     private boolean defer = false;
 
-    protected ReplyEnv(AbstractChannel srcChannel, JupyterChannels channels, MessageContext context) {
-        this.srcChannel = srcChannel;
-
+    ReplyEnv(JupyterChannels channels, MessageContext context) {
         this.iopub = channels.iopub();
         this.shell = channels.shell();
         this.control = channels.control();
@@ -37,17 +34,6 @@ public class ReplyEnv {
         this.heartbeat = channels.heartbeat();
 
         this.context = context;
-    }
-
-    public void interceptSystemIO(boolean stdinEnabled) {
-        System.setOut(new PrintStream(new EnvOutputStream(this::writeToStdOut)));
-        System.setErr(new PrintStream(new EnvOutputStream(this::writeToStdErr)));
-        System.setIn(new EnvInputStream(this, stdinEnabled));
-    }
-
-    public void flushSystemIO() {
-        System.out.flush();
-        System.err.flush();
     }
 
     public ReplyEnv defer() {
@@ -73,10 +59,6 @@ public class ReplyEnv {
 
     public String readFromStdIn(String prompt, boolean isPassword) {
         return stdin.getInput(getContext(), prompt, isPassword);
-    }
-
-    public String readFromStdIn(String prompt) {
-        return this.readFromStdIn(prompt, false);
     }
 
     public String readFromStdIn() {

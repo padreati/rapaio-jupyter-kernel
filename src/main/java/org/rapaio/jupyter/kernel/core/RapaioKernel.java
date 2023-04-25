@@ -2,6 +2,7 @@ package org.rapaio.jupyter.kernel.core;
 
 import java.io.InputStream;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -21,6 +22,7 @@ import org.rapaio.jupyter.kernel.core.java.CompileException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.message.Header;
@@ -53,6 +55,7 @@ import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
 
+@SuppressWarnings("rawtypes")
 public class RapaioKernel implements KernelMessageHandler {
 
     public static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
@@ -67,8 +70,8 @@ public class RapaioKernel implements KernelMessageHandler {
     private final JavaEngine javaEngine;
     private final MagicEvaluator magicEvaluator;
 
-
     private ReplyEnv currentReplyEnv;
+    private final JShellIO shellIO = new JShellIO();
 
     public RapaioKernel() {
 
@@ -104,7 +107,7 @@ public class RapaioKernel implements KernelMessageHandler {
 
     public void updateDisplay(DisplayData dd) {
         if (currentReplyEnv != null) {
-            if(!dd.hasDisplayId()) {
+            if (!dd.hasDisplayId()) {
                 throw new IllegalArgumentException("Cannot update a display without display_id.");
             }
             currentReplyEnv.publish(new IOPubUpdateDisplayData(dd));
@@ -235,7 +238,11 @@ public class RapaioKernel implements KernelMessageHandler {
         // some clients don't allow asking input
         boolean allowStdin = executeRequestMessage.content().stdinEnabled();
         // hooke system io to allow execution to output into notebook
-        env.interceptSystemIO(allowStdin);
+        System.setIn(shellIO.getIn());
+        System.setOut(new PrintStream(shellIO.getOut(), true, StandardCharsets.UTF_8));
+        System.setErr(new PrintStream(shellIO.getErr(), true, StandardCharsets.UTF_8));
+
+        shellIO.bindEnv(env, allowStdin);
 
         currentReplyEnv = env;
 
@@ -248,8 +255,10 @@ public class RapaioKernel implements KernelMessageHandler {
             System.setIn(oldStdIn);
         });
 
+        // unbind environment
+        env.defer(shellIO::unbindEnv);
         // flush before restoring
-        env.defer(env::flushSystemIO);
+        env.defer(shellIO::flush);
 
         try {
             DisplayData out = eval(request.code());
@@ -290,7 +299,9 @@ public class RapaioKernel implements KernelMessageHandler {
         ShellInspectRequest request = message.content();
         env.setBusyDeferIdle();
         try {
-            DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos(), request.detailLevel());
+            // request.detailLevel() is not used since we do not get the source as required
+            // for detail level above 0
+            DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
             env.reply(new ShellInspectReply(inspection != null, DisplayData.emptyIfNull(inspection)));
         } catch (Exception e) {
             env.replyError(MessageType.SHELL_INSPECT_REPLY.error(), ErrorReply.of(e, 0));
