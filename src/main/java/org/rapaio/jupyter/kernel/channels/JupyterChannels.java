@@ -80,8 +80,8 @@ public final class JupyterChannels {
         return kernelMessageHandler.getHandler(type);
     }
 
-    public ReplyEnv prepareReplyEnv(AbstractChannel shell, MessageContext<?> context) {
-        return new ReplyEnv(shell, this, context);
+    public ReplyEnv prepareReplyEnv(MessageContext<?> context) {
+        return new ReplyEnv(this, context);
     }
 
     public void close() {

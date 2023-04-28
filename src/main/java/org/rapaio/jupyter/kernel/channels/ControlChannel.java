@@ -26,7 +26,7 @@ public class ControlChannel extends AbstractChannel {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings( {"rawtypes", "unchecked"})
     public void bind(ConnectionProperties connProps) {
         if (this.isBound()) {
             throw new IllegalStateException("Shell channel already bound");
@@ -47,7 +47,7 @@ public class ControlChannel extends AbstractChannel {
                 MessageHandler handler = connection.getHandler(message.header().type());
                 if (handler != null) {
                     LOGGER.info(logPrefix + "Handling message: " + message.header().type().getName());
-                    ReplyEnv env = connection.prepareReplyEnv(this, message.getContext());
+                    ReplyEnv env = connection.prepareReplyEnv(message.getContext());
                     try {
                         handler.handle(env, message);
                     } catch (Exception e) {
