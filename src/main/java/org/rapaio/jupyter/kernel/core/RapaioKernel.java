@@ -189,24 +189,24 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private List<String> formatCompileException(CompilerException e) {
 
-        List<String> msgs = new ArrayList<>();
+        List<String> msgs = new ArrayList<>(ANSIText.errorTypeHeader("Compile error"));
         SnippetEvent event = e.getBadSnippetCompilation();
         Snippet snippet = event.snippet();
         var diagnostics = javaEngine.getShell().diagnostics(snippet).toList();
         for (var d : diagnostics) {
-            msgs.addAll(ANSIText.compileErrorSourceCode(snippet.source(), (int) d.getPosition(),
+            msgs.addAll(ANSIText.sourceCode(snippet.source(), (int) d.getPosition(),
                     (int) d.getStartPosition(), (int) d.getEndPosition()));
 
-            msgs.addAll(ANSIText.compileErrorMessages(d.getMessage(Locale.getDefault())));
+            msgs.addAll(ANSIText.errorMessages(d.getMessage(Locale.getDefault())));
             msgs.add("");
         }
         // Declaration snippets are unique in that they can be active with unresolved references
         if (snippet instanceof DeclarationSnippet declarationSnippet) {
             List<String> unresolvedDependencies = javaEngine.getShell().unresolvedDependencies(declarationSnippet).toList();
             if (!unresolvedDependencies.isEmpty()) {
-                msgs.addAll(ANSIText.compileErrorSourceCode(snippet.source(), -1, -1, -1));
-                msgs.addAll(ANSIText.compileErrorMessages("Unresolved dependencies:"));
-                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSIText.compileErrorMessages("   - " + dep)));
+                msgs.addAll(ANSIText.sourceCode(snippet.source()));
+                msgs.addAll(ANSIText.errorMessages("Unresolved dependencies:"));
+                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSIText.errorMessages("   - " + dep)));
             }
         }
 
@@ -214,13 +214,16 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     private List<String> formatInterruptedException(EvaluationInterruptedException e) {
-        // todo: something better
-        return List.of("InterruptedException:", e.getSource());
+        List<String> msgs = new ArrayList<>(ANSIText.errorTypeHeader("InterruptedException"));
+        msgs.addAll(ANSIText.sourceCode(e.getSource()));
+        return msgs;
     }
 
     private List<String> formatTimeoutException(EvaluationTimeoutException e) {
-        // todo: something better
-        return List.of(e.getMessage());
+        List<String> msgs = new ArrayList<>(ANSIText.errorTypeHeader("TimeoutException"));
+        msgs.addAll(ANSIText.sourceCode(e.getSource()));
+        msgs.addAll(ANSIText.errorMessages(e.getMessage()));
+        return msgs;
     }
 
     private List<String> formatMagicParseExpression(MagicParseException e) {
@@ -265,7 +268,7 @@ public class RapaioKernel implements KernelMessageHandler {
 
         // some clients don't allow asking input
         boolean allowStdin = executeRequestMessage.content().stdinEnabled();
-        // hooke system io to allow execution to output into notebook
+        // hook system io to allow execution to output into notebook
         System.setIn(shellIO.getIn());
         System.setOut(new PrintStream(shellIO.getOut(), true, StandardCharsets.UTF_8));
         System.setErr(new PrintStream(shellIO.getErr(), true, StandardCharsets.UTF_8));

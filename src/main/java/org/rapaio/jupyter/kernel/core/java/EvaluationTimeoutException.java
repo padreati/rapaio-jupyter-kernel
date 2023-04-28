@@ -23,8 +23,6 @@
  */
 package org.rapaio.jupyter.kernel.core.java;
 
-import java.util.concurrent.TimeUnit;
-
 public class EvaluationTimeoutException extends Exception {
     private final long duration;
     private final String source;
@@ -44,8 +42,6 @@ public class EvaluationTimeoutException extends Exception {
 
     @Override
     public String getMessage() {
-        return String.format("Evaluator timed out after %d millis while executing: '%s'",
-                this.duration,
-                this.source);
+        return String.format("Evaluator timed out after %d millis", this.duration);
     }
 }

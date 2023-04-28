@@ -116,9 +116,16 @@ public final class ANSIText {
 
     private static final String CODE_LINE_PROMPT = "|    ";
 
-    public static List<String> compileErrorSourceCode(String code, int position, int startPosition, int endPosition) {
+    public static List<String> errorTypeHeader(String errorType) {
+        return List.of(new ANSIText().reset().codes(BOLD, FG_RED).text(errorType).text(":").build());
+    }
+
+    public static List<String> sourceCode(String code) {
+        return sourceCode(code, -1, -1, -1);
+    }
+
+    public static List<String> sourceCode(String code, int position, int startPosition, int endPosition) {
         List<String> lines = new ArrayList<>();
-        lines.add(new ANSIText().reset().codes(BOLD, FG_RED).text("Compile error:").build());
         if (position == -1) {
             for (String line : code.split("\\R")) {
                 lines.add(new ANSIText().reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).reset().build());
@@ -147,7 +154,7 @@ public final class ANSIText {
         return lines;
     }
 
-    public static List<String> compileErrorMessages(String errorMessage) {
+    public static List<String> errorMessages(String errorMessage) {
         List<String> lines = new ArrayList<>();
         for (String line : errorMessage.split("\\R")) {
             if (!line.trim().startsWith("location:")) {

@@ -31,19 +31,19 @@ public class ANSITextTest {
         Snippet snippet = event.snippet();
         var diagnostics = engine.getShell().diagnostics(snippet).toList();
         for (var d : diagnostics) {
-            msgs.addAll(ANSIText.compileErrorSourceCode(snippet.source(), (int) d.getPosition(),
+            msgs.addAll(ANSIText.sourceCode(snippet.source(), (int) d.getPosition(),
                     (int) d.getStartPosition(), (int) d.getEndPosition()));
 
-            msgs.addAll(ANSIText.compileErrorMessages(d.getMessage(Locale.getDefault())));
+            msgs.addAll(ANSIText.errorMessages(d.getMessage(Locale.getDefault())));
             msgs.add("");
         }
         // Declaration snippets are unique in that they can be active with unresolved references
         if (snippet instanceof DeclarationSnippet declarationSnippet) {
             List<String> unresolvedDependencies = engine.getShell().unresolvedDependencies(declarationSnippet).toList();
             if (!unresolvedDependencies.isEmpty()) {
-                msgs.addAll(ANSIText.compileErrorSourceCode(snippet.source(), -1, -1, -1));
-                msgs.addAll(ANSIText.compileErrorMessages("Unresolved dependencies:"));
-                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSIText.compileErrorMessages("   - " + dep)));
+                msgs.addAll(ANSIText.sourceCode(snippet.source(), -1, -1, -1));
+                msgs.addAll(ANSIText.errorMessages("Unresolved dependencies:"));
+                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSIText.errorMessages("   - " + dep)));
             }
         }
 
