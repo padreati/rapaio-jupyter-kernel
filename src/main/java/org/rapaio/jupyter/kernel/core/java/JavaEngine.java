@@ -59,6 +59,10 @@ public class JavaEngine {
         this.startupScripts = startupScripts;
     }
 
+    public JShell getShell() {
+        return shell;
+    }
+
     public SourceCodeAnalysis getSourceAnalysis() {
         return sourceAnalysis;
     }
@@ -134,9 +138,8 @@ public class JavaEngine {
 
                     throw e;
                 }
-
                 if (!event.status().isDefined()) {
-                    throw new CompileException(event);
+                    throw new CompilerException(event);
                 }
             }
         }
@@ -224,7 +227,7 @@ public class JavaEngine {
         protected Builder() {
         }
 
-        private Long timeoutMillis = null;
+        private long timeoutMillis = -1L;
         private final List<String> compilerOptions = new LinkedList<>();
         private final List<String> startupScripts = new LinkedList<>();
 
@@ -269,15 +272,7 @@ public class JavaEngine {
             return this;
         }
 
-        private void validateValues() {
-            if (timeoutMillis == null) {
-                throw new IllegalArgumentException("Timeout must be specified.");
-            }
-        }
-
         public JavaEngine build() {
-
-            validateValues();
 
             String executionId = UUID.randomUUID().toString();
 

@@ -3,10 +3,12 @@ package org.rapaio.jupyter.kernel.core;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -18,7 +20,8 @@ import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
-import org.rapaio.jupyter.kernel.core.java.CompileException;
+import org.rapaio.jupyter.kernel.core.display.text.ANSIText;
+import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -54,6 +57,10 @@ import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
+
+import jdk.jshell.DeclarationSnippet;
+import jdk.jshell.Snippet;
+import jdk.jshell.SnippetEvent;
 
 @SuppressWarnings("rawtypes")
 public class RapaioKernel implements KernelMessageHandler {
@@ -165,7 +172,7 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     public List<String> formatException(Exception e) {
-        if (e instanceof CompileException ce) {
+        if (e instanceof CompilerException ce) {
             return formatCompileException(ce);
         }
         if (e instanceof EvaluationInterruptedException ie) {
@@ -180,9 +187,30 @@ public class RapaioKernel implements KernelMessageHandler {
         return List.of(e.getMessage());
     }
 
-    private List<String> formatCompileException(CompileException e) {
-        // todo: something nicer
-        return List.of("CompileExceptio:", e.getBadSnippetCompilation().toString());
+    private List<String> formatCompileException(CompilerException e) {
+
+        List<String> msgs = new ArrayList<>();
+        SnippetEvent event = e.getBadSnippetCompilation();
+        Snippet snippet = event.snippet();
+        var diagnostics = javaEngine.getShell().diagnostics(snippet).toList();
+        for (var d : diagnostics) {
+            msgs.addAll(ANSIText.compileErrorSourceCode(snippet.source(), (int) d.getPosition(),
+                    (int) d.getStartPosition(), (int) d.getEndPosition()));
+
+            msgs.addAll(ANSIText.compileErrorMessages(d.getMessage(Locale.getDefault())));
+            msgs.add("");
+        }
+        // Declaration snippets are unique in that they can be active with unresolved references
+        if (snippet instanceof DeclarationSnippet declarationSnippet) {
+            List<String> unresolvedDependencies = javaEngine.getShell().unresolvedDependencies(declarationSnippet).toList();
+            if (!unresolvedDependencies.isEmpty()) {
+                msgs.addAll(ANSIText.compileErrorSourceCode(snippet.source(), -1, -1, -1));
+                msgs.addAll(ANSIText.compileErrorMessages("Unresolved dependencies:"));
+                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSIText.compileErrorMessages("   - " + dep)));
+            }
+        }
+
+        return msgs;
     }
 
     private List<String> formatInterruptedException(EvaluationInterruptedException e) {

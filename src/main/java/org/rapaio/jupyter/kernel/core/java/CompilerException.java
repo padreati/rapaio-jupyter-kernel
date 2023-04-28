@@ -25,10 +25,10 @@ package org.rapaio.jupyter.kernel.core.java;
 
 import jdk.jshell.SnippetEvent;
 
-public class CompileException extends Exception {
+public class CompilerException extends Exception {
     private final SnippetEvent badSnippetCompilation;
 
-    public CompileException(SnippetEvent badSnippetCompilation) {
+    public CompilerException(SnippetEvent badSnippetCompilation) {
         this.badSnippetCompilation = badSnippetCompilation;
     }
 
