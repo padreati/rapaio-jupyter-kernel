@@ -56,13 +56,13 @@ public class MavenCoordinates implements MagicHandler {
 
         try {
             DepCoordinates dc = new DepCoordinates(args);
-            env.writeToStdOut("Solving dependencies for " + ANSI.start().fgBlue().text(dc.toString()).reset().build() + "\n");
+            env.writeToStdOut("Solving dependencies for " + ANSI.start().bold().fgGreen().text(dc.toString()).reset().build() + "\n");
             var adrs = IvyDependencies.resolve(dc);
             env.writeToStdOut("Found dependencies count: " + adrs.size() + "\n");
             for (var adr : adrs) {
                 if (adr.getExt().equalsIgnoreCase("jar") && adr.getType().equalsIgnoreCase("jar")) {
                     env.writeToStdOut("Add to classpath: " +
-                            ANSI.start().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build() + "\n");
+                            ANSI.start().fgGreen().text(adr.getLocalFile().getAbsolutePath()).reset().build() + "\n");
                     javaEngine.getShell().addToClasspath(adr.getLocalFile().getAbsolutePath());
                 }
             }
