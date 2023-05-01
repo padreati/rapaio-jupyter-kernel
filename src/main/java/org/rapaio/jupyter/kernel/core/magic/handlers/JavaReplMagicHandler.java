@@ -6,8 +6,8 @@ import java.util.List;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 
 public class JavaReplMagicHandler implements MagicHandler {
@@ -16,7 +16,7 @@ public class JavaReplMagicHandler implements MagicHandler {
 
     @Override
     public String name() {
-        return "JShell";
+        return "JShell (non implemented yet!)";
     }
 
     @Override
@@ -43,7 +43,7 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(ReplyEnv env, MagicSnippet snippet) {
+    public Object eval(JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }

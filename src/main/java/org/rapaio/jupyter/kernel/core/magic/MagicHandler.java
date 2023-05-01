@@ -5,6 +5,7 @@ import java.util.List;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 
 public interface MagicHandler {
 
@@ -16,7 +17,7 @@ public interface MagicHandler {
 
     boolean canHandleSnippet(MagicSnippet snippet);
 
-    Object eval(ReplyEnv env, MagicSnippet snippet) throws MagicParseException;
+    Object eval(JavaEngine engine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException;
 
     DisplayData inspect(ReplyEnv env, MagicSnippet snippet);
 

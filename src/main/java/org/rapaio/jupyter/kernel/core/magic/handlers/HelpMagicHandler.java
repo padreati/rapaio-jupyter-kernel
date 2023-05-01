@@ -10,6 +10,7 @@ import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSIText;
+import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -49,7 +50,7 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(ReplyEnv env, MagicSnippet snippet) throws MagicParseException {
+    public Object eval(JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }

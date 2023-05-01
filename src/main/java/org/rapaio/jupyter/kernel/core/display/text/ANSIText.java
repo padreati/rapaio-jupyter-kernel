@@ -62,6 +62,10 @@ public final class ANSIText {
 
     private final StringBuilder sb = new StringBuilder();
 
+    public static ANSIText start() {
+        return new ANSIText().reset();
+    }
+
     public ANSIText codes(int... codes) {
         sb.append(escape(codes));
         return this;
