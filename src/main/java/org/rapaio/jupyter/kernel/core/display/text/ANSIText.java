@@ -72,6 +72,21 @@ public final class ANSIText {
         return this;
     }
 
+    public ANSIText bold() {
+        sb.append(escape(BOLD));
+        return this;
+    }
+
+    public ANSIText fgBlue() {
+        sb.append(escape(FG_BLUE));
+        return this;
+    }
+
+    public ANSIText fgGreen() {
+        sb.append(escape(FG_GREEN));
+        return this;
+    }
+
     public ANSIText fgColor(int index) {
         sb.append(escape(FG_COLOR, COLOR_SET_8_BIT, index));
         return this;

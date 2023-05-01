@@ -31,7 +31,10 @@ import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
+import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
@@ -216,7 +219,7 @@ public class RapaioKernel implements KernelMessageHandler {
     public DisplayData eval(String expr) throws Exception {
 
         // try first the magic
-        MagicEvaluator.MagicResult magicResult = magicEvaluator.eval(expr);
+        MagicEvalResult magicResult = magicEvaluator.eval(currentReplyEnv, expr);
         if (magicResult.handled()) {
             return transformEval(magicResult.result());
         }
@@ -394,6 +397,14 @@ public class RapaioKernel implements KernelMessageHandler {
         ShellInspectRequest request = message.content();
         env.setBusyDeferIdle();
         try {
+
+            MagicInspectResult magicResult = magicEvaluator.inspect(currentReplyEnv, request.code(), request.cursorPos());
+            if (magicResult.handled()) {
+                DisplayData inspection = magicResult.displayData();
+                env.reply(new ShellInspectReply(inspection != null, DisplayData.emptyIfNull(inspection)));
+                return;
+            }
+
             // request.detailLevel() is not used since we do not get the source as required
             // for detail level above 0
             DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
@@ -407,7 +418,12 @@ public class RapaioKernel implements KernelMessageHandler {
         ShellCompleteRequest request = message.content();
         env.setBusyDeferIdle();
         try {
-            ReplacementOptions options = javaEngine.complete(request.code(), request.cursorPos());
+            MagicCompleteResult magicResult = magicEvaluator.complete(currentReplyEnv, request.code(), request.cursorPos());
+
+            ReplacementOptions options = magicResult.handled()
+                    ? magicResult.replacementOptions()
+                    : javaEngine.complete(request.code(), request.cursorPos());
+
             if (options == null) {
                 env.reply(new ShellCompleteReply(Collections.emptyList(), request.cursorPos(), request.cursorPos(),
                         Collections.emptyMap()));

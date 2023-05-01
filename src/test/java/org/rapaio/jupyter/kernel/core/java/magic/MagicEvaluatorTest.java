@@ -9,7 +9,7 @@ public class MagicEvaluatorTest {
     @Test
     void magicHelpTest() throws Exception {
         RapaioKernel kernel = new RapaioKernel();
-        DisplayData dd = kernel.eval("%");
+        DisplayData dd = kernel.eval("%help");
         System.out.println(dd);
     }
 }
