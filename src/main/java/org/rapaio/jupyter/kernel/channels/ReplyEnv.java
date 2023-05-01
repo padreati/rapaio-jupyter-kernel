@@ -37,7 +37,7 @@ public final class ReplyEnv {
     }
 
     public ReplyEnv defer() {
-        this.defer = true;
+        defer = true;
         return this;
     }
 
@@ -81,24 +81,18 @@ public final class ReplyEnv {
     public void reply(Message<?> msg) {
         if (defer) {
             deferred.push(() -> shell.sendMessage(msg));
-            this.defer = false;
+            defer = false;
         } else {
             shell.sendMessage(msg);
         }
     }
 
-    /**
-     * Defer an arbitrary action. See {@link #defer()} but instead of
-     * deferring the next message send, defer a specific action.
-     *
-     * @param action the action to run when the deferrals are resolved
-     */
     public void defer(Runnable action) {
-        this.deferred.push(action);
+        deferred.push(action);
     }
 
     public void resolveDeferrals() {
-        if (this.defer) {
+        if (defer) {
             throw new IllegalStateException("Reply environment is in defer mode but a resolution was request.");
         }
 

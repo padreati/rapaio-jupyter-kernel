@@ -17,11 +17,7 @@ public class IOPubExecuteResult extends DisplayData implements ContentType<IOPub
     private final int count;
 
     public IOPubExecuteResult(int count, DisplayData data) {
-        super(data);
+        super(data.data(), data.metadata(), data.transientData());
         this.count = count;
-    }
-
-    public int getCount() {
-        return count;
     }
 }

@@ -12,6 +12,6 @@ public class IOPubDisplayData extends DisplayData implements ContentType<IOPubDi
     }
 
     public IOPubDisplayData(DisplayData data) {
-        super(data);
+        super(data.data(), data.metadata(), data.transientData());
     }
 }

@@ -15,7 +15,7 @@ public class ShellInspectReply extends DisplayData implements ContentType<ShellI
     protected final boolean found;
 
     public ShellInspectReply(boolean found, DisplayData data) {
-        super(data);
+        super(data.data(), data.metadata(), data.transientData());
         this.found = found;
     }
 

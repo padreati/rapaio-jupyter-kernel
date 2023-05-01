@@ -19,7 +19,6 @@ import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellCompleteReply;
 import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellHistoryReply;
 import org.rapaio.jupyter.kernel.message.messages.StdinInputReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellInspectReply;
 import org.rapaio.jupyter.kernel.message.messages.ControlInterruptReply;
@@ -68,9 +67,6 @@ public class MessageType<T> {
 
     public static final MessageType<ShellHistoryRequest> SHELL_HISTORY_REQUEST =
             new MessageType<>("history_request", ShellHistoryRequest.class);
-
-    public static final MessageType<ShellHistoryReply> SHELL_HISTORY_REPLY =
-            new MessageType<>("history_reply", ShellHistoryReply.class);
 
     public static final MessageType<ShellIsCompleteRequest> SHELL_IS_COMPLETE_REQUEST =
             new MessageType<>("is_complete_request", ShellIsCompleteRequest.class);

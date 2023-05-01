@@ -25,7 +25,7 @@ import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
-import org.rapaio.jupyter.kernel.core.display.text.ANSIText;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
@@ -256,24 +256,24 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private List<String> formatCompileException(CompilerException e) {
 
-        List<String> msgs = new ArrayList<>(ANSIText.errorTypeHeader("Compile error"));
+        List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("Compile error"));
         SnippetEvent event = e.getBadSnippetCompilation();
         Snippet snippet = event.snippet();
         var diagnostics = javaEngine.getShell().diagnostics(snippet).toList();
         for (var d : diagnostics) {
-            msgs.addAll(ANSIText.sourceCode(snippet.source(), (int) d.getPosition(),
+            msgs.addAll(ANSI.sourceCode(snippet.source(), (int) d.getPosition(),
                     (int) d.getStartPosition(), (int) d.getEndPosition()));
 
-            msgs.addAll(ANSIText.errorMessages(d.getMessage(Locale.getDefault())));
+            msgs.addAll(ANSI.errorMessages(d.getMessage(Locale.getDefault())));
             msgs.add("");
         }
         // Declaration snippets are unique in that they can be active with unresolved references
         if (snippet instanceof DeclarationSnippet declarationSnippet) {
             List<String> unresolvedDependencies = javaEngine.getShell().unresolvedDependencies(declarationSnippet).toList();
             if (!unresolvedDependencies.isEmpty()) {
-                msgs.addAll(ANSIText.sourceCode(snippet.source()));
-                msgs.addAll(ANSIText.errorMessages("Unresolved dependencies:"));
-                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSIText.errorMessages("   - " + dep)));
+                msgs.addAll(ANSI.sourceCode(snippet.source()));
+                msgs.addAll(ANSI.errorMessages("Unresolved dependencies:"));
+                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSI.errorMessages("   - " + dep)));
             }
         }
 
@@ -281,15 +281,15 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     private List<String> formatInterruptedException(EvaluationInterruptedException e) {
-        List<String> msgs = new ArrayList<>(ANSIText.errorTypeHeader("InterruptedException"));
-        msgs.addAll(ANSIText.sourceCode(e.getSource()));
+        List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("InterruptedException"));
+        msgs.addAll(ANSI.sourceCode(e.getSource()));
         return msgs;
     }
 
     private List<String> formatTimeoutException(EvaluationTimeoutException e) {
-        List<String> msgs = new ArrayList<>(ANSIText.errorTypeHeader("TimeoutException"));
-        msgs.addAll(ANSIText.sourceCode(e.getSource()));
-        msgs.addAll(ANSIText.errorMessages(e.getMessage()));
+        List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("TimeoutException"));
+        msgs.addAll(ANSI.sourceCode(e.getSource()));
+        msgs.addAll(ANSI.errorMessages(e.getMessage()));
         return msgs;
     }
 
@@ -474,10 +474,9 @@ public class RapaioKernel implements KernelMessageHandler {
     // custom communication is not implemented, however, we have to behave properly
 
     private void handleCommOpenCommand(ReplyEnv env, Message<CustomCommOpen> message) {
-        CustomCommOpen openCommand = message.content();
+        String id = message.content().commId();
         env.setBusyDeferIdle();
-        CustomCommClose closeCommand = new CustomCommClose(openCommand.commId(), Transform.EMPTY_JSON_OBJ);
-        env.publish(closeCommand);
+        env.publish(new CustomCommClose(id, Transform.EMPTY_JSON_OBJ));
     }
 
     private void handleCommMsgCommand(ReplyEnv env, Message<CustomCommMsg> ignored) {
@@ -490,7 +489,6 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private void handleCommInfoRequest(ReplyEnv env, Message<ShellCommInfoRequest> message) {
         env.setBusyDeferIdle();
-        Map<String, ShellCommInfoReply.CommInfo> comms = new LinkedHashMap<>();
-        env.reply(new ShellCommInfoReply(comms));
+        env.reply(new ShellCommInfoReply(new LinkedHashMap<>()));
     }
 }

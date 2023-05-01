@@ -12,7 +12,7 @@ public class IOPubUpdateDisplayData extends DisplayData implements ContentType<I
     }
 
     public IOPubUpdateDisplayData(DisplayData data) {
-        super(data);
+        super(data.data(), data.metadata(), data.transientData());
 
         if (!data.hasDisplayId()) {
             throw new IllegalArgumentException("In order to update a display, the data must have a display_id.");

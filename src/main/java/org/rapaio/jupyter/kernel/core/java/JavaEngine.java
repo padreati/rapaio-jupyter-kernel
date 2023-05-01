@@ -209,9 +209,7 @@ public class JavaEngine {
                 )))
         ).render();
 
-        DisplayData dd = new DisplayData();
-        dd.putHTML(html);
-        return dd;
+        return DisplayData.withHtml(html);
     }
 
     public static Builder builder() {
@@ -230,11 +228,6 @@ public class JavaEngine {
 
         public Builder withTimeoutMillis(Long timeoutMillis) {
             this.timeoutMillis = timeoutMillis;
-            return this;
-        }
-
-        public Builder withCompilerOption(String option) {
-            this.compilerOptions.add(option);
             return this;
         }
 

@@ -6,14 +6,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Map;
 
-import org.rapaio.jupyter.kernel.core.history.HistoryEntry;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.KernelTimestamp;
 import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.adapters.ExpressionValueAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.HeaderAdapter;
-import org.rapaio.jupyter.kernel.message.adapters.HistoryEntryAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.HistoryRequestAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.KernelTimestampAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.MessageTypeAdapter;
@@ -42,7 +40,6 @@ public class Transform {
 
 
     private static final Gson replyGson = new GsonBuilder()
-            .registerTypeAdapter(HistoryEntry.class, HistoryEntryAdapter.INSTANCE)
             .registerTypeAdapter(ExpressionValue.class, ExpressionValueAdapter.INSTANCE)
             .create();
 
