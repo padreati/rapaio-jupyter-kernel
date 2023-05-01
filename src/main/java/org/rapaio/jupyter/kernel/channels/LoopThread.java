@@ -33,11 +33,9 @@ public class LoopThread extends Thread {
     public synchronized void start() {
         running = true;
         super.start();
-        LOGGER.info(getName() + "Loop started.");
     }
 
     public void shutdown() {
         running = false;
-        LOGGER.info(getName() + "Loop shutdown.");
     }
 }

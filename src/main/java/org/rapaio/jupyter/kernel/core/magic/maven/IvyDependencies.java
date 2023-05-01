@@ -3,7 +3,6 @@ package org.rapaio.jupyter.kernel.core.magic.maven;
 import java.io.File;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -17,7 +16,7 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
-import org.rapaio.jupyter.kernel.core.display.text.ANSIText;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
 public class IvyDependencies {
 
@@ -89,12 +88,12 @@ public class IvyDependencies {
 
         System.out.println("resolve rapaio:");
         for(var adr : resolve(rapaio)) {
-            System.out.println(ANSIText.start().bold().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build());
+            System.out.println(ANSI.start().bold().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build());
         }
 
         System.out.println("solve spring:");
         for(var adr : resolve(spring)) {
-            System.out.println(ANSIText.start().bold().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build());
+            System.out.println(ANSI.start().bold().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build());
         }
     }
 

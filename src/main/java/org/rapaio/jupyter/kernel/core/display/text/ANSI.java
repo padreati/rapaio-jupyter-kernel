@@ -14,7 +14,7 @@ import java.util.List;
  *     <li><a href="https://en.wikipedia.org/wiki/ANSI_escape_code">Wikipedia on ANSI escape code</a></li>
  * </ul>
  */
-public final class ANSIText {
+public final class ANSI {
 
     public static final int RESET = 0;
     public static final int BOLD = 1;
@@ -62,56 +62,59 @@ public final class ANSIText {
 
     private final StringBuilder sb = new StringBuilder();
 
-    public static ANSIText start() {
-        return new ANSIText().reset();
+    private ANSI() {
     }
 
-    public ANSIText codes(int... codes) {
+    public static ANSI start() {
+        return new ANSI().reset();
+    }
+
+    public ANSI codes(int... codes) {
         sb.append(escape(codes));
         return this;
     }
 
-    public ANSIText text(String text) {
+    public ANSI text(String text) {
         sb.append(text);
         return this;
     }
 
-    public ANSIText bold() {
+    public ANSI bold() {
         sb.append(escape(BOLD));
         return this;
     }
 
-    public ANSIText fgBlue() {
+    public ANSI fgBlue() {
         sb.append(escape(FG_BLUE));
         return this;
     }
 
-    public ANSIText fgGreen() {
+    public ANSI fgGreen() {
         sb.append(escape(FG_GREEN));
         return this;
     }
 
-    public ANSIText fgColor(int index) {
+    public ANSI fgColor(int index) {
         sb.append(escape(FG_COLOR, COLOR_SET_8_BIT, index));
         return this;
     }
 
-    public ANSIText fgColor(Color color) {
+    public ANSI fgColor(Color color) {
         sb.append(escape(FG_COLOR, COLOR_SET_TRUE_COLOR, color.getRed(), color.getGreen(), color.getBlue()));
         return this;
     }
 
-    public ANSIText bgColor(int index) {
+    public ANSI bgColor(int index) {
         sb.append(escape(BG_COLOR, COLOR_SET_8_BIT, index));
         return this;
     }
 
-    public ANSIText bgColor(Color color) {
+    public ANSI bgColor(Color color) {
         sb.append(escape(BG_COLOR, COLOR_SET_TRUE_COLOR, color.getRed(), color.getGreen(), color.getBlue()));
         return this;
     }
 
-    public ANSIText reset() {
+    public ANSI reset() {
         sb.append(escape(RESET));
         return this;
     }
@@ -136,7 +139,7 @@ public final class ANSIText {
     private static final String CODE_LINE_PROMPT = "|    ";
 
     public static List<String> errorTypeHeader(String errorType) {
-        return List.of(new ANSIText().reset().codes(BOLD, FG_RED).text(errorType).text(":").build());
+        return List.of(ANSI.start().codes(BOLD, FG_RED).text(errorType).text(":").build());
     }
 
     public static List<String> sourceCode(String code) {
@@ -147,7 +150,7 @@ public final class ANSIText {
         List<String> lines = new ArrayList<>();
         if (position == -1) {
             for (String line : code.split("\\R")) {
-                lines.add(new ANSIText().reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).reset().build());
+                lines.add(ANSI.start().reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).reset().build());
             }
         } else {
             int start = 0;
@@ -155,12 +158,12 @@ public final class ANSIText {
                 int end = start + line.length();
 
                 if (end < startPosition || start > endPosition) {
-                    lines.add(new ANSIText().reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).build());
+                    lines.add(new ANSI().reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).build());
                 } else {
                     int startMark = Math.max(start, startPosition);
                     int endMark = Math.min(end, endPosition);
 
-                    lines.add(new ANSIText()
+                    lines.add(new ANSI()
                             .reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line.substring(0, startMark - start))
                             .reset().codes(BOLD, BG_RED).fgColor(Color.YELLOW).text(line.substring(startMark - start, endMark - start))
                             .reset().codes(BOLD, FG_BLACK).text(line.substring(endMark - start))
@@ -177,7 +180,7 @@ public final class ANSIText {
         List<String> lines = new ArrayList<>();
         for (String line : errorMessage.split("\\R")) {
             if (!line.trim().startsWith("location:")) {
-                lines.add(new ANSIText().reset().codes(BOLD, FG_BLUE).text(line).build());
+                lines.add(new ANSI().reset().codes(BOLD, FG_BLUE).text(line).build());
             }
         }
         return lines;

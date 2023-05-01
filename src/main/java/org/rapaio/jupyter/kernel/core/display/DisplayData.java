@@ -1,6 +1,5 @@
 package org.rapaio.jupyter.kernel.core.display;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -14,36 +13,61 @@ import com.google.gson.annotations.SerializedName;
  */
 public class DisplayData {
 
+    public static DisplayData withText(String text) {
+        DisplayData dd = new DisplayData();
+        dd.putText(text);
+        return dd;
+    }
+
+    public static DisplayData withHtml(String html) {
+        DisplayData dd = new DisplayData();
+        dd.putHTML(html);
+        return dd;
+    }
+
+    public static DisplayData emptyIfNull(DisplayData displayData) {
+        return displayData == null ? new DisplayData() : displayData;
+    }
+
     public static final String DISPLAY_ID_KEY = "display_id";
 
-    public static DisplayData emptyIfNull(DisplayData bundle) {
-        return bundle == null ? new DisplayData(Collections.emptyMap()) : bundle;
-    }
-
     @SerializedName("data")
-    private final Map<String, Object> data = new HashMap<>();
+    protected final Map<String, Object> data;
 
     @SerializedName("metadata")
-    private final Map<String, Object> metadata = new LinkedHashMap<>();
+    protected final Map<String, Object> metadata;
 
     @SerializedName("transient")
-    private final Map<String, Object> transientData = new LinkedHashMap<>();
+    protected final Map<String, Object> transientData;
 
-    private DisplayData(Map<String, Object> data) {
-        this.data.putAll(data);
+    protected DisplayData() {
+        this(new HashMap<>(), new LinkedHashMap<>(), new LinkedHashMap<>());
     }
 
-    public DisplayData(DisplayData that) {
-        this.data.putAll(that.data);
-        this.metadata.putAll(that.metadata);
-        this.transientData.putAll(that.transientData);
+    protected DisplayData(Map<String, Object> data, Map<String, Object> metadata, Map<String, Object> transientData) {
+        this.data = new HashMap<>(data);
+        this.metadata = new LinkedHashMap<>(metadata);
+        this.transientData = new LinkedHashMap<>(transientData);
     }
 
-    public DisplayData(String textData) {
-        this.putText(textData);
+    public DisplayData copy() {
+        DisplayData copy = new DisplayData();
+        copy.data.putAll(data);
+        copy.metadata.putAll(metadata);
+        copy.transientData.putAll(transientData);
+        return copy;
     }
 
-    public DisplayData() {
+    public Map<String, Object> data() {
+        return data;
+    }
+
+    public Map<String, Object> metadata() {
+        return metadata;
+    }
+
+    public Map<String, Object> transientData() {
+        return transientData;
     }
 
     public void putData(String mimeType, Object data) {
@@ -62,21 +86,8 @@ public class DisplayData {
         transientData.put(key, value);
     }
 
-    public boolean hasDataForKey(String key) {
-        return this.data.containsKey(key);
-    }
-
-    public void assign(DisplayData dd) {
-        data.clear();
-        data.putAll(dd.data);
-        metadata.clear();
-        metadata.putAll(dd.metadata);
-        transientData.clear();
-        transientData.putAll(dd.transientData);
-    }
-
     public void setDisplayId(String id) {
-        this.putTransient(DISPLAY_ID_KEY, id);
+        putTransient(DISPLAY_ID_KEY, id);
     }
 
     public boolean hasDisplayId() {
@@ -84,47 +95,19 @@ public class DisplayData {
     }
 
     public String getDisplayId() {
-        Object id = this.transientData.get(DISPLAY_ID_KEY);
-        if (id == null) {
-            return null;
-        }
-        return String.valueOf(id);
+        Object id = transientData.get(DISPLAY_ID_KEY);
+        return id == null ? null : String.valueOf(id);
     }
 
     public void putText(String text) {
-        this.putData(MIMEType.TEXT, text);
+        putData(MIMEType.TEXT, text);
     }
 
     public void putHTML(String html) {
-        this.putData(MIMEType.HTML, html);
-    }
-
-    public void putLatex(String latex) {
-        this.putData(MIMEType.LATEX, latex);
-    }
-
-    public void putMath(String math) {
-        this.putLatex("$$" + math + "$$");
-    }
-
-    public void putMarkdown(String markdown) {
-        this.putData(MIMEType.MARKDOWN, markdown);
-    }
-
-    public void putJavaScript(String javascript) {
-        this.putData(MIMEType.JAVASCRIPT, javascript);
-    }
-
-    public void putJSON(String json) {
-        this.putData(MIMEType.JSON, json);
-    }
-
-    public void putJSON(String json, boolean expanded) {
-        this.putJSON(json);
-        this.putMetaData("expanded", expanded);
+        putData(MIMEType.HTML, html);
     }
 
     public void putData(MIMEType mimeType, String data) {
-        this.putData(mimeType.toString(), data);
+        putData(mimeType.toString(), data);
     }
 }

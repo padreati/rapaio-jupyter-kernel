@@ -9,7 +9,7 @@ import java.util.List;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.text.ANSIText;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
@@ -65,9 +65,7 @@ public class HelpMagicHandler implements MagicHandler {
 
     @Override
     public DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {
-        DisplayData displayData = new DisplayData();
-        displayData.putHTML(each(helpMessage(), line -> p(texts(line))).render());
-        return displayData;
+        return DisplayData.withHtml(each(helpMessage(), line -> p(texts(line))).render());
     }
 
     @Override
@@ -77,20 +75,17 @@ public class HelpMagicHandler implements MagicHandler {
 
     private DisplayData help() {
         StringBuilder sb = new StringBuilder();
-        sb.append(new ANSIText()
-                .reset().bold().fgBlue().text("Information about registered magic handlers.\n").reset().build());
+        sb.append(ANSI.start().bold().fgBlue().text("Information about registered magic handlers.\n").reset().build());
         for (var handler : magicHandlers) {
             sb.append("\n");
-            sb.append(new ANSIText().reset().bold().text(handler.name()).reset().build()).append("\n");
+            sb.append(ANSI.start().bold().text(handler.name()).reset().build()).append("\n");
 
             sb.append("Syntax: ");
-            sb.append(new ANSIText().reset().bold().fgGreen().text(handler.syntax()).reset().build()).append("\n");
+            sb.append(ANSI.start().bold().fgGreen().text(handler.syntax()).reset().build()).append("\n");
             for (var helpLine : handler.helpMessage()) {
                 sb.append("\t").append(helpLine).append("\n");
             }
         }
-        DisplayData dd = new DisplayData();
-        dd.putText(sb.toString());
-        return dd;
+        return DisplayData.withText(sb.toString());
     }
 }
