@@ -182,14 +182,10 @@ public class JavaEngine {
 
     public DisplayData inspect(String source, int pos) {
 
-        // Move the code position to the end of the identifier to make the inspection work at any
-        // point in the identifier. i.e "System.o|ut" or "System.out|" will return the same result.
         while (pos + 1 < source.length() && Character.isJavaIdentifierPart(source.charAt(pos + 1))) {
             pos++;
         }
 
-        // If the next non-whitespace character is an opening paren '(' then this must be included
-        // in the documentation search to ensure it searches for a method call.
         int parenIdx = pos;
         while (parenIdx + 1 < source.length() && Character.isWhitespace(source.charAt(parenIdx + 1))) {
             parenIdx++;

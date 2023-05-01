@@ -4,6 +4,7 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -65,7 +66,15 @@ import jdk.jshell.SnippetEvent;
 @SuppressWarnings("rawtypes")
 public class RapaioKernel implements KernelMessageHandler {
 
-    public static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
+    public static final String RJK_TIMEOUT_MILLIS = "RJK_TIMEOUT_MILLIS";
+    public static final String RJK_COMPILER_OPTIONS = "RJK_COMPILER_OPTIONS";
+    public static final String RJK_INIT_SCRIPT = "RJK_INIT_SCRIPT";
+
+    public static final String DEFAULT_RJK_TIMEOUT_MILLIS = "-1";
+    public static final String DEFAULT_COMPILER_OPTIONS = "";
+    public static final String DEFAULT_INIT_SCRIPT = "";
+
+    private static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
 
     private static final Logger LOGGER = Logger.getLogger(RapaioKernel.class.getSimpleName());
     private static final AtomicInteger executionCount = new AtomicInteger(1);
@@ -82,10 +91,31 @@ public class RapaioKernel implements KernelMessageHandler {
 
     public RapaioKernel() {
 
+        String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
+        if (envCompilerOptions == null) {
+            envCompilerOptions = DEFAULT_COMPILER_OPTIONS;
+        }
+        String[] compilerTokens = Arrays.stream(envCompilerOptions.split("\\s"))
+                .filter(s -> !s.trim().isEmpty()).toArray(String[]::new);
+        List<String> compilerOptions = new ArrayList<>(List.of(compilerTokens));
+
+        String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
+        if (envTimeoutMillis == null) {
+            envTimeoutMillis = DEFAULT_RJK_TIMEOUT_MILLIS;
+        }
+        long timeoutMillis;
+        try {
+            timeoutMillis = Long.parseLong(envTimeoutMillis);
+        } catch (NumberFormatException ex) {
+            throw new RuntimeException(
+                    "Cannot start kernel. Could not parse as long the value specified for env variable " + RJK_TIMEOUT_MILLIS);
+        }
+
         this.renderer = new DefaultRenderer();
         this.javaEngine = JavaEngine.builder()
+                .withCompilerOptions(compilerOptions)
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
-                .withTimeoutMillis(-1L)
+                .withTimeoutMillis(timeoutMillis)
                 .build();
         this.javaEngine.initialize();
         this.magicEvaluator = new MagicEvaluator(javaEngine);

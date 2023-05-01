@@ -1,8 +1,12 @@
 package org.rapaio.jupyter.kernel;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
@@ -10,6 +14,7 @@ import org.rapaio.jupyter.kernel.channels.JupyterChannels;
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.Transform;
+import org.rapaio.jupyter.kernel.install.Installer;
 
 public class MainApp {
 
@@ -21,7 +26,17 @@ public class MainApp {
             throw new IllegalArgumentException("Missing connection file argument");
         }
 
-        Path connectionFile = Paths.get(args[0]);
+        if (args[0].equals("-i")) {
+            Installer installer = new Installer();
+            String[] installerArgs = Arrays.copyOfRange(args, 1, args.length);
+            installer.install(installerArgs);
+        } else {
+            runKernel(args[0]);
+        }
+    }
+
+    private static void runKernel(String connectionFileArg) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        Path connectionFile = Paths.get(connectionFileArg);
 
         if (!Files.isRegularFile(connectionFile)) {
             throw new IllegalArgumentException("Connection file '" + connectionFile + "' isn't a file.");
@@ -37,5 +52,6 @@ public class MainApp {
         JupyterChannels connection = new JupyterChannels(connProps, kernel);
         connection.connect();
         connection.joinUntilClose();
+
     }
 }
