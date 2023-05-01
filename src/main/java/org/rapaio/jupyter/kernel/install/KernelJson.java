@@ -9,5 +9,5 @@ public record KernelJson(
         @SerializedName("display_name") String displayName,
         @SerializedName("language") String language,
         @SerializedName("interrupt_mode") String interruptMode,
-        @SerializedName("map") Map<String, String> env) {
+        @SerializedName("env") Map<String, String> env) {
 }

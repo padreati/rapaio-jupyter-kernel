@@ -1,5 +1,9 @@
 package org.rapaio.jupyter.kernel.core;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -92,6 +96,7 @@ public class RapaioKernel implements KernelMessageHandler {
     public RapaioKernel() {
 
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
+        LOGGER.info(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
         if (envCompilerOptions == null) {
             envCompilerOptions = DEFAULT_COMPILER_OPTIONS;
         }
@@ -100,6 +105,7 @@ public class RapaioKernel implements KernelMessageHandler {
         List<String> compilerOptions = new ArrayList<>(List.of(compilerTokens));
 
         String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
+        LOGGER.info(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
         if (envTimeoutMillis == null) {
             envTimeoutMillis = DEFAULT_RJK_TIMEOUT_MILLIS;
         }
@@ -111,14 +117,42 @@ public class RapaioKernel implements KernelMessageHandler {
                     "Cannot start kernel. Could not parse as long the value specified for env variable " + RJK_TIMEOUT_MILLIS);
         }
 
+        String envInitScript = System.getenv(RJK_INIT_SCRIPT);
+        LOGGER.info(RJK_INIT_SCRIPT + " env: " + envInitScript);
+        if (envInitScript == null) {
+            envInitScript = DEFAULT_INIT_SCRIPT;
+        }
+        String initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
+
         this.renderer = new DefaultRenderer();
         this.javaEngine = JavaEngine.builder()
                 .withCompilerOptions(compilerOptions)
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
+                .withStartupScript(initScriptContent)
                 .withTimeoutMillis(timeoutMillis)
                 .build();
         this.javaEngine.initialize();
         this.magicEvaluator = new MagicEvaluator(javaEngine);
+    }
+
+    private String loadInitScript(String path) {
+        LOGGER.info("Loading init script: " + path);
+        try {
+            File file = new File(path);
+            StringBuilder content = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                while (true) {
+                    String line = reader.readLine();
+                    if (line == null) {
+                        break;
+                    }
+                    content.append(line).append("\n");
+                }
+            }
+            return content.toString();
+        } catch (IOException e) {
+            throw new RuntimeException("Cannot load specified init script: " + path);
+        }
     }
 
     @Override
