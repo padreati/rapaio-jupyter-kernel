@@ -16,6 +16,9 @@ import org.apache.ivy.core.settings.IvySettings;
 import org.apache.ivy.plugins.resolver.ChainResolver;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.apache.ivy.plugins.resolver.IBiblioResolver;
+import org.apache.ivy.util.DefaultMessageLogger;
+import org.apache.ivy.util.Message;
+import org.apache.ivy.util.MessageLogger;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
 public class IvyDependencies {
@@ -57,7 +60,11 @@ public class IvyDependencies {
         ivySettings.addResolver(dependencyResolver);
         ivySettings.setDefaultResolver(dependencyResolver.getName());
 
+
+        MessageLogger ivyLogger = new DefaultMessageLogger(Message.MSG_WARN);
+
         Ivy ivy = Ivy.newInstance(ivySettings);
+        ivy.getLoggerEngine().setDefaultLogger(ivyLogger);
 
         // Step 1: you always need to resolve before you can retrieve
         //
