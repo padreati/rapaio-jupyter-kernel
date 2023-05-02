@@ -59,9 +59,4 @@ public class JavaReplMagicHandler implements MagicHandler {
     public ReplacementOptions complete(ReplyEnv env, MagicSnippet snippet) {
         return null;
     }
-
-    @Override
-    public DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {
-        return null;
-    }
 }

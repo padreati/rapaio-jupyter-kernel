@@ -1,5 +1,11 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
+
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -8,6 +14,7 @@ import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.html.Tags;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -71,12 +78,6 @@ public class MavenCoordinates implements MagicHandler {
         } catch (ParseException | IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
-    }
-
-
-    @Override
-    public DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {
         return null;
     }
 

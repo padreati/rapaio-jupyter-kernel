@@ -64,11 +64,6 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {
-        return DisplayData.withHtml(each(helpMessage(), line -> p(texts(line))).render());
-    }
-
-    @Override
     public ReplacementOptions complete(ReplyEnv env, MagicSnippet snippet) {
         return null;
     }

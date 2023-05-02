@@ -216,14 +216,12 @@ public class RapaioKernel implements KernelMessageHandler {
         javaEngine.interrupt();
     }
 
-    public DisplayData eval(String expr) throws Exception {
-
+    public MagicEvalResult evalMagic(String expr) throws Exception {
         // try first the magic
-        MagicEvalResult magicResult = magicEvaluator.eval(currentReplyEnv, expr);
-        if (magicResult.handled()) {
-            return transformEval(magicResult.result());
-        }
+        return magicEvaluator.eval(currentReplyEnv, expr);
+    }
 
+    public DisplayData eval(String expr) throws Exception {
         // if not handled try the java engine
         return transformEval(javaEngine.eval(expr));
     }
@@ -328,6 +326,28 @@ public class RapaioKernel implements KernelMessageHandler {
         env.setBusyDeferIdle();
         env.publish(new IOPubExecuteInput(request.code(), count));
 
+        currentReplyEnv = env;
+        env.defer(() -> currentReplyEnv = null);
+
+        // before binding IO try to do evaluation of magic.
+        // if magic handled the request then this is it, everything remains here
+        // otherwise continue normally with java evaluation
+        try {
+            MagicEvalResult magicResult = evalMagic(request.code());
+            if (magicResult.handled()) {
+                if (magicResult.result() != null) {
+                    env.publish(new IOPubExecuteResult(count, transformEval(magicResult.result())));
+                }
+                env.defer().reply(ShellExecuteReply.withOk(count, Collections.emptyMap()));
+                return;
+            }
+        } catch (Exception e) {
+            ErrorReply error = ErrorReply.of(e, count);
+            env.publish(IOPubError.of(e, this::formatException));
+            env.defer().replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error);
+            return;
+        }
+
         // collect old streams
         PrintStream oldStdOut = System.out;
         PrintStream oldStdErr = System.err;
@@ -341,10 +361,6 @@ public class RapaioKernel implements KernelMessageHandler {
         System.setErr(new PrintStream(shellIO.getErr(), true, StandardCharsets.UTF_8));
 
         shellIO.bindEnv(env, allowStdin);
-
-        currentReplyEnv = env;
-
-        env.defer(() -> currentReplyEnv = null);
 
         // push on stack restore streams
         env.defer(() -> {
