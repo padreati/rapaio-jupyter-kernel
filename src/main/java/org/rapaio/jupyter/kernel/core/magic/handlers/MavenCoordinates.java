@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
+import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
@@ -57,8 +58,9 @@ public class MavenCoordinates implements MagicHandler {
         try {
             DepCoordinates dc = new DepCoordinates(args);
             env.writeToStdOut("Solving dependencies for " + ANSI.start().bold().fgGreen().text(dc.toString()).reset().build() + "\n");
-            var adrs = IvyDependencies.resolve(dc);
-            env.writeToStdOut("Found dependencies count: " + adrs.size() + "\n");
+            ResolveReport resolveReport = IvyDependencies.getInstance().resolve(dc);
+            var adrs = resolveReport.getAllArtifactsReports();
+            env.writeToStdOut("Found dependencies count: " + adrs.length + "\n");
             for (var adr : adrs) {
                 if (adr.getExt().equalsIgnoreCase("jar") && adr.getType().equalsIgnoreCase("jar")) {
                     env.writeToStdOut("Add to classpath: " +
@@ -71,6 +73,7 @@ public class MavenCoordinates implements MagicHandler {
         }
         return null;
     }
+
 
     @Override
     public DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {

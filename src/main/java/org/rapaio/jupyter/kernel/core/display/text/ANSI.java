@@ -163,12 +163,19 @@ public final class ANSI {
                     int startMark = Math.max(start, startPosition);
                     int endMark = Math.min(end, endPosition);
 
-                    lines.add(new ANSI()
+                    String highlight = line.substring(startMark - start, endMark - start);
+                    lines.add(ANSI.start()
                             .reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line.substring(0, startMark - start))
-                            .reset().codes(BOLD, BG_RED).fgColor(Color.YELLOW).text(line.substring(startMark - start, endMark - start))
+                            .reset().codes(BOLD, BG_RED).fgColor(Color.YELLOW).text(highlight)
                             .reset().codes(BOLD, FG_BLACK).text(line.substring(endMark - start))
                             .build()
                     );
+
+                    if (startMark == endMark) {
+                        String underline =
+                                " ".repeat(startMark - start + CODE_LINE_PROMPT.length()) + "^" + " ".repeat(Math.min(0, line.length() - startMark + start + 1));
+                        lines.add(ANSI.start().bold().text(underline).build());
+                    }
                 }
                 start += line.length() + 1; // one position for newline
             }

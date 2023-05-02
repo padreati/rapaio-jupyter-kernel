@@ -99,7 +99,7 @@ public class RapaioKernel implements KernelMessageHandler {
     public RapaioKernel() {
 
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
-        LOGGER.info(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
+        LOGGER.finest(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
         if (envCompilerOptions == null) {
             envCompilerOptions = DEFAULT_COMPILER_OPTIONS;
         }
@@ -108,7 +108,7 @@ public class RapaioKernel implements KernelMessageHandler {
         List<String> compilerOptions = new ArrayList<>(List.of(compilerTokens));
 
         String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
-        LOGGER.info(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
+        LOGGER.finest(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
         if (envTimeoutMillis == null) {
             envTimeoutMillis = DEFAULT_RJK_TIMEOUT_MILLIS;
         }
@@ -121,7 +121,7 @@ public class RapaioKernel implements KernelMessageHandler {
         }
 
         String envInitScript = System.getenv(RJK_INIT_SCRIPT);
-        LOGGER.info(RJK_INIT_SCRIPT + " env: " + envInitScript);
+        LOGGER.finest(RJK_INIT_SCRIPT + " env: " + envInitScript);
         if (envInitScript == null) {
             envInitScript = DEFAULT_INIT_SCRIPT;
         }
