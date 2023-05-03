@@ -9,6 +9,7 @@ import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.MavenCoordinates;
 
@@ -20,6 +21,7 @@ public class MagicEvaluator {
         // register magic handlers
         magicHandlers.add(new JavaReplMagicHandler());
         magicHandlers.add(new MavenCoordinates());
+        magicHandlers.add(new JarMagicHandler());
         magicHandlers.add(new HelpMagicHandler(magicHandlers));
     }
 
@@ -32,7 +34,7 @@ public class MagicEvaluator {
     private record MagicPair(MagicSnippet snippet, MagicHandler handler) {
     }
 
-    public MagicEvalResult eval(ReplyEnv env, String expr) throws MagicParseException {
+    public MagicEvalResult eval(ReplyEnv env, String expr) throws MagicParseException, MagicEvalException {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parseSnippets(expr, -1);

@@ -26,6 +26,7 @@ import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
@@ -236,66 +237,6 @@ public class RapaioKernel implements KernelMessageHandler {
         return null;
     }
 
-    public List<String> formatException(Exception e) {
-        if (e instanceof CompilerException ce) {
-            return formatCompileException(ce);
-        }
-        if (e instanceof EvaluationInterruptedException ie) {
-            return formatInterruptedException(ie);
-        }
-        if (e instanceof EvaluationTimeoutException te) {
-            return formatTimeoutException(te);
-        }
-        if (e instanceof MagicParseException me) {
-            return formatMagicParseExpression(me);
-        }
-        return List.of(e.getMessage());
-    }
-
-    private List<String> formatCompileException(CompilerException e) {
-
-        List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("Compile error"));
-        SnippetEvent event = e.getBadSnippetCompilation();
-        Snippet snippet = event.snippet();
-        var diagnostics = javaEngine.getShell().diagnostics(snippet).toList();
-        for (var d : diagnostics) {
-            msgs.addAll(ANSI.sourceCode(snippet.source(), (int) d.getPosition(),
-                    (int) d.getStartPosition(), (int) d.getEndPosition()));
-
-            msgs.addAll(ANSI.errorMessages(d.getMessage(Locale.getDefault())));
-            msgs.add("");
-        }
-        // Declaration snippets are unique in that they can be active with unresolved references
-        if (snippet instanceof DeclarationSnippet declarationSnippet) {
-            List<String> unresolvedDependencies = javaEngine.getShell().unresolvedDependencies(declarationSnippet).toList();
-            if (!unresolvedDependencies.isEmpty()) {
-                msgs.addAll(ANSI.sourceCode(snippet.source()));
-                msgs.addAll(ANSI.errorMessages("Unresolved dependencies:"));
-                unresolvedDependencies.forEach(dep -> msgs.addAll(ANSI.errorMessages("   - " + dep)));
-            }
-        }
-
-        return msgs;
-    }
-
-    private List<String> formatInterruptedException(EvaluationInterruptedException e) {
-        List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("InterruptedException"));
-        msgs.addAll(ANSI.sourceCode(e.getSource()));
-        return msgs;
-    }
-
-    private List<String> formatTimeoutException(EvaluationTimeoutException e) {
-        List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("TimeoutException"));
-        msgs.addAll(ANSI.sourceCode(e.getSource()));
-        msgs.addAll(ANSI.errorMessages(e.getMessage()));
-        return msgs;
-    }
-
-    private List<String> formatMagicParseExpression(MagicParseException e) {
-        // todo: something better
-        return List.of(e.getMessage());
-    }
-
     //
     // MESSAGE HANDLERS
     //
@@ -343,7 +284,7 @@ public class RapaioKernel implements KernelMessageHandler {
             }
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
-            env.publish(IOPubError.of(e, this::formatException));
+            env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
             env.defer().replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error);
             return;
         }
@@ -384,7 +325,7 @@ public class RapaioKernel implements KernelMessageHandler {
             env.defer().reply(ShellExecuteReply.withOk(count, Collections.emptyMap()));
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
-            env.publish(IOPubError.of(e, this::formatException));
+            env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
             env.defer().replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error);
         }
     }

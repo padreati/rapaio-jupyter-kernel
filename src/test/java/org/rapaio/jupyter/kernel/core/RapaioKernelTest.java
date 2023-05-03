@@ -18,6 +18,6 @@ public class RapaioKernelTest {
                 line 2 of command
                 """;
         CompilerException ce = assertThrows(CompilerException.class, () -> rk.eval(s));
-        rk.formatException(ce);
+
     }
 }

@@ -24,7 +24,7 @@ public interface MagicHandler {
 
     boolean canHandleSnippet(MagicSnippet snippet);
 
-    Object eval(JavaEngine engine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException;
+    Object eval(JavaEngine engine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException, MagicEvalException;
 
     default DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {
         return DisplayData.withHtml(
