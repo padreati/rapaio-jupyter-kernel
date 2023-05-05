@@ -23,7 +23,7 @@ public class HeartbeatChannel extends AbstractChannel {
     }
 
     private boolean isBound() {
-        return this.loopThread != null;
+        return loopThread != null;
     }
 
     @Override
@@ -38,7 +38,7 @@ public class HeartbeatChannel extends AbstractChannel {
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);
 
-        ZMQ.Poller poller = super.ctx.poller(1);
+        ZMQ.Poller poller = ctx.poller(1);
         poller.register(socket, ZMQ.Poller.POLLIN);
 
         this.loopThread = new LoopThread(channelThreadName, HB_DEFAULT_SLEEP_MS, () -> {

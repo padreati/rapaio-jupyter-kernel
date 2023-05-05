@@ -12,6 +12,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -27,6 +28,7 @@ import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
+import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
 
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
@@ -38,11 +40,10 @@ import jdk.jshell.SourceCodeAnalysis;
 public class JavaEngine {
 
     private static final EnumSet<Snippet.SubKind> ALLOWED_LAST_OUTPUT = EnumSet.of(
-            Snippet.SubKind.VAR_DECLARATION_WITH_INITIALIZER_SUBKIND,
             Snippet.SubKind.VAR_VALUE_SUBKIND,
             Snippet.SubKind.OTHER_EXPRESSION_SUBKIND,
-            Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND,
-            Snippet.SubKind.ASSIGNMENT_SUBKIND);
+            Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND
+    );
 
 
     private final String executionId;
@@ -216,13 +217,16 @@ public class JavaEngine {
         return DisplayData.withHtml(html);
     }
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder builder(JShellIO shellIO) {
+        return new Builder(shellIO);
     }
 
     public static class Builder {
 
-        protected Builder() {
+        private final JShellIO shellIO;
+
+        protected Builder(JShellIO shellIO) {
+            this.shellIO = shellIO;
         }
 
         private long timeoutMillis = -1L;
@@ -277,6 +281,9 @@ public class JavaEngine {
             JShell shell = JShell.builder()
                     .compilerOptions(compilerOptions.toArray(String[]::new))
                     .executionEngine(controlProvider, controlParameterMap)
+                    .in(shellIO.getIn())
+                    .out(new PrintStream(shellIO.getOut(), true))
+                    .err(new PrintStream(shellIO.getErr(), true))
                     .build();
             return new JavaEngine(executionId, controlProvider, shell, startupScripts);
         }

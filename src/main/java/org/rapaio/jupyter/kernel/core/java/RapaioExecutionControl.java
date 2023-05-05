@@ -40,7 +40,7 @@ public class RapaioExecutionControl extends DirectExecutionControl {
     }
 
     public Object takeResult(String key) {
-        Object result = this.results.remove(key);
+        Object result = results.remove(key);
         if (result == null) {
             throw new IllegalStateException("No result with key: " + key);
         }
@@ -56,13 +56,13 @@ public class RapaioExecutionControl extends DirectExecutionControl {
     }
 
     private Object execute(String id, Method methodCall) throws Exception {
-        Future<Object> runningTask = this.executor.submit(() -> methodCall.invoke(null));
+        Future<Object> runningTask = executor.submit(() -> methodCall.invoke(null));
 
         running.put(id, runningTask);
 
         try {
             if (timeoutTime > 0) {
-                return runningTask.get(this.timeoutTime, TimeUnit.MILLISECONDS);
+                return runningTask.get(timeoutTime, TimeUnit.MILLISECONDS);
             }
             return runningTask.get();
         } catch (CancellationException e) {
@@ -84,8 +84,7 @@ public class RapaioExecutionControl extends DirectExecutionControl {
                 throw new UserException(cause.getMessage(), cause.getClass().getName(), cause.getStackTrace());
             }
         } catch (TimeoutException e) {
-            throw new UserException("Execution timed out", TIMEOUT_MARKER, e.getStackTrace()
-            );
+            throw new UserException("Execution timed out", TIMEOUT_MARKER, e.getStackTrace());
         } finally {
             running.remove(id, runningTask);
         }

@@ -1,11 +1,5 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
@@ -13,10 +7,9 @@ import java.util.List;
 import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.ReplacementOptions;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.html.Tags;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -55,7 +48,7 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public Object eval(JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException {
+    public Object eval(MagicEvaluator magicEvaluator, JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }

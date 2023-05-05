@@ -44,11 +44,9 @@ public class StdinChannel extends AbstractChannel {
     public synchronized String getInput(MessageContext<?> context, String prompt, boolean isPasswordRequest) {
         StdinInputRequest content = new StdinInputRequest(prompt, isPasswordRequest);
         Message<StdinInputRequest> request = new Message<>(context, MessageType.STDIN_INPUT_REQUEST, null, content, null);
+        sendMessage(request);
 
-        super.sendMessage(request);
-
-        Message<StdinInputReply> reply = super.readMessage(MessageType.STDIN_INPUT_REPLY);
-
+        Message<StdinInputReply> reply = readMessage(MessageType.STDIN_INPUT_REPLY);
         return reply.content().value() + System.lineSeparator();
     }
 }

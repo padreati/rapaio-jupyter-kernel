@@ -12,7 +12,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.channels.JupyterChannels;
-import org.rapaio.jupyter.kernel.channels.KernelMessageHandler;
 import org.rapaio.jupyter.kernel.channels.MessageHandler;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
@@ -56,7 +55,7 @@ import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
 
 @SuppressWarnings("rawtypes")
-public class RapaioKernel implements KernelMessageHandler {
+public class RapaioKernel {
 
     public static final String RJK_TIMEOUT_MILLIS = "RJK_TIMEOUT_MILLIS";
     public static final String RJK_COMPILER_OPTIONS = "RJK_COMPILER_OPTIONS";
@@ -86,7 +85,7 @@ public class RapaioKernel implements KernelMessageHandler {
         KernelEnv kernelEnv = new KernelEnv();
 
         this.renderer = new DefaultRenderer();
-        this.javaEngine = JavaEngine.builder()
+        this.javaEngine = JavaEngine.builder(shellIO)
                 .withCompilerOptions(kernelEnv.compilerOptions())
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
                 .withStartupScript(kernelEnv.initScriptContent())
@@ -96,7 +95,6 @@ public class RapaioKernel implements KernelMessageHandler {
         this.magicEvaluator = new MagicEvaluator(javaEngine);
     }
 
-    @Override
     @SuppressWarnings("unchecked")
     public <T> MessageHandler<T> getHandler(MessageType<T> type) {
         return messageHandlers.get(type);
@@ -172,7 +170,6 @@ public class RapaioKernel implements KernelMessageHandler {
     // MESSAGE HANDLERS
     //
 
-    @Override
     public void registerChannels(JupyterChannels channels) {
         this.channels = channels;
         messageHandlers.put(MessageType.SHELL_EXECUTE_REQUEST, this::handleExecuteRequest);
@@ -195,11 +192,11 @@ public class RapaioKernel implements KernelMessageHandler {
 
         int count = executionCount.getAndIncrement();
 
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         env.publish(new IOPubExecuteInput(request.code(), count));
 
         currentReplyEnv = env;
-        env.defer(() -> currentReplyEnv = null);
+        env.delay(() -> currentReplyEnv = null);
 
         // before binding IO try to do evaluation of magic.
         // if magic handled the request then this is it, everything remains here
@@ -210,13 +207,13 @@ public class RapaioKernel implements KernelMessageHandler {
                 if (magicResult.result() != null) {
                     env.publish(new IOPubExecuteResult(count, transformEval(magicResult.result())));
                 }
-                env.defer().reply(ShellExecuteReply.withOk(count, Collections.emptyMap()));
+                env.delay(()-> env.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
                 return;
             }
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
             env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            env.defer().replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error);
+            env.delay(() -> env.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
             return;
         }
 
@@ -235,16 +232,16 @@ public class RapaioKernel implements KernelMessageHandler {
         shellIO.bindEnv(env, allowStdin);
 
         // push on stack restore streams
-        env.defer(() -> {
+        env.delay(() -> {
             System.setOut(oldStdOut);
             System.setErr(oldStdErr);
             System.setIn(oldStdIn);
         });
 
         // unbind environment
-        env.defer(shellIO::unbindEnv);
+        env.delay(shellIO::unbindEnv);
         // flush before restoring
-        env.defer(shellIO::flush);
+        env.delay(shellIO::flush);
 
         try {
             DisplayData out = eval(request.code());
@@ -253,11 +250,11 @@ public class RapaioKernel implements KernelMessageHandler {
                 env.publish(new IOPubExecuteResult(count, out));
             }
 
-            env.defer().reply(ShellExecuteReply.withOk(count, Collections.emptyMap()));
+            env.delay(()->env.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
             env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            env.defer().replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error);
+            env.delay(()-> env.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
         }
     }
 
@@ -267,7 +264,7 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private void handleIsCompleteRequest(ReplyEnv env, Message<ShellIsCompleteRequest> message) {
         ShellIsCompleteRequest request = message.content();
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
 
         String result = javaEngine.isComplete(request.code());
 
@@ -282,7 +279,7 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private void handleInspectRequest(ReplyEnv env, Message<ShellInspectRequest> message) {
         ShellInspectRequest request = message.content();
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         try {
 
             MagicInspectResult magicResult = magicEvaluator.inspect(currentReplyEnv, request.code(), request.cursorPos());
@@ -303,7 +300,7 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private void handleCompleteRequest(ReplyEnv env, Message<ShellCompleteRequest> message) {
         ShellCompleteRequest request = message.content();
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         try {
             MagicCompleteResult magicResult = magicEvaluator.complete(currentReplyEnv, request.code(), request.cursorPos());
 
@@ -335,25 +332,25 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     private void handleKernelInfoRequest(ReplyEnv env, Message<ShellKernelInfoRequest> ignored) {
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         env.reply(getKernelInfo());
     }
 
     private void handleShutdownRequest(ReplyEnv env, Message<ControlShutdownRequest> shutdownRequestMessage) {
         ControlShutdownRequest request = shutdownRequestMessage.content();
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
 
-        env.defer().reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN);
+        env.delay(()->env.reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN));
 
         // request.restart() is no use for now, but might be used in the end
         onShutdown();
-        env.resolveDeferrals();
+        env.doDelayedActions();
         // this will determine the connections to shut down
         env.markForShutdown();
     }
 
     private void handleInterruptRequest(ReplyEnv env, Message<ControlInterruptRequest> interruptRequestMessage) {
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         env.reply(new ControlInterruptReply());
         interrupt();
     }
@@ -362,7 +359,7 @@ public class RapaioKernel implements KernelMessageHandler {
 
     private void handleCommOpenCommand(ReplyEnv env, Message<CustomCommOpen> message) {
         String id = message.content().commId();
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         env.publish(new CustomCommClose(id, Transform.EMPTY_JSON_OBJ));
     }
 
@@ -375,7 +372,7 @@ public class RapaioKernel implements KernelMessageHandler {
     }
 
     private void handleCommInfoRequest(ReplyEnv env, Message<ShellCommInfoRequest> message) {
-        env.setBusyDeferIdle();
+        env.busyThenIdle();
         env.reply(new ShellCommInfoReply(new LinkedHashMap<>()));
     }
 }

@@ -5,6 +5,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Set;
 
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageContext;
@@ -26,13 +27,13 @@ public final class JupyterChannels {
 
     private final Set<AbstractChannel> channels;
 
-    private KernelMessageHandler kernelMessageHandler;
+    private final RapaioKernel kernel;
 
     private boolean isConnected = false;
 
-    public JupyterChannels(ConnectionProperties connProps, KernelMessageHandler kernelMessageHandler) throws NoSuchAlgorithmException, InvalidKeyException {
+    public JupyterChannels(ConnectionProperties connProps, RapaioKernel kernel) throws NoSuchAlgorithmException, InvalidKeyException {
         this.connProps = connProps;
-        this.kernelMessageHandler = kernelMessageHandler;
+        this.kernel = kernel;
         ctx = ZMQ.context(1);
 
         HMACDigest hmacDigest = connProps.createHMACDigest();
@@ -50,7 +51,7 @@ public final class JupyterChannels {
         if (!isConnected) {
             channels.forEach(s -> s.bind(this.connProps));
             iopub.sendMessage(new Message<>(null, MessageType.IOPUB_STATUS, null, IOPubStatus.STARTING, null));
-            kernelMessageHandler.registerChannels(this);
+            kernel.registerChannels(this);
             isConnected = true;
         }
     }
@@ -77,7 +78,7 @@ public final class JupyterChannels {
 
     @SuppressWarnings("unchecked")
     public <T> MessageHandler<T> getHandler(MessageType<T> type) {
-        return kernelMessageHandler.getHandler(type);
+        return kernel.getHandler(type);
     }
 
     public ReplyEnv prepareReplyEnv(MessageContext<?> context) {

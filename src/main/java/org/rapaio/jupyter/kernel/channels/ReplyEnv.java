@@ -1,7 +1,6 @@
 package org.rapaio.jupyter.kernel.channels;
 
-import java.util.Deque;
-import java.util.LinkedList;
+import java.util.Stack;
 
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.Message;
@@ -14,39 +13,24 @@ import org.rapaio.jupyter.kernel.message.messages.IOPubStream;
 @SuppressWarnings("rawtypes")
 public final class ReplyEnv {
 
-    private final IOPubChannel iopub;
-    private final ShellChannel shell;
-    private final ControlChannel control;
-    private final StdinChannel stdin;
-    private final HeartbeatChannel heartbeat;
     private final MessageContext context;
+    private final JupyterChannels channels;
 
-    private final Deque<Runnable> deferred = new LinkedList<>();
+    private final Stack<Runnable> delayedActions = new Stack<>();
 
     private boolean requestShutdown = false;
-    private boolean defer = false;
 
     ReplyEnv(JupyterChannels channels, MessageContext context) {
-        this.iopub = channels.iopub();
-        this.shell = channels.shell();
-        this.control = channels.control();
-        this.stdin = channels.stdin();
-        this.heartbeat = channels.heartbeat();
-
+        this.channels = channels;
         this.context = context;
     }
 
-    public ReplyEnv defer() {
-        defer = true;
-        return this;
-    }
-
     public void markForShutdown() {
-        this.requestShutdown = true;
+        requestShutdown = true;
     }
 
     public boolean isMarkedForShutdown() {
-        return this.requestShutdown;
+        return requestShutdown;
     }
 
     public void writeToStdOut(String msg) {
@@ -57,12 +41,8 @@ public final class ReplyEnv {
         publish(new IOPubStream(IOPubStream.StreamName.ERR, msg));
     }
 
-    public String readFromStdIn(String prompt, boolean isPassword) {
-        return stdin.getInput(getContext(), prompt, isPassword);
-    }
-
     public String readFromStdIn() {
-        return this.readFromStdIn("", false);
+        return channels.stdin().getInput(getContext(), "", false);
     }
 
     public MessageContext<?> getContext() {
@@ -70,35 +50,11 @@ public final class ReplyEnv {
     }
 
     public void publish(Message<?> msg) {
-        if (defer) {
-            deferred.push(() -> iopub.sendMessage(msg));
-            this.defer = false;
-        } else {
-            iopub.sendMessage(msg);
-        }
+        channels.iopub().sendMessage(msg);
     }
 
     public void reply(Message<?> msg) {
-        if (defer) {
-            deferred.push(() -> shell.sendMessage(msg));
-            defer = false;
-        } else {
-            shell.sendMessage(msg);
-        }
-    }
-
-    public void defer(Runnable action) {
-        deferred.push(action);
-    }
-
-    public void resolveDeferrals() {
-        if (defer) {
-            throw new IllegalStateException("Reply environment is in defer mode but a resolution was request.");
-        }
-
-        while (!deferred.isEmpty()) {
-            deferred.pop().run();
-        }
+        channels.shell().sendMessage(msg);
     }
 
     public <T extends ContentType<T>> void publish(T content) {
@@ -114,9 +70,18 @@ public final class ReplyEnv {
         reply(new Message(context, type, null, error, null));
     }
 
-    public void setBusyDeferIdle() {
+    public void delay(Runnable action) {
+        delayedActions.push(action);
+    }
+
+    public void doDelayedActions() {
+        while (!delayedActions.isEmpty()) {
+            delayedActions.pop().run();
+        }
+    }
+
+    public void busyThenIdle() {
         publish(IOPubStatus.BUSY);
-        defer();
-        publish(IOPubStatus.IDLE);
+        delay(() -> publish(IOPubStatus.IDLE));
     }
 }

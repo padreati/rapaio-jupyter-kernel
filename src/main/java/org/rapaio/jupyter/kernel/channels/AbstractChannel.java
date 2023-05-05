@@ -42,7 +42,7 @@ public abstract class AbstractChannel extends Thread {
     public abstract void bind(ConnectionProperties connProps);
 
     public synchronized Message<?> readMessage() {
-        if (this.closed) {
+        if (closed) {
             return null;
         }
 
@@ -102,7 +102,7 @@ public abstract class AbstractChannel extends Thread {
     }
 
     public synchronized void sendMessage(Message<?> message) {
-        if (this.closed) {
+        if (closed) {
             return;
         }
 
@@ -137,7 +137,7 @@ public abstract class AbstractChannel extends Thread {
 
     public void close() {
         socket.close();
-        this.closed = true;
+        closed = true;
     }
 
     public void joinUntilClose() {}

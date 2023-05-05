@@ -18,7 +18,7 @@ public class ShellChannel extends AbstractChannel {
     private static final AtomicInteger ID = new AtomicInteger();
 
     protected final JupyterChannels connection;
-    protected volatile LoopThread ioloop;
+    protected volatile LoopThread loopThread;
 
     public ShellChannel(ZMQ.Context context, HMACDigest hmacGenerator, JupyterChannels connection) {
         super("ShellChannel", context, SocketType.ROUTER, hmacGenerator);
@@ -28,7 +28,7 @@ public class ShellChannel extends AbstractChannel {
     @Override
     @SuppressWarnings("unchecked")
     public void bind(ConnectionProperties connProps) {
-        if (this.isBound()) {
+        if (isBound()) {
             throw new IllegalStateException("Shell channel already bound");
         }
 
@@ -41,10 +41,10 @@ public class ShellChannel extends AbstractChannel {
         ZMQ.Poller poller = super.ctx.poller(1);
         poller.register(socket, ZMQ.Poller.POLLIN);
 
-        this.ioloop = new LoopThread(channelThreadName, SHELL_DEFAULT_LOOP_SLEEP_MS, () -> {
+        this.loopThread = new LoopThread(channelThreadName, SHELL_DEFAULT_LOOP_SLEEP_MS, () -> {
             int events = poller.poll(0);
             if (events > 0) {
-                Message message = super.readMessage();
+                Message message = readMessage();
 
                 MessageHandler handler = connection.getHandler(message.header().type());
                 if (handler != null) {
@@ -56,7 +56,7 @@ public class ShellChannel extends AbstractChannel {
                         LOGGER.severe(logPrefix + "Unhandled exception handling " + message.header().type().getName() + ". " + e.getClass()
                                 .getSimpleName() + " - " + e.getLocalizedMessage());
                     } finally {
-                        env.resolveDeferrals();
+                        env.doDelayedActions();
                     }
                     if (env.isMarkedForShutdown()) {
                         LOGGER.info(logPrefix + channelThreadName + " shutting down connection as environment was marked for shutdown.");
@@ -68,29 +68,28 @@ public class ShellChannel extends AbstractChannel {
             }
         });
 
-        this.ioloop.start();
+        loopThread.start();
 
         LOGGER.info(logPrefix + "Polling on " + channelThreadName);
     }
 
     protected boolean isBound() {
-        return this.ioloop != null;
+        return loopThread != null;
     }
 
     @Override
     public void close() {
-        if (this.isBound()) {
-            this.ioloop.shutdown();
+        if (isBound()) {
+            loopThread.shutdown();
         }
-
         super.close();
     }
 
     @Override
     public void joinUntilClose() {
-        if (this.ioloop != null) {
+        if (loopThread != null) {
             try {
-                this.ioloop.join();
+                loopThread.join();
             } catch (InterruptedException ignored) {
             }
         }

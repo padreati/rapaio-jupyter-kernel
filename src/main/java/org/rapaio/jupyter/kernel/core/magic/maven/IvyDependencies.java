@@ -16,7 +16,6 @@ import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.apache.ivy.util.DefaultMessageLogger;
 import org.apache.ivy.util.Message;
 import org.apache.ivy.util.MessageLogger;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
 public class IvyDependencies {
 
@@ -84,28 +83,6 @@ public class IvyDependencies {
         DefaultModuleDescriptor md = DefaultModuleDescriptor.newCallerInstance(ri, DEFAULT_MODULE_DESC_CONFIGS, true, true);
 
         return IvyDependencies.getInstance().ivy.resolve(md, ro);
-    }
-
-    public static void main(String[] args) throws Exception {
-
-        DepCoordinates rapaio = new DepCoordinates("io.github.padreati:rapaio-core:5.0.0");
-        DepCoordinates spring = new DepCoordinates("org.springframework:spring-context-support:4.0.2.RELEASE");
-
-        System.out.println("resolve rapaio:");
-        ResolveReport rr = IvyDependencies.getInstance().resolve(rapaio);
-        if (rr.hasError()) {
-            throw new RuntimeException(rr.getAllProblemMessages().toString());
-        }
-
-        for (var adr : rr.getAllArtifactsReports()) {
-            System.out.println(ANSI.start().bold().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build());
-        }
-
-        System.out.println("solve spring:");
-        rr = IvyDependencies.getInstance().resolve(spring);
-        for (var adr : rr.getAllArtifactsReports()) {
-            System.out.println(ANSI.start().bold().fgBlue().text(adr.getLocalFile().getAbsolutePath()).reset().build());
-        }
     }
 
 }

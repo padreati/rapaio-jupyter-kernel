@@ -11,6 +11,7 @@ import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.LoadMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.MavenCoordinates;
 
 public class MagicEvaluator {
@@ -22,6 +23,7 @@ public class MagicEvaluator {
         magicHandlers.add(new JavaReplMagicHandler());
         magicHandlers.add(new MavenCoordinates());
         magicHandlers.add(new JarMagicHandler());
+        magicHandlers.add(new LoadMagicHandler());
         magicHandlers.add(new HelpMagicHandler(magicHandlers));
     }
 
@@ -62,7 +64,7 @@ public class MagicEvaluator {
         // if everything is fine then execute handlers
         Object lastResult = null;
         for (var pair : magicPairs) {
-            lastResult = pair.handler.eval(javaEngine, env, pair.snippet);
+            lastResult = pair.handler.eval(this, javaEngine, env, pair.snippet);
         }
 
         // return last result

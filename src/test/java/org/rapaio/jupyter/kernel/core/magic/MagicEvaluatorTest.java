@@ -1,9 +1,7 @@
-package org.rapaio.jupyter.kernel.core.java.magic;
+package org.rapaio.jupyter.kernel.core.magic;
 
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 
 public class MagicEvaluatorTest {
 

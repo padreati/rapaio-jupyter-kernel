@@ -28,7 +28,7 @@ public class ControlChannel extends AbstractChannel {
     @Override
     @SuppressWarnings( {"rawtypes", "unchecked"})
     public void bind(ConnectionProperties connProps) {
-        if (this.isBound()) {
+        if (isBound()) {
             throw new IllegalStateException("Shell channel already bound");
         }
 
@@ -38,7 +38,7 @@ public class ControlChannel extends AbstractChannel {
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);
 
-        ZMQ.Poller poller = super.ctx.poller(1);
+        ZMQ.Poller poller = ctx.poller(1);
         poller.register(socket, ZMQ.Poller.POLLIN);
 
         this.loopThread = new LoopThread(channelThreadName, SHELL_DEFAULT_LOOP_SLEEP_MS, () -> {
@@ -54,7 +54,7 @@ public class ControlChannel extends AbstractChannel {
                         LOGGER.severe(logPrefix + "Unhandled exception handling " + message.header().type().getName() + ". " + e.getClass()
                                 .getSimpleName() + " - " + e.getLocalizedMessage());
                     } finally {
-                        env.resolveDeferrals();
+                        env.doDelayedActions();
                     }
                     if (env.isMarkedForShutdown()) {
                         LOGGER.info(logPrefix + channelThreadName + " shutting down connection as environment was marked for shutdown.");
@@ -66,21 +66,20 @@ public class ControlChannel extends AbstractChannel {
             }
         });
 
-        this.loopThread.start();
+        loopThread.start();
 
         LOGGER.info(logPrefix + "Polling on " + channelThreadName);
     }
 
     protected boolean isBound() {
-        return this.loopThread != null;
+        return loopThread != null;
     }
 
     @Override
     public void close() {
-        if (this.isBound()) {
-            this.loopThread.shutdown();
+        if (isBound()) {
+            loopThread.shutdown();
         }
-
         super.close();
     }
 
