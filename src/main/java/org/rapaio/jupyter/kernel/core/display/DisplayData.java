@@ -25,6 +25,12 @@ public class DisplayData {
         return dd;
     }
 
+    public static DisplayData withType(MIMEType type, String data) {
+        DisplayData dd = new DisplayData();
+        dd.putData(type, data);
+        return dd;
+    }
+
     public static DisplayData emptyIfNull(DisplayData displayData) {
         return displayData == null ? new DisplayData() : displayData;
     }

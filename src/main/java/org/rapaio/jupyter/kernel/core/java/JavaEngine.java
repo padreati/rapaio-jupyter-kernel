@@ -94,7 +94,11 @@ public class JavaEngine {
         SourceCodeAnalysis.CompletionInfo info = sourceAnalysis.analyzeCompletion(code);
 
         while (info.completeness().isComplete()) {
-            lastResult = evalSnippet(info.source());
+            // pay attention to trim, new lines can broke code
+            String trimmedSource = info.source().trim();
+            if (!trimmedSource.isEmpty()) {
+                lastResult = evalSnippet(trimmedSource);
+            }
             info = sourceAnalysis.analyzeCompletion(info.remaining());
         }
 
@@ -267,7 +271,7 @@ public class JavaEngine {
 
             Map<String, String> controlParameterMap = new HashMap<>();
             controlParameterMap.put(RapaioExecutionControlProvider.EXECUTION_ID_KEY, executionId);
-            controlParameterMap.put(RapaioExecutionControlProvider.EXECUTION_TIMEOUT_MILLIS_KEY, String.valueOf(timeoutMillis));
+            controlParameterMap.put(RapaioExecutionControlProvider.EXECUTION_TIMEOUT_KEY, String.valueOf(timeoutMillis));
 
             RapaioExecutionControlProvider controlProvider = new RapaioExecutionControlProvider();
             JShell shell = JShell.builder()

@@ -10,7 +10,7 @@ import jdk.jshell.spi.ExecutionEnv;
 public class RapaioExecutionControlProvider implements ExecutionControlProvider {
 
     public static final String EXECUTION_ID_KEY = "execution_id";
-    public static final String EXECUTION_TIMEOUT_MILLIS_KEY = "timeout_millis";
+    public static final String EXECUTION_TIMEOUT_KEY = "timeout";
 
     private final Map<String, RapaioExecutionControl> controllers = new WeakHashMap<>();
 
@@ -24,10 +24,10 @@ public class RapaioExecutionControlProvider implements ExecutionControlProvider 
     }
 
     @Override
-    public ExecutionControl generate(ExecutionEnv env, Map<String, String> parameters) throws Throwable {
+    public ExecutionControl generate(ExecutionEnv env, Map<String, String> parameters) {
         long timeout = -1;
-        if (parameters != null && parameters.containsKey(EXECUTION_TIMEOUT_MILLIS_KEY)) {
-            timeout = Long.parseLong(parameters.get(EXECUTION_TIMEOUT_MILLIS_KEY));
+        if (parameters != null && parameters.containsKey(EXECUTION_TIMEOUT_KEY)) {
+            timeout = Long.parseLong(parameters.get(EXECUTION_TIMEOUT_KEY));
         }
 
         var control = new RapaioExecutionControl(timeout);

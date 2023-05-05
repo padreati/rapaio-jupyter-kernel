@@ -22,15 +22,11 @@ public class RapaioExecutionControl extends DirectExecutionControl {
 
     public static final String TIMEOUT_MARKER = "## Timeout Marker ##";
     public static final String INTERRUPTED_MARKER = "## Interrupted Marker ##";
-
     private static final Object NULL = new Object();
-
     private static final AtomicInteger ID = new AtomicInteger(0);
 
     private final ExecutorService executor;
-
     private final long timeoutTime;
-
     private final ConcurrentMap<String, Future<Object>> running = new ConcurrentHashMap<>();
     private final Map<String, Object> results = new ConcurrentHashMap<>();
 
@@ -52,56 +48,46 @@ public class RapaioExecutionControl extends DirectExecutionControl {
     }
 
     @Override
-    protected String invoke(Method doitMethod) throws Exception {
+    protected String invoke(Method methodCall) throws Exception {
         String id = UUID.randomUUID().toString();
-        Object value = execute(id, doitMethod);
+        Object value = execute(id, methodCall);
         results.put(id, value);
         return id;
     }
 
-    private Object execute(String key, Method doitMethod) throws Exception {
-        Future<Object> runningTask = this.executor.submit(() -> doitMethod.invoke(null));
+    private Object execute(String id, Method methodCall) throws Exception {
+        Future<Object> runningTask = this.executor.submit(() -> methodCall.invoke(null));
 
-        this.running.put(key, runningTask);
+        running.put(id, runningTask);
 
         try {
-            if (this.timeoutTime > 0) {
+            if (timeoutTime > 0) {
                 return runningTask.get(this.timeoutTime, TimeUnit.MILLISECONDS);
             }
             return runningTask.get();
         } catch (CancellationException e) {
-            // If canceled this means that stop() or interrupt() was invoked.
-            if (this.executor.isShutdown()) {
-                // If the executor is shutdown, the situation is the former in which
-                // case the protocol is to throw an ExecutionControl.StoppedException.
+            if (executor.isShutdown()) {
                 throw new StoppedException();
             } else {
-                // The execution was purposely interrupted.
                 throw new UserException("Execution interrupted.", INTERRUPTED_MARKER, e.getStackTrace());
             }
         } catch (ExecutionException e) {
-            // The execution threw an exception. The actual exception is the cause of the ExecutionException.
             Throwable cause = e.getCause();
             if (cause instanceof InvocationTargetException) {
-                // Unbox further
                 cause = cause.getCause();
             }
             if (cause == null) {
                 throw new UserException("null", "Unknown Invocation Exception", e.getStackTrace());
-            } else if (cause instanceof SPIResolutionException) {
-                throw new ResolutionException(((SPIResolutionException) cause).id(), cause.getStackTrace());
+            } else if (cause instanceof SPIResolutionException spiResCause) {
+                throw new ResolutionException(spiResCause.id(), cause.getStackTrace());
             } else {
-                throw new UserException(String.valueOf(cause.getMessage()), cause.getClass().getName(),
-                        cause.getStackTrace());
+                throw new UserException(cause.getMessage(), cause.getClass().getName(), cause.getStackTrace());
             }
         } catch (TimeoutException e) {
-            throw new UserException(
-                    String.format("Execution timed out after configured timeout of %d millis.", this.timeoutTime),
-                    TIMEOUT_MARKER,
-                    e.getStackTrace()
+            throw new UserException("Execution timed out", TIMEOUT_MARKER, e.getStackTrace()
             );
         } finally {
-            this.running.remove(key, runningTask);
+            running.remove(id, runningTask);
         }
     }
 

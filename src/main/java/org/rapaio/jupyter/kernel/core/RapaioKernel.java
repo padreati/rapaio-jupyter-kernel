@@ -1,19 +1,12 @@
 package org.rapaio.jupyter.kernel.core;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
@@ -25,18 +18,13 @@ import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
-import org.rapaio.jupyter.kernel.core.java.CompilerException;
-import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
-import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
 import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
@@ -67,10 +55,6 @@ import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
 
-import jdk.jshell.DeclarationSnippet;
-import jdk.jshell.Snippet;
-import jdk.jshell.SnippetEvent;
-
 @SuppressWarnings("rawtypes")
 public class RapaioKernel implements KernelMessageHandler {
 
@@ -88,75 +72,28 @@ public class RapaioKernel implements KernelMessageHandler {
     private static final AtomicInteger executionCount = new AtomicInteger(1);
 
     private final Map<MessageType<?>, MessageHandler> messageHandlers = new HashMap<>();
-    private JupyterChannels channels;
+    JupyterChannels channels;
 
     private final Renderer renderer;
     private final JavaEngine javaEngine;
     private final MagicEvaluator magicEvaluator;
 
-    private ReplyEnv currentReplyEnv;
+    ReplyEnv currentReplyEnv;
     private final JShellIO shellIO = new JShellIO();
 
     public RapaioKernel() {
 
-        String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
-        LOGGER.finest(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
-        if (envCompilerOptions == null) {
-            envCompilerOptions = DEFAULT_COMPILER_OPTIONS;
-        }
-        String[] compilerTokens = Arrays.stream(envCompilerOptions.split("\\s"))
-                .filter(s -> !s.trim().isEmpty()).toArray(String[]::new);
-        List<String> compilerOptions = new ArrayList<>(List.of(compilerTokens));
-
-        String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
-        LOGGER.finest(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
-        if (envTimeoutMillis == null) {
-            envTimeoutMillis = DEFAULT_RJK_TIMEOUT_MILLIS;
-        }
-        long timeoutMillis;
-        try {
-            timeoutMillis = Long.parseLong(envTimeoutMillis);
-        } catch (NumberFormatException ex) {
-            throw new RuntimeException(
-                    "Cannot start kernel. Could not parse as long the value specified for env variable " + RJK_TIMEOUT_MILLIS);
-        }
-
-        String envInitScript = System.getenv(RJK_INIT_SCRIPT);
-        LOGGER.finest(RJK_INIT_SCRIPT + " env: " + envInitScript);
-        if (envInitScript == null) {
-            envInitScript = DEFAULT_INIT_SCRIPT;
-        }
-        String initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
+        KernelEnv kernelEnv = new KernelEnv();
 
         this.renderer = new DefaultRenderer();
         this.javaEngine = JavaEngine.builder()
-                .withCompilerOptions(compilerOptions)
+                .withCompilerOptions(kernelEnv.compilerOptions())
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
-                .withStartupScript(initScriptContent)
-                .withTimeoutMillis(timeoutMillis)
+                .withStartupScript(kernelEnv.initScriptContent())
+                .withTimeoutMillis(kernelEnv.timeoutMillis())
                 .build();
         this.javaEngine.initialize();
         this.magicEvaluator = new MagicEvaluator(javaEngine);
-    }
-
-    private String loadInitScript(String path) {
-        LOGGER.info("Loading init script: " + path);
-        try {
-            File file = new File(path);
-            StringBuilder content = new StringBuilder();
-            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
-                while (true) {
-                    String line = reader.readLine();
-                    if (line == null) {
-                        break;
-                    }
-                    content.append(line).append("\n");
-                }
-            }
-            return content.toString();
-        } catch (IOException e) {
-            throw new RuntimeException("Cannot load specified init script: " + path);
-        }
     }
 
     @Override
@@ -203,16 +140,10 @@ public class RapaioKernel implements KernelMessageHandler {
         return new ShellKernelInfoReply(Header.PROTOCOL_VERSION, kernelName, kernelVersion, languageInfo, banner, helpLinks);
     }
 
-    /**
-     * Invoked on shutdown requests with messages, before shutting down the connection.
-     */
     public void onShutdown() {
         javaEngine.shutdown();
     }
 
-    /**
-     * Invoked when the client requested to interrupt the code executor.
-     */
     public void interrupt() {
         javaEngine.interrupt();
     }
@@ -347,7 +278,6 @@ public class RapaioKernel implements KernelMessageHandler {
             default -> ShellIsCompleteReply.getIncompleteReplyWithIndent(result);
         };
         env.reply(reply);
-
     }
 
     private void handleInspectRequest(ReplyEnv env, Message<ShellInspectRequest> message) {
