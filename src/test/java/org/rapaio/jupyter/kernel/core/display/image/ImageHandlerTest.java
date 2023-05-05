@@ -9,13 +9,15 @@ import java.net.URL;
 
 import javax.imageio.ImageIO;
 
+import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
 
 public class ImageHandlerTest {
 
-    public static void main(String[] args) throws IOException {
+    @Test
+    void testImageRender() throws IOException {
         BufferedImage image = ImageIO.read(new URL("https://www.xmpie.com/VDPSoftware/assets/images/untitled-11-1046x547.png"));
         DisplayData dd = new DefaultRenderer().render(image);
         assertNotNull(dd);
