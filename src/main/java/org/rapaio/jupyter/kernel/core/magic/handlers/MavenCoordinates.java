@@ -26,8 +26,8 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public String syntax() {
-        return "%maven group_id:artifact_id:version";
+    public List<String> syntax() {
+        return List.of("%maven group_id:artifact_id:version");
     }
 
     @Override

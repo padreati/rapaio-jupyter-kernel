@@ -20,8 +20,8 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public String syntax() {
-        return "%jshell /cmd";
+    public List<String> syntax() {
+        return List.of("%jshell /cmd");
     }
 
     @Override

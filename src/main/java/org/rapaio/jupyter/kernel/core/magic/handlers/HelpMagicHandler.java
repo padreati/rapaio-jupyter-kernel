@@ -28,8 +28,8 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public String syntax() {
-        return "%help";
+    public List<String> syntax() {
+        return List.of("%help");
     }
 
     @Override
@@ -72,10 +72,13 @@ public class HelpMagicHandler implements MagicHandler {
             sb.append("\n");
             sb.append(ANSI.start().bold().text(handler.name()).reset().build()).append("\n");
 
-            sb.append("Syntax: ");
-            sb.append(ANSI.start().bold().fgGreen().text(handler.syntax()).reset().build()).append("\n");
+            sb.append("Syntax:\n");
+            for(String syntaxLine : handler.syntax()) {
+                sb.append("    ").append(ANSI.start().bold().fgGreen().text(syntaxLine).reset().build()).append("\n");
+            }
+            sb.append("Documentation:\n");
             for (var helpLine : handler.helpMessage()) {
-                sb.append("\t").append(helpLine).append("\n");
+                sb.append("    ").append(helpLine).append("\n");
             }
         }
         return DisplayData.withText(sb.toString());

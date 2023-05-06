@@ -31,8 +31,8 @@ public class LoadMagicHandler implements MagicHandler {
     }
 
     @Override
-    public String syntax() {
-        return "%load path_to_script_or_notebook";
+    public List<String> syntax() {
+        return List.of("%load path_to_script_or_notebook");
     }
 
     @Override

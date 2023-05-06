@@ -37,6 +37,10 @@ public class Tags {
         return new TagTexts(texts);
     }
 
+    public static TagTexts space(int repeat) {
+        return new TagTexts("&nbsp;".repeat(repeat));
+    }
+
     public static TagIf iif(boolean cond, Tag... tags) {
         return new TagIf(cond, tags);
     }

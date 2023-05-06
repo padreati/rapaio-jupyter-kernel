@@ -23,8 +23,8 @@ public class JarMagicHandler implements MagicHandler {
     }
 
     @Override
-    public String syntax() {
-        return PREFIX + "path_to_jar_or_folder_of_jars";
+    public List<String> syntax() {
+        return List.of(PREFIX + "path_to_jar_or_folder_of_jars");
     }
 
     @Override
