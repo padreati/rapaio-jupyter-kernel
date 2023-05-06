@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
-import org.rapaio.jupyter.kernel.core.ReplacementOptions;
+import org.rapaio.jupyter.kernel.core.Replacements;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
@@ -144,7 +144,7 @@ public class MagicEvaluator {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                ReplacementOptions replacementOptions = handler.complete(env, snippet);
+                Replacements replacementOptions = handler.complete(env, snippet);
                 return new MagicCompleteResult(true, replacementOptions);
             }
         }

@@ -6,13 +6,12 @@ import java.util.logging.Logger;
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
 import org.rapaio.jupyter.kernel.message.Message;
-import org.rapaio.jupyter.kernel.util.Formatter;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
 public class ShellChannel extends AbstractChannel {
 
-    private static final Logger LOGGER = Logger.getLogger("ShellChannel");
+    private static final Logger LOGGER = Logger.getLogger(ShellChannel.class.getSimpleName());
     private static final long SHELL_DEFAULT_LOOP_SLEEP_MS = 50;
 
     private static final AtomicInteger ID = new AtomicInteger();
@@ -33,7 +32,7 @@ public class ShellChannel extends AbstractChannel {
         }
 
         String channelThreadName = "Shell-" + ID.getAndIncrement();
-        String addr = Formatter.formatAddress(connProps.transport(), connProps.ip(), connProps.shellPort());
+        String addr = formatAddress(connProps.transport(), connProps.ip(), connProps.shellPort());
 
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);
@@ -56,7 +55,7 @@ public class ShellChannel extends AbstractChannel {
                         LOGGER.severe(logPrefix + "Unhandled exception handling " + message.header().type().getName() + ". " + e.getClass()
                                 .getSimpleName() + " - " + e.getLocalizedMessage());
                     } finally {
-                        env.doDelayedActions();
+                        env.runDelayedActions();
                     }
                     if (env.isMarkedForShutdown()) {
                         LOGGER.info(logPrefix + channelThreadName + " shutting down connection as environment was marked for shutdown.");
@@ -67,10 +66,7 @@ public class ShellChannel extends AbstractChannel {
                 }
             }
         });
-
         loopThread.start();
-
-        LOGGER.info(logPrefix + "Polling on " + channelThreadName);
     }
 
     protected boolean isBound() {

@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.core.ReplacementOptions;
+import org.rapaio.jupyter.kernel.core.Replacements;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 
 public final class HandlerUtils {
@@ -14,7 +14,7 @@ public final class HandlerUtils {
     private HandlerUtils() {
     }
 
-    public static ReplacementOptions oneLinePathComplete(String prefix, MagicSnippet snippet, FileFilter fileFilter) {
+    public static Replacements oneLinePathComplete(String prefix, MagicSnippet snippet, FileFilter fileFilter) {
         var line = snippet.lines().get(0);
         if (!line.hasPosition()) {
             return null;
@@ -33,7 +33,7 @@ public final class HandlerUtils {
                     List<String> options =
                             new ArrayList<>(Arrays.stream(children).map(f -> f.isDirectory() ? f.getName() + '/' : f.getName()).toList());
                     options.sort(String::compareTo);
-                    return new ReplacementOptions(options,
+                    return new Replacements(options,
                             line.globalPosition() - line.relativePosition() + prefix.length() + path.length(),
                             line.globalPosition() - line.relativePosition() + line.code().length());
                 }

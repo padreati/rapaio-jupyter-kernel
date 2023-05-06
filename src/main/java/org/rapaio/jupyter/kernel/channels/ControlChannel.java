@@ -6,13 +6,12 @@ import java.util.logging.Logger;
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
 import org.rapaio.jupyter.kernel.message.Message;
-import org.rapaio.jupyter.kernel.util.Formatter;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
 public class ControlChannel extends AbstractChannel {
 
-    private static final Logger LOGGER = Logger.getLogger("ControlChannel");
+    private static final Logger LOGGER = Logger.getLogger(ControlChannel.class.getSimpleName());
     private static final long SHELL_DEFAULT_LOOP_SLEEP_MS = 50;
 
     private static final AtomicInteger ID = new AtomicInteger();
@@ -33,7 +32,7 @@ public class ControlChannel extends AbstractChannel {
         }
 
         String channelThreadName = "Shell-" + ID.getAndIncrement();
-        String addr = Formatter.formatAddress(connProps.transport(), connProps.ip(), connProps.controlPort());
+        String addr = formatAddress(connProps.transport(), connProps.ip(), connProps.controlPort());
 
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);
@@ -43,7 +42,7 @@ public class ControlChannel extends AbstractChannel {
 
         this.loopThread = new LoopThread(channelThreadName, SHELL_DEFAULT_LOOP_SLEEP_MS, () -> {
             if (poller.poll(0) > 0) {
-                Message<?> message = super.readMessage();
+                Message<?> message = readMessage();
                 MessageHandler handler = connection.getHandler(message.header().type());
                 if (handler != null) {
                     LOGGER.info(logPrefix + "Handling message: " + message.header().type().getName());
@@ -54,7 +53,7 @@ public class ControlChannel extends AbstractChannel {
                         LOGGER.severe(logPrefix + "Unhandled exception handling " + message.header().type().getName() + ". " + e.getClass()
                                 .getSimpleName() + " - " + e.getLocalizedMessage());
                     } finally {
-                        env.doDelayedActions();
+                        env.runDelayedActions();
                     }
                     if (env.isMarkedForShutdown()) {
                         LOGGER.info(logPrefix + channelThreadName + " shutting down connection as environment was marked for shutdown.");
@@ -65,10 +64,7 @@ public class ControlChannel extends AbstractChannel {
                 }
             }
         });
-
         loopThread.start();
-
-        LOGGER.info(logPrefix + "Polling on " + channelThreadName);
     }
 
     protected boolean isBound() {

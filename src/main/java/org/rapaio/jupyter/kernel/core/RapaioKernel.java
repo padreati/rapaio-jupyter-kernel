@@ -304,7 +304,7 @@ public class RapaioKernel {
         try {
             MagicCompleteResult magicResult = magicEvaluator.complete(currentReplyEnv, request.code(), request.cursorPos());
 
-            ReplacementOptions options = magicResult.handled()
+            Replacements options = magicResult.handled()
                     ? magicResult.replacementOptions()
                     : javaEngine.complete(request.code(), request.cursorPos());
 
@@ -344,7 +344,7 @@ public class RapaioKernel {
 
         // request.restart() is no use for now, but might be used in the end
         onShutdown();
-        env.doDelayedActions();
+        env.runDelayedActions();
         // this will determine the connections to shut down
         env.markForShutdown();
     }

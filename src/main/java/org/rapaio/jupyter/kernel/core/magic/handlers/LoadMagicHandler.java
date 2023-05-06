@@ -7,7 +7,8 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
-import org.rapaio.jupyter.kernel.core.ReplacementOptions;
+import org.rapaio.jupyter.kernel.core.Replacements;
+import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
@@ -15,6 +16,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.message.messages.IOPubError;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
@@ -56,13 +58,14 @@ public class LoadMagicHandler implements MagicHandler {
 
         File file = new File(path);
 
-        if (file.isFile() && file.exists() && path.endsWith(".jshell")) {
-            return evalShellScript(engine, env, file);
-        }
-        if (file.isFile() && file.exists() && path.endsWith(".ipynb")) {
+        if (file.isFile() && file.exists()) {
             try {
                 String content = Files.readString(Path.of(file.getAbsolutePath()));
-                return evalNotebook(magicEvaluator, engine, env, snippet, content);
+                if (path.endsWith(".ipynb")) {
+                    return evalNotebook(magicEvaluator, engine, env, snippet, content);
+                } else {
+                    return evalShellScript(engine, env, content);
+                }
             } catch (IOException ex) {
                 throw new MagicParseException("LoadMagicHandler",
                         snippet.line(0).code(),
@@ -73,14 +76,27 @@ public class LoadMagicHandler implements MagicHandler {
     }
 
     @Override
-    public ReplacementOptions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Replacements complete(ReplyEnv env, MagicSnippet snippet) {
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || f.getName().endsWith(".ipynb") || f.getName().endsWith(".jshell"));
     }
 
-    private Object evalShellScript(JavaEngine engine, ReplyEnv env, File file) {
-        env.writeToStdErr("Not implemented yet.");
-        return null;
+    private boolean checkLanguage(JsonElement root) {
+        // since all metadata fields are optional, we do the check if we have information
+        // otherwise we simply assume we deal with java and let the compiler fail
+
+        if (root.isJsonObject() && root.getAsJsonObject().has("metadata")) {
+            var metadata = root.getAsJsonObject().get("metadata").getAsJsonObject();
+            if (metadata.has("language_info")) {
+                var languageInfo = metadata.get("language_info").getAsJsonObject();
+                if (languageInfo.has("name")) {
+                    String languageName = languageInfo.get("name").getAsString();
+                    return languageName.equalsIgnoreCase("java");
+                }
+            }
+        }
+        // no metadata, we think optimistic
+        return true;
     }
 
     /**
@@ -122,28 +138,19 @@ public class LoadMagicHandler implements MagicHandler {
                     engine.eval(cellCode);
                 }
             } catch (Exception e) {
-                System.out.println("Error at:\n" + cellCode);
-                throw new RuntimeException(e);
+                env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
+                return null;
             }
         }
         return null;
     }
 
-    private boolean checkLanguage(JsonElement root) {
-        // since all metadata fields are optional, we do the check if we have information
-        // otherwise we simply assume we deal with java and let the compiler fail
-
-        if (root.isJsonObject() && root.getAsJsonObject().has("metadata")) {
-            var metadata = root.getAsJsonObject().get("metadata").getAsJsonObject();
-            if (metadata.has("language_info")) {
-                var languageInfo = metadata.get("language_info").getAsJsonObject();
-                if (languageInfo.has("name")) {
-                    String languageName = languageInfo.get("name").getAsString();
-                    return languageName.equalsIgnoreCase("java");
-                }
-            }
+    private Object evalShellScript(JavaEngine engine, ReplyEnv env, String content) {
+        try {
+            return engine.eval(content);
+        } catch (Exception e) {
+            env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
+            return null;
         }
-        // no metadata, we think optimistic
-        return true;
     }
 }
