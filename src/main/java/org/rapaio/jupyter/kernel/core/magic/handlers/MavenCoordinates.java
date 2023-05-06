@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
-import org.rapaio.jupyter.kernel.core.ReplacementOptions;
+import org.rapaio.jupyter.kernel.core.Replacements;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
@@ -75,7 +75,7 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public ReplacementOptions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Replacements complete(ReplyEnv env, MagicSnippet snippet) {
         return null;
     }
 }

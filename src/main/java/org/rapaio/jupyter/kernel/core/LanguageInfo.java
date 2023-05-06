@@ -16,7 +16,7 @@ public record LanguageInfo(
          // {@code codemirror} mode for syntax highlighting in the notebook as in
         //  <a href="https://codemirror.net/doc/manual.html#option_mode">language config</a>
         @SerializedName("codemirror_mode") Object codemirrorMode,
-         //  the exported for scripts written in this language, by default is {@code "script"} exporter
+         //  exporter for scripts written in this language, by default is {@code "script"} exporter
         @SerializedName("nbconvert_exporter") String nbconvertExporter
 ) {
 

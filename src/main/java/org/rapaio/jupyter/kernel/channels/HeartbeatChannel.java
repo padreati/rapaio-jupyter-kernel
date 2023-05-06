@@ -5,7 +5,6 @@ import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
-import org.rapaio.jupyter.kernel.util.Formatter;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
@@ -28,12 +27,12 @@ public class HeartbeatChannel extends AbstractChannel {
 
     @Override
     public void bind(ConnectionProperties connProps) {
-        if (this.isBound()) {
+        if (isBound()) {
             throw new IllegalStateException("Heartbeat channel already bound");
         }
 
         String channelThreadName = "Heartbeat-" + ID.getAndIncrement();
-        String addr = Formatter.formatAddress(connProps.transport(), connProps.ip(), connProps.hbPort());
+        String addr = formatAddress(connProps.transport(), connProps.ip(), connProps.hbPort());
 
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);

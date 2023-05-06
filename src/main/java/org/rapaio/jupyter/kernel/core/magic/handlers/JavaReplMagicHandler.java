@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
-import org.rapaio.jupyter.kernel.core.ReplacementOptions;
+import org.rapaio.jupyter.kernel.core.Replacements;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -56,7 +56,7 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public ReplacementOptions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Replacements complete(ReplyEnv env, MagicSnippet snippet) {
         return null;
     }
 }

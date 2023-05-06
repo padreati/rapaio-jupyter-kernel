@@ -42,39 +42,27 @@ public final class ReplyEnv {
     }
 
     public String readFromStdIn() {
-        return channels.stdin().getInput(getContext(), "", false);
-    }
-
-    public MessageContext<?> getContext() {
-        return context;
-    }
-
-    public void publish(Message<?> msg) {
-        channels.iopub().sendMessage(msg);
-    }
-
-    public void reply(Message<?> msg) {
-        channels.shell().sendMessage(msg);
+        return channels.stdin().getInput(context, "", false);
     }
 
     public <T extends ContentType<T>> void publish(T content) {
-        publish(new Message<>(context, content.type(), null, content, null));
+        channels.iopub().sendMessage(new Message<>(context, content.type(), null, content, null));
     }
 
     public <T extends ContentType<T>> void reply(T content) {
-        reply(new Message<>(context, content.type(), null, content, null));
+        channels.shell().sendMessage(new Message<>(context, content.type(), null, content, null));
     }
 
     @SuppressWarnings("unchecked")
     public void replyError(MessageType<?> type, ErrorReply error) {
-        reply(new Message(context, type, null, error, null));
+        channels.shell().sendMessage(new Message(context, type, null, error, null));
     }
 
     public void delay(Runnable action) {
         delayedActions.push(action);
     }
 
-    public void doDelayedActions() {
+    public void runDelayedActions() {
         while (!delayedActions.isEmpty()) {
             delayedActions.pop().run();
         }

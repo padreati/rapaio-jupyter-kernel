@@ -3,7 +3,7 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
-import org.rapaio.jupyter.kernel.core.ReplacementOptions;
+import org.rapaio.jupyter.kernel.core.Replacements;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -61,7 +61,7 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public ReplacementOptions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Replacements complete(ReplyEnv env, MagicSnippet snippet) {
         return null;
     }
 

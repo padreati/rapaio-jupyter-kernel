@@ -70,7 +70,7 @@ public abstract class AbstractChannel extends Thread {
         String calculatedSig = this.hmacGenerator.calculateSignature(headerRaw, parentHeaderRaw, metadataRaw, contentRaw);
 
         if (calculatedSig != null && !calculatedSig.equals(signature)) {
-            throw new SecurityException("Message received had invalid signature");
+            throw new SecurityException("Received message with invalid signature");
         }
 
         Header<?> header = Transform.fromJson(headerRaw, Header.class);
@@ -84,12 +84,7 @@ public abstract class AbstractChannel extends Thread {
                     header.type().error(), header.version());
         }
 
-        @SuppressWarnings("unchecked")
-        Message<?> message = new Message(identities, header, parentHeader, metadata, content, blobs);
-
-        LOGGER.finer("Received from " + socket.base().getSocketOptx(zmq.ZMQ.ZMQ_LAST_ENDPOINT) + ":\n" + Transform.toJson(message));
-
-        return message;
+        return new Message(identities, header, parentHeader, metadata, content, blobs);
     }
 
     @SuppressWarnings("unchecked")
@@ -141,4 +136,9 @@ public abstract class AbstractChannel extends Thread {
     }
 
     public void joinUntilClose() {}
+
+    protected String formatAddress(String transport, String ip, int port) {
+        return transport + "://" + ip + ":" + port;
+    }
+
 }

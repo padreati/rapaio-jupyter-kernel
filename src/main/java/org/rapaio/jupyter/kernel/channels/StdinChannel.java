@@ -9,13 +9,12 @@ import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.messages.StdinInputReply;
 import org.rapaio.jupyter.kernel.message.messages.StdinInputRequest;
-import org.rapaio.jupyter.kernel.util.Formatter;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
 public class StdinChannel extends AbstractChannel {
 
-    private static final Logger LOGGER = Logger.getLogger("StdinChannel");
+    private static final Logger LOGGER = Logger.getLogger(StdinChannel.class.getSimpleName());
 
     public StdinChannel(ZMQ.Context context, HMACDigest hmacGenerator) {
         super("StdinChannel", context, SocketType.ROUTER, hmacGenerator);
@@ -23,7 +22,7 @@ public class StdinChannel extends AbstractChannel {
 
     @Override
     public void bind(ConnectionProperties connProps) {
-        String addr = Formatter.formatAddress(connProps.transport(), connProps.ip(), connProps.stdinPort());
+        String addr = formatAddress(connProps.transport(), connProps.ip(), connProps.stdinPort());
 
         LOGGER.info(logPrefix + String.format("Binding stdin to %s.", addr));
         socket.bind(addr);

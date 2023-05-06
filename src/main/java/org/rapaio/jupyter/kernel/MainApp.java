@@ -27,10 +27,12 @@ public class MainApp {
         }
 
         if (args[0].equals("-i")) {
+            // run installer
             Installer installer = new Installer();
             String[] installerArgs = Arrays.copyOfRange(args, 1, args.length);
             installer.install(installerArgs);
         } else {
+            // run kernel called by jupyter
             runKernel(args[0]);
         }
     }
