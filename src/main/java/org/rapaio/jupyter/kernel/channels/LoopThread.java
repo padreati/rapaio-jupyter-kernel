@@ -1,9 +1,9 @@
 package org.rapaio.jupyter.kernel.channels;
 
-import java.util.logging.Logger;
-
-public class LoopThread extends Thread {
-    private static final Logger LOGGER = Logger.getLogger(LoopThread.class.getSimpleName());
+/**
+ * Thread which runs in loop the loop body after each waiting period.
+ */
+public final class LoopThread extends Thread {
 
     private volatile boolean running = false;
     private final long sleep;
@@ -22,17 +22,16 @@ public class LoopThread extends Thread {
             try {
                 Thread.sleep(sleep);
             } catch (InterruptedException e) {
-                LOGGER.info(getName() + "Loop interrupted. Stopping...");
                 running = false;
-                break;
+                return;
             }
         }
     }
 
     @Override
     public synchronized void start() {
-        running = true;
         super.start();
+        running = true;
     }
 
     public void shutdown() {

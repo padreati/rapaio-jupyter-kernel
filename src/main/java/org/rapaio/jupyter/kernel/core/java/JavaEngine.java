@@ -25,10 +25,10 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.Replacements;
+import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
-import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
+import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import jdk.jshell.EvalException;
 import jdk.jshell.JShell;
@@ -44,7 +44,6 @@ public class JavaEngine {
             Snippet.SubKind.OTHER_EXPRESSION_SUBKIND,
             Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND
     );
-
 
     private final String executionId;
     private final RapaioExecutionControlProvider controlProvider;
@@ -91,11 +90,13 @@ public class JavaEngine {
 
     public Object eval(String code) throws Exception {
 
+        // the last result will be displayed if we have the result of an expression,
+        // or it's the value of a variable (emulate the behavior from ipython)
         Object lastResult = null;
         SourceCodeAnalysis.CompletionInfo info = sourceAnalysis.analyzeCompletion(code);
 
         while (info.completeness().isComplete()) {
-            // pay attention to trim, new lines can broke code
+            // pay attention to trim, new lines can broke code evaluation
             String trimmedSource = info.source().trim();
             if (!trimmedSource.isEmpty()) {
                 lastResult = evalSnippet(trimmedSource);
@@ -103,7 +104,7 @@ public class JavaEngine {
             info = sourceAnalysis.analyzeCompletion(info.remaining());
         }
 
-        // ignore eventual last empty snippet
+        // ignore eventual last empty snippet, but throw error if not empty
         if (info.completeness() != SourceCodeAnalysis.Completeness.EMPTY) {
             throw new IncompleteSourceException(info.remaining().trim());
         }
@@ -167,7 +168,7 @@ public class JavaEngine {
         };
     }
 
-    public Replacements complete(String code, int at) {
+    public Suggestions complete(String code, int at) {
         int[] anchor = new int[1];
         List<SourceCodeAnalysis.Suggestion> suggestions = sourceAnalysis.completionSuggestions(code, at, anchor);
         if (suggestions == null || suggestions.isEmpty()) {
@@ -182,7 +183,7 @@ public class JavaEngine {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return new Replacements(options, anchor[0], at);
+        return new Suggestions(options, anchor[0], at);
     }
 
     public DisplayData inspect(String source, int pos) {
@@ -204,29 +205,29 @@ public class JavaEngine {
             return null;
         }
 
-        String html = join(
-                each(documentations, doc -> p(join(
-                        b(texts(doc.signature())),
-                        iif(doc.javadoc() != null,
-                                br(),
-                                texts(JavadocTools.javadocPreprocess(doc.javadoc()))
-                        )
-                )))
-        ).render();
-
-        return DisplayData.withHtml(html);
+        return DisplayData.withHtml(
+                join(
+                        each(documentations, doc -> p(join(
+                                b(texts(doc.signature())),
+                                iif(doc.javadoc() != null,
+                                        br(),
+                                        texts(JavadocTools.javadocPreprocess(doc.javadoc()))
+                                )
+                        )))
+                ).render()
+        );
     }
 
-    public static Builder builder(JShellIO shellIO) {
-        return new Builder(shellIO);
+    public static Builder builder(JShellConsole shellConsole) {
+        return new Builder(shellConsole);
     }
 
     public static class Builder {
 
-        private final JShellIO shellIO;
+        private final JShellConsole shellConsole;
 
-        protected Builder(JShellIO shellIO) {
-            this.shellIO = shellIO;
+        protected Builder(JShellConsole shellConsole) {
+            this.shellConsole = shellConsole;
         }
 
         private long timeoutMillis = -1L;
@@ -281,9 +282,9 @@ public class JavaEngine {
             JShell shell = JShell.builder()
                     .compilerOptions(compilerOptions.toArray(String[]::new))
                     .executionEngine(controlProvider, controlParameterMap)
-                    .in(shellIO.getIn())
-                    .out(new PrintStream(shellIO.getOut(), true))
-                    .err(new PrintStream(shellIO.getErr(), true))
+                    .in(shellConsole.getIn())
+                    .out(new PrintStream(shellConsole.getOut(), true))
+                    .err(new PrintStream(shellConsole.getErr(), true))
                     .build();
             return new JavaEngine(executionId, controlProvider, shell, startupScripts);
         }

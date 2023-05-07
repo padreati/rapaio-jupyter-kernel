@@ -31,14 +31,12 @@ public class RapaioExecutionControlProvider implements ExecutionControlProvider 
         }
 
         var control = new RapaioExecutionControl(timeout);
-
         if (parameters != null && parameters.containsKey(EXECUTION_ID_KEY)) {
             String id = parameters.get(EXECUTION_ID_KEY);
             if (id != null) {
                 controllers.put(id, control);
             }
         }
-
         return control;
     }
 }

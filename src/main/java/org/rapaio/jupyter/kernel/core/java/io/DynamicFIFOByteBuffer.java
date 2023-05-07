@@ -1,12 +1,18 @@
 package org.rapaio.jupyter.kernel.core.java.io;
 
-public class ByteBuffer {
+/**
+ * A dynamic byte buffer. It allows appending data at the end and consuming bytes from beginning.
+ * At each operation it tests if the space can be saved or changed, depending on situations.
+ * <p>
+ * It is basically like a circular byte buffer who's size is dynamic.
+ */
+public class DynamicFIFOByteBuffer {
 
     private byte[] buffer = new byte[1024];
     private int start = 0;
     private int end = 0;
 
-    public ByteBuffer() {
+    public DynamicFIFOByteBuffer() {
     }
 
     public boolean canTake(int n) {

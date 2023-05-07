@@ -13,7 +13,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
+import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import jdk.jshell.SourceCodeAnalysis;
 
@@ -22,7 +22,7 @@ public class TagsTest {
     @Test
     void tagsTest() {
 
-        JavaEngine engine = JavaEngine.builder(new JShellIO())
+        JavaEngine engine = JavaEngine.builder(new JShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
 

@@ -24,4 +24,8 @@ public record ConnectionProperties(
         }
         return new HMACDigest(signatureScheme, key);
     }
+
+    public String formatAddress(int port) {
+        return transport + "://" + ip + ":" + port;
+    }
 }

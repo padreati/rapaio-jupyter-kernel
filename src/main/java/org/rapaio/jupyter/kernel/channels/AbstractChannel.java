@@ -18,7 +18,8 @@ import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
 
-public abstract class AbstractChannel extends Thread {
+public abstract sealed class AbstractChannel extends Thread
+        permits ControlChannel, HeartbeatChannel, ShellChannel, IOPubChannel, StdinChannel {
 
     private static final Logger LOGGER = Logger.getLogger(AbstractChannel.class.getSimpleName());
 
@@ -32,7 +33,7 @@ public abstract class AbstractChannel extends Thread {
 
     protected AbstractChannel(String channelName, ZMQ.Context ctx, SocketType type, HMACDigest hmacGenerator) {
         this.ctx = ctx;
-        this. socket = ctx.socket(type);
+        this.socket = ctx.socket(type);
         this.channelName = channelName;
         this.logPrefix = "[" + channelName + "]: ";
         this.hmacGenerator = hmacGenerator;
@@ -41,6 +42,7 @@ public abstract class AbstractChannel extends Thread {
 
     public abstract void bind(ConnectionProperties connProps);
 
+    @SuppressWarnings({"unchecked","rawtypes"})
     public synchronized Message<?> readMessage() {
         if (closed) {
             return null;
@@ -67,23 +69,20 @@ public abstract class AbstractChannel extends Thread {
             blobs.add(socket.recv());
         }
 
-        String calculatedSig = this.hmacGenerator.calculateSignature(headerRaw, parentHeaderRaw, metadataRaw, contentRaw);
+        String computedSignature = hmacGenerator.computeSignature(headerRaw, parentHeaderRaw, metadataRaw, contentRaw);
 
-        if (calculatedSig != null && !calculatedSig.equals(signature)) {
-            throw new SecurityException("Received message with invalid signature");
+        if (computedSignature != null && !computedSignature.equals(signature)) {
+            throw new SecurityException("Invalid signature on message received.");
         }
 
         Header<?> header = Transform.fromJson(headerRaw, Header.class);
         Header<?> parentHeader = Transform.fromJsonNull(parentHeaderRaw, Header.class);
-
         Map<String, Object> metadata = Transform.fromJsonMap(metadataRaw);
-
         Object content = Transform.fromJson(contentRaw, header.type().getContentType());
         if (content instanceof ErrorReply) {
             header = new Header<>(header.id(), header.username(), header.sessionId(), header.timestamp(),
                     header.type().error(), header.version());
         }
-
         return new Message(identities, header, parentHeader, metadata, content, blobs);
     }
 
@@ -91,7 +90,7 @@ public abstract class AbstractChannel extends Thread {
     public <T> Message<T> readMessage(MessageType<T> type) {
         Message<?> message = readMessage();
         if (message.header().type() != type) {
-            throw new RuntimeException("Expected a " + type + " message but received a " + message.header().type() + " message.");
+            throw new RuntimeException("Expected message of type:" + type + ", but received one with type:" + message.header().type());
         }
         return (Message<T>) message;
     }
@@ -106,9 +105,10 @@ public abstract class AbstractChannel extends Thread {
         byte[] metadata = Transform.toJsonBytes(message.metadata());
         byte[] content = Transform.toJsonBytes(message.content());
 
-        String hmac = hmacGenerator.calculateSignature(headerRaw, parentHeaderRaw, metadata, content);
+        String hmac = hmacGenerator.computeSignature(headerRaw, parentHeaderRaw, metadata, content);
 
-        LOGGER.finer("Sending to " + socket.base().getSocketOptx(zmq.ZMQ.ZMQ_LAST_ENDPOINT) + ":\n" + Transform.toJson(message));
+        LOGGER.finest("Sending to " + socket.base().getSocketOptx(zmq.ZMQ.ZMQ_LAST_ENDPOINT) + ":\n"
+                + Transform.toJson(message));
 
         List<byte[]> chunks = new ArrayList<>(message.identities());
         chunks.add(Transform.IDENTITY_DELIMITER);
@@ -121,13 +121,10 @@ public abstract class AbstractChannel extends Thread {
             chunks.addAll(message.blobs());
         }
 
-        for (int i = 0; i < chunks.size(); i++) {
-            if (i < chunks.size() - 1) {
-                socket.sendMore(chunks.get(i));
-            } else {
-                socket.send(chunks.get(i));
-            }
+        for (int i = 0; i < chunks.size() - 1; i++) {
+            socket.sendMore(chunks.get(i));
         }
+        socket.send(chunks.get(chunks.size() - 1));
     }
 
     public void close() {
@@ -135,10 +132,6 @@ public abstract class AbstractChannel extends Thread {
         closed = true;
     }
 
-    public void joinUntilClose() {}
-
-    protected String formatAddress(String transport, String ip, int port) {
-        return transport + "://" + ip + ":" + port;
+    public void joinUntilClose() {
     }
-
 }

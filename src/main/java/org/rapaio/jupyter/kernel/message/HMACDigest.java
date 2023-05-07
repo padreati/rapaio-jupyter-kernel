@@ -28,7 +28,7 @@ public class HMACDigest {
         }
     }
 
-    public synchronized String calculateSignature(byte[]... messageParts) {
+    public synchronized String computeSignature(byte[]... messageParts) {
         if (mac == null) {
             return "";
         }

@@ -40,8 +40,8 @@ public class ConnectionPropertiesTest {
                 "test2".getBytes(StandardCharsets.US_ASCII)
         };
 
-        String hmac = hmacGen.calculateSignature(buffers);
-        assertEquals(hmac, hmacGen.calculateSignature(buffers));
-        assertEquals("", HMACDigest.NO_AUTH_INSTANCE.calculateSignature(buffers));
+        String hmac = hmacGen.computeSignature(buffers);
+        assertEquals(hmac, hmacGen.computeSignature(buffers));
+        assertEquals("", HMACDigest.NO_AUTH_INSTANCE.computeSignature(buffers));
     }
 }

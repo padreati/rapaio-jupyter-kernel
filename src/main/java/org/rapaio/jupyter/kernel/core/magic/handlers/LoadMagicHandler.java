@@ -7,7 +7,7 @@ import java.nio.file.Path;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
-import org.rapaio.jupyter.kernel.core.Replacements;
+import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
@@ -76,7 +76,7 @@ public class LoadMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Replacements complete(ReplyEnv env, MagicSnippet snippet) {
+    public Suggestions complete(ReplyEnv env, MagicSnippet snippet) {
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || f.getName().endsWith(".ipynb") || f.getName().endsWith(".jshell"));
     }

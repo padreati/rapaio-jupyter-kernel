@@ -6,14 +6,13 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
+import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 public class JavaEngineTest {
 
     @Test
     void buildTest() throws Exception {
-        JShellIO io = new JShellIO();
+        JShellConsole io = new JShellConsole();
         JavaEngine engine = JavaEngine.builder(io)
                 .withTimeoutMillis(-1L)
                 .build();
@@ -31,7 +30,7 @@ public class JavaEngineTest {
 
     @Test
     void completionTest() {
-        JavaEngine engine = JavaEngine.builder(new JShellIO())
+        JavaEngine engine = JavaEngine.builder(new JShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
         var replacements = engine.complete("Sys", 3);
@@ -40,7 +39,7 @@ public class JavaEngineTest {
 
     @Test
     void printerTest() throws Exception {
-        JavaEngine engine = JavaEngine.builder(new JShellIO())
+        JavaEngine engine = JavaEngine.builder(new JShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
         var out = engine.eval("System.out.println(\"test\")");

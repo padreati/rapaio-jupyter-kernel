@@ -8,11 +8,11 @@ import org.rapaio.jupyter.kernel.message.HMACDigest;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
-public class HeartbeatChannel extends AbstractChannel {
+public final class HeartbeatChannel extends AbstractChannel {
 
     private static final Logger LOGGER = Logger.getLogger(HeartbeatChannel.class.getSimpleName());
 
-    private static final long HB_DEFAULT_SLEEP_MS = 50;
+    private static final long LOOP_SLEEP = 50;
     private static final AtomicInteger ID = new AtomicInteger();
 
     private volatile LoopThread loopThread;
@@ -21,18 +21,14 @@ public class HeartbeatChannel extends AbstractChannel {
         super("HeartbeatChannel", context, SocketType.REP, hmacGenerator);
     }
 
-    private boolean isBound() {
-        return loopThread != null;
-    }
-
     @Override
     public void bind(ConnectionProperties connProps) {
-        if (isBound()) {
-            throw new IllegalStateException("Heartbeat channel already bound");
+        if (loopThread != null) {
+            throw new IllegalStateException("Channel already bound.");
         }
 
         String channelThreadName = "Heartbeat-" + ID.getAndIncrement();
-        String addr = formatAddress(connProps.transport(), connProps.ip(), connProps.hbPort());
+        String addr = connProps.formatAddress(connProps.hbPort());
 
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);
@@ -40,28 +36,27 @@ public class HeartbeatChannel extends AbstractChannel {
         ZMQ.Poller poller = ctx.poller(1);
         poller.register(socket, ZMQ.Poller.POLLIN);
 
-        this.loopThread = new LoopThread(channelThreadName, HB_DEFAULT_SLEEP_MS, () -> {
+        loopThread = new LoopThread(channelThreadName, LOOP_SLEEP, () -> {
             int events = poller.poll(0);
             if (events > 0) {
                 byte[] msg = socket.recv();
                 if (msg == null) {
-                    //Error during receive, just continue
+                    // ignore errors, just show them
                     LOGGER.severe(logPrefix + "Poll returned 1 event but could not read the echo string");
                     return;
                 }
                 if (!socket.send(msg)) {
                     LOGGER.severe(logPrefix + "Could not send heartbeat reply");
                 }
-                LOGGER.finest(logPrefix + "Heartbeat pulse");
             }
         });
-        this.loopThread.start();
+        loopThread.start();
         LOGGER.info(logPrefix + "Polling on " + channelThreadName);
     }
 
     @Override
     public void close() {
-        if (isBound()) {
+        if (loopThread != null) {
             loopThread.shutdown();
         }
         super.close();

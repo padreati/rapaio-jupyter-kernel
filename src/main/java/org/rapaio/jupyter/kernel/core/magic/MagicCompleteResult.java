@@ -1,6 +1,6 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import org.rapaio.jupyter.kernel.core.Replacements;
+import org.rapaio.jupyter.kernel.core.Suggestions;
 
-public record MagicCompleteResult(boolean handled, Replacements replacementOptions) {
+public record MagicCompleteResult(boolean handled, Suggestions replacementOptions) {
 }

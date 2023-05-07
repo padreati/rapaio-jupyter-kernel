@@ -19,7 +19,7 @@ import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.java.io.JShellIO;
+import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
@@ -78,14 +78,14 @@ public class RapaioKernel {
     private final MagicEvaluator magicEvaluator;
 
     ReplyEnv currentReplyEnv;
-    private final JShellIO shellIO = new JShellIO();
+    private final JShellConsole shellConsole = new JShellConsole();
 
     public RapaioKernel() {
 
         KernelEnv kernelEnv = new KernelEnv();
 
         this.renderer = new DefaultRenderer();
-        this.javaEngine = JavaEngine.builder(shellIO)
+        this.javaEngine = JavaEngine.builder(shellConsole)
                 .withCompilerOptions(kernelEnv.compilerOptions())
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
                 .withStartupScript(kernelEnv.initScriptContent())
@@ -225,11 +225,11 @@ public class RapaioKernel {
         // some clients don't allow asking input
         boolean allowStdin = executeRequestMessage.content().stdinEnabled();
         // hook system io to allow execution to output into notebook
-        System.setIn(shellIO.getIn());
-        System.setOut(new PrintStream(shellIO.getOut(), true, StandardCharsets.UTF_8));
-        System.setErr(new PrintStream(shellIO.getErr(), true, StandardCharsets.UTF_8));
+        System.setIn(shellConsole.getIn());
+        System.setOut(new PrintStream(shellConsole.getOut(), true, StandardCharsets.UTF_8));
+        System.setErr(new PrintStream(shellConsole.getErr(), true, StandardCharsets.UTF_8));
 
-        shellIO.bindEnv(env, allowStdin);
+        shellConsole.bindEnv(env, allowStdin);
 
         // push on stack restore streams
         env.delay(() -> {
@@ -239,9 +239,9 @@ public class RapaioKernel {
         });
 
         // unbind environment
-        env.delay(shellIO::unbindEnv);
+        env.delay(shellConsole::unbindEnv);
         // flush before restoring
-        env.delay(shellIO::flush);
+        env.delay(shellConsole::flush);
 
         try {
             DisplayData out = eval(request.code());
@@ -285,14 +285,14 @@ public class RapaioKernel {
             MagicInspectResult magicResult = magicEvaluator.inspect(currentReplyEnv, request.code(), request.cursorPos());
             if (magicResult.handled()) {
                 DisplayData inspection = magicResult.displayData();
-                env.reply(new ShellInspectReply(inspection != null, DisplayData.emptyIfNull(inspection)));
+                env.reply(new ShellInspectReply(inspection != null, inspection));
                 return;
             }
 
             // request.detailLevel() is not used since we do not get the source as required
             // for detail level above 0
             DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
-            env.reply(new ShellInspectReply(inspection != null, DisplayData.emptyIfNull(inspection)));
+            env.reply(new ShellInspectReply(inspection != null, inspection));
         } catch (Exception e) {
             env.replyError(MessageType.SHELL_INSPECT_REPLY.error(), ErrorReply.of(e, 0));
         }
@@ -304,7 +304,7 @@ public class RapaioKernel {
         try {
             MagicCompleteResult magicResult = magicEvaluator.complete(currentReplyEnv, request.code(), request.cursorPos());
 
-            Replacements options = magicResult.handled()
+            Suggestions options = magicResult.handled()
                     ? magicResult.replacementOptions()
                     : javaEngine.complete(request.code(), request.cursorPos());
 

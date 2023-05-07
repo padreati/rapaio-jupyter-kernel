@@ -31,11 +31,7 @@ public class DisplayData {
         return dd;
     }
 
-    public static DisplayData emptyIfNull(DisplayData displayData) {
-        return displayData == null ? new DisplayData() : displayData;
-    }
-
-    public static final String DISPLAY_ID_KEY = "display_id";
+    public static final String DISPLAY_ID = "display_id";
 
     @SerializedName("data")
     protected final Map<String, Object> data;
@@ -54,14 +50,6 @@ public class DisplayData {
         this.data = new HashMap<>(data);
         this.metadata = new LinkedHashMap<>(metadata);
         this.transientData = new LinkedHashMap<>(transientData);
-    }
-
-    public DisplayData copy() {
-        DisplayData copy = new DisplayData();
-        copy.data.putAll(data);
-        copy.metadata.putAll(metadata);
-        copy.transientData.putAll(transientData);
-        return copy;
     }
 
     public Map<String, Object> data() {
@@ -93,15 +81,15 @@ public class DisplayData {
     }
 
     public void setDisplayId(String id) {
-        putTransient(DISPLAY_ID_KEY, id);
+        putTransient(DISPLAY_ID, id);
     }
 
     public boolean hasDisplayId() {
-        return transientData.containsKey(DISPLAY_ID_KEY);
+        return transientData.containsKey(DISPLAY_ID);
     }
 
     public String getDisplayId() {
-        Object id = transientData.get(DISPLAY_ID_KEY);
+        Object id = transientData.get(DISPLAY_ID);
         return id == null ? null : String.valueOf(id);
     }
 

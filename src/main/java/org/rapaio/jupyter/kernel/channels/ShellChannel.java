@@ -9,15 +9,14 @@ import org.rapaio.jupyter.kernel.message.Message;
 import org.zeromq.SocketType;
 import org.zeromq.ZMQ;
 
-public class ShellChannel extends AbstractChannel {
+public final class ShellChannel extends AbstractChannel {
 
     private static final Logger LOGGER = Logger.getLogger(ShellChannel.class.getSimpleName());
-    private static final long SHELL_DEFAULT_LOOP_SLEEP_MS = 50;
-
+    private static final long LOOP_SLEEP = 50;
     private static final AtomicInteger ID = new AtomicInteger();
 
-    protected final JupyterChannels connection;
-    protected volatile LoopThread loopThread;
+    private final JupyterChannels connection;
+    private volatile LoopThread loopThread;
 
     public ShellChannel(ZMQ.Context context, HMACDigest hmacGenerator, JupyterChannels connection) {
         super("ShellChannel", context, SocketType.ROUTER, hmacGenerator);
@@ -25,57 +24,53 @@ public class ShellChannel extends AbstractChannel {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     public void bind(ConnectionProperties connProps) {
-        if (isBound()) {
-            throw new IllegalStateException("Shell channel already bound");
+        if (loopThread != null) {
+            throw new IllegalStateException("Channel already bound.");
         }
 
         String channelThreadName = "Shell-" + ID.getAndIncrement();
-        String addr = formatAddress(connProps.transport(), connProps.ip(), connProps.shellPort());
+        String addr = connProps.formatAddress(connProps.shellPort());
 
         LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
         socket.bind(addr);
 
-        ZMQ.Poller poller = super.ctx.poller(1);
+        ZMQ.Poller poller = ctx.poller(1);
         poller.register(socket, ZMQ.Poller.POLLIN);
 
-        this.loopThread = new LoopThread(channelThreadName, SHELL_DEFAULT_LOOP_SLEEP_MS, () -> {
+        this.loopThread = new LoopThread(channelThreadName, LOOP_SLEEP, () -> {
             int events = poller.poll(0);
             if (events > 0) {
-                Message message = readMessage();
-
-                MessageHandler handler = connection.getHandler(message.header().type());
+                Message<?> message = readMessage();
+                var type = message.header().type();
+                MessageHandler handler = connection.getHandler(type);
                 if (handler != null) {
-                    LOGGER.info(logPrefix + "Handling message: " + message.header().type().getName());
-                    ReplyEnv env = connection.prepareReplyEnv(message.getContext());
+                    LOGGER.info(logPrefix + "Handling message: " + type.getName());
+                    ReplyEnv env = connection.newReplyEnv(message.getContext());
                     try {
                         handler.handle(env, message);
                     } catch (Exception e) {
-                        LOGGER.severe(logPrefix + "Unhandled exception handling " + message.header().type().getName() + ". " + e.getClass()
-                                .getSimpleName() + " - " + e.getLocalizedMessage());
+                        LOGGER.severe(logPrefix + "Exception handling " + type.getName() + ". " +
+                                e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
                     } finally {
                         env.runDelayedActions();
                     }
                     if (env.isMarkedForShutdown()) {
-                        LOGGER.info(logPrefix + channelThreadName + " shutting down connection as environment was marked for shutdown.");
+                        LOGGER.info(logPrefix + "Shutting down connection marked for shutdown.");
                         connection.close();
                     }
                 } else {
-                    LOGGER.severe(logPrefix + "Unhandled message: " + message.header().type().getName());
+                    LOGGER.severe(logPrefix + "Unhandled message: " + type.getName());
                 }
             }
         });
         loopThread.start();
     }
 
-    protected boolean isBound() {
-        return loopThread != null;
-    }
-
     @Override
     public void close() {
-        if (isBound()) {
+        if (loopThread != null) {
             loopThread.shutdown();
         }
         super.close();

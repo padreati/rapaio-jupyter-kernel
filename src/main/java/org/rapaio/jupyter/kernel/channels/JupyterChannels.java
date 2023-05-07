@@ -38,18 +38,18 @@ public final class JupyterChannels {
 
         HMACDigest hmacDigest = connProps.createHMACDigest();
 
-        heartbeat = new HeartbeatChannel(this.ctx, hmacDigest);
-        shell = new ShellChannel(this.ctx, hmacDigest, this);
-        control = new ControlChannel(this.ctx, hmacDigest, this);
-        stdin = new StdinChannel(this.ctx, hmacDigest);
-        iopub = new IOPubChannel(this.ctx, hmacDigest);
+        heartbeat = new HeartbeatChannel(ctx, hmacDigest);
+        shell = new ShellChannel(ctx, hmacDigest, this);
+        control = new ControlChannel(ctx, hmacDigest, this);
+        stdin = new StdinChannel(ctx, hmacDigest);
+        iopub = new IOPubChannel(ctx, hmacDigest);
 
         channels = Set.of(heartbeat, shell, control, stdin, iopub);
     }
 
     public void connect() {
         if (!isConnected) {
-            channels.forEach(s -> s.bind(this.connProps));
+            channels.forEach(s -> s.bind(connProps));
             iopub.sendMessage(new Message<>(null, MessageType.IOPUB_STATUS, null, IOPubStatus.STARTING, null));
             kernel.registerChannels(this);
             isConnected = true;
@@ -81,7 +81,7 @@ public final class JupyterChannels {
         return kernel.getHandler(type);
     }
 
-    public ReplyEnv prepareReplyEnv(MessageContext<?> context) {
+    public ReplyEnv newReplyEnv(MessageContext<?> context) {
         return new ReplyEnv(this, context);
     }
 

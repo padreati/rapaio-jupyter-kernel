@@ -1,5 +1,7 @@
 package org.rapaio.jupyter.kernel.message.messages;
 
+import java.util.Collections;
+
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
@@ -15,7 +17,11 @@ public class ShellInspectReply extends DisplayData implements ContentType<ShellI
     protected final boolean found;
 
     public ShellInspectReply(boolean found, DisplayData data) {
-        super(data.data(), data.metadata(), data.transientData());
+        super(
+                data == null ? Collections.emptyMap() : data.data(),
+                data == null ? Collections.emptyMap() : data.metadata(),
+                data == null ? Collections.emptyMap() : data.transientData()
+        );
         this.found = found;
     }
 

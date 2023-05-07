@@ -10,7 +10,7 @@ import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 public class JShellInputStream extends InputStream {
     private static final Charset encoding = StandardCharsets.UTF_8;
 
-    private final ByteBuffer buffer = new ByteBuffer();
+    private final DynamicFIFOByteBuffer buffer = new DynamicFIFOByteBuffer();
     private ReplyEnv env;
     private boolean enabled;
 
@@ -56,7 +56,7 @@ public class JShellInputStream extends InputStream {
             throw new IndexOutOfBoundsException("len must be semipositive");
         }
         if (len > into.length - intoOffset) {
-            throw new IndexOutOfBoundsException("There is no space to read.");
+            throw new IndexOutOfBoundsException("There is not enough data to read.");
         }
         if (len == 0) {
             return 0;

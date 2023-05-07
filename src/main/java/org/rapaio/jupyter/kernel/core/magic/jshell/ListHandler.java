@@ -45,7 +45,6 @@ public class ListHandler implements JShellCommandHandler {
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
-            sb.append("\n");
         }
         return DisplayData.withText(sb.toString());
     }
@@ -60,7 +59,6 @@ public class ListHandler implements JShellCommandHandler {
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
-            sb.append("\n");
         }
         return DisplayData.withText(sb.toString());
     }
@@ -77,7 +75,6 @@ public class ListHandler implements JShellCommandHandler {
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
-            sb.append("\n");
             return DisplayData.withText(sb.toString());
         }
         throw new MagicEvalException(magicSnippet, "No snippet with id: " + id + " was found.");

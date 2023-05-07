@@ -15,7 +15,6 @@ public final class ReplyEnv {
 
     private final MessageContext context;
     private final JupyterChannels channels;
-
     private final Stack<Runnable> delayedActions = new Stack<>();
 
     private boolean requestShutdown = false;

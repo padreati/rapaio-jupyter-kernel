@@ -22,7 +22,6 @@ public class RapaioExecutionControl extends DirectExecutionControl {
 
     public static final String TIMEOUT_MARKER = "## Timeout Marker ##";
     public static final String INTERRUPTED_MARKER = "## Interrupted Marker ##";
-    private static final Object NULL = new Object();
     private static final AtomicInteger ID = new AtomicInteger(0);
 
     private final ExecutorService executor;
@@ -44,7 +43,7 @@ public class RapaioExecutionControl extends DirectExecutionControl {
         if (result == null) {
             throw new IllegalStateException("No result with key: " + key);
         }
-        return result == NULL ? null : result;
+        return result;
     }
 
     @Override
@@ -57,7 +56,6 @@ public class RapaioExecutionControl extends DirectExecutionControl {
 
     private Object execute(String id, Method methodCall) throws Exception {
         Future<Object> runningTask = executor.submit(() -> methodCall.invoke(null));
-
         running.put(id, runningTask);
 
         try {

@@ -23,14 +23,14 @@ public class MainApp {
 
     public static void main(String[] args) throws Exception {
         if (args.length < 1) {
-            throw new IllegalArgumentException("Missing connection file argument");
+            throw new IllegalArgumentException("Kernel should have at least one argument. You can start it either with -i option for "
+                    + "launching installer, either with connection file name as argument to work as a kernel.");
         }
 
         if (args[0].equals("-i")) {
             // run installer
-            Installer installer = new Installer();
             String[] installerArgs = Arrays.copyOfRange(args, 1, args.length);
-            installer.install(installerArgs);
+            new Installer().install(installerArgs);
         } else {
             // run kernel called by jupyter
             runKernel(args[0]);
@@ -38,6 +38,7 @@ public class MainApp {
     }
 
     private static void runKernel(String connectionFileArg) throws IOException, NoSuchAlgorithmException, InvalidKeyException {
+        LogManager.getLogManager().readConfiguration(MainApp.class.getClassLoader().getResourceAsStream("logging.properties"));
         Path connectionFile = Paths.get(connectionFileArg);
 
         if (!Files.isRegularFile(connectionFile)) {
@@ -46,14 +47,11 @@ public class MainApp {
 
         String contents = new String(Files.readAllBytes(connectionFile));
 
-        LogManager.getLogManager().readConfiguration(MainApp.class.getClassLoader().getResourceAsStream("logging.properties"));
-
         ConnectionProperties connProps = Transform.fromJson(contents, ConnectionProperties.class);
-        LOGGER.info("Kernel connected with: " + contents);
+        LOGGER.info("Kernel connection file content: " + contents);
 
         JupyterChannels connection = new JupyterChannels(connProps, kernel);
         connection.connect();
         connection.joinUntilClose();
-
     }
 }

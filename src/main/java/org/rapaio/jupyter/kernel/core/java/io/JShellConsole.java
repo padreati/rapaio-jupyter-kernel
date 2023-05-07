@@ -2,13 +2,13 @@ package org.rapaio.jupyter.kernel.core.java.io;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 
-public final class JShellIO {
+public final class JShellConsole {
 
     private final JShellOutputStream out;
     private final JShellOutputStream err;
     private final JShellInputStream in;
 
-    public JShellIO() {
+    public JShellConsole() {
         this.out = new JShellOutputStream(false);
         this.err = new JShellOutputStream(true);
         this.in = new JShellInputStream();
