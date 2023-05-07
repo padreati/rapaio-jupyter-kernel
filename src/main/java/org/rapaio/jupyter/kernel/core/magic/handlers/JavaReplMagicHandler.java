@@ -1,18 +1,40 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.Replacements;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.jshell.ImportsHandler;
+import org.rapaio.jupyter.kernel.core.magic.jshell.JShellCommandHandler;
+import org.rapaio.jupyter.kernel.core.magic.jshell.ListHandler;
+import org.rapaio.jupyter.kernel.core.magic.jshell.MethodsHandler;
+import org.rapaio.jupyter.kernel.core.magic.jshell.TypesHandler;
+import org.rapaio.jupyter.kernel.core.magic.jshell.VarsHandler;
 
 public class JavaReplMagicHandler implements MagicHandler {
 
-    private static final String LINE_PREFIX = "%jshell";
+    public static final String LINE_PREFIX = "%jshell";
+
+    private static final Map<String, JShellCommandHandler> handlerMap = new LinkedHashMap<>();
+
+    static {
+        ListHandler listHandler = new ListHandler();
+        handlerMap.put("%jshell /list", listHandler);
+        handlerMap.put("%jshell /list -all", listHandler);
+        handlerMap.put("%jshell /list \\w*", listHandler);
+        handlerMap.put("%jshell /vars", new VarsHandler());
+        handlerMap.put("%jshell /imports", new ImportsHandler());
+        handlerMap.put("%jshell /types", new TypesHandler());
+        handlerMap.put("%jshell /methods", new MethodsHandler());
+    }
 
     @Override
     public String name() {
@@ -21,7 +43,15 @@ public class JavaReplMagicHandler implements MagicHandler {
 
     @Override
     public List<String> syntax() {
-        return List.of("%jshell /cmd");
+        return List.of(
+                "%jshell /list",
+                "%jshell /list -all",
+                "%jshell /list [id]",
+                "%jshell /vars",
+                "%jshell /imports",
+                "%jshell /types",
+                "%jshell /methods"
+        );
     }
 
     @Override
@@ -43,15 +73,17 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(MagicEvaluator magicEvaluator, JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) {
+    public Object eval(MagicEvaluator magicEvaluator, JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
-        String expr = snippet.lines().get(0).code();
-        List<String> tokens = Arrays.stream(expr.trim().split("\\s")).filter(s -> !s.isEmpty()).toList();
-        tokens = tokens.subList(1, tokens.size());
-
-
+        String expr = snippet.lines().get(0).code().trim();
+        for (var entry : handlerMap.entrySet()) {
+            if (expr.trim().matches(entry.getKey())) {
+                return entry.getValue().eval(magicEvaluator, javaEngine, env, snippet, expr.trim());
+            }
+        }
+        env.writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
         return null;
     }
 
