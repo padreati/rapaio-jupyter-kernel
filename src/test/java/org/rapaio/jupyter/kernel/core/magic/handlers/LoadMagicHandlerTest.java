@@ -6,11 +6,13 @@ import static org.mockito.Mockito.mock;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.mockito.Mockito;
+import org.rapaio.jupyter.kernel.TestUtils;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 
 public class LoadMagicHandlerTest {
@@ -196,9 +198,9 @@ public class LoadMagicHandlerTest {
     @Test
     void loadNotebook() throws MagicEvalException {
         LoadMagicHandler handler = new LoadMagicHandler();
-        JavaEngine engine = JavaEngine.builder(new JShellConsole()).build();
-        MagicEvaluator magicEvaluator = new MagicEvaluator(engine);
-        ReplyEnv env = mock(ReplyEnv.class);
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole()).build();
+        MagicEngine magicEvaluator = new MagicEngine(engine);
+        Channels env = mock(Channels.class);
         MagicSnippet snippet = mock(MagicSnippet.class);
 
         handler.evalNotebook(magicEvaluator, engine, env, snippet, content1);

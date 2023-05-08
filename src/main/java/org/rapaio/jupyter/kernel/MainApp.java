@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.rapaio.jupyter.kernel.channels.JupyterChannels;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.Transform;
@@ -50,8 +50,8 @@ public class MainApp {
         ConnectionProperties connProps = Transform.fromJson(contents, ConnectionProperties.class);
         LOGGER.info("Kernel connection file content: " + contents);
 
-        JupyterChannels connection = new JupyterChannels(connProps, kernel);
-        connection.connect();
-        connection.joinUntilClose();
+        Channels channels = new Channels(connProps);
+        channels.connect(kernel);
+        channels.joinUntilClose();
     }
 }

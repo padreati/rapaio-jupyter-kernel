@@ -5,11 +5,11 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -48,7 +48,7 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public Object eval(MagicEvaluator magicEvaluator, JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException {
+    public Object eval(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }
@@ -57,13 +57,13 @@ public class MavenCoordinates implements MagicHandler {
 
         try {
             DepCoordinates dc = new DepCoordinates(args);
-            env.writeToStdOut("Solving dependencies for " + ANSI.start().bold().fgGreen().text(dc.toString()).reset().build() + "\n");
+            channels.writeToStdOut("Solving dependencies for " + ANSI.start().bold().fgGreen().text(dc.toString()).reset().build() + "\n");
             ResolveReport resolveReport = IvyDependencies.getInstance().resolve(dc);
             var adrs = resolveReport.getAllArtifactsReports();
-            env.writeToStdOut("Found dependencies count: " + adrs.length + "\n");
+            channels.writeToStdOut("Found dependencies count: " + adrs.length + "\n");
             for (var adr : adrs) {
                 if (adr.getExt().equalsIgnoreCase("jar") && adr.getType().equalsIgnoreCase("jar")) {
-                    env.writeToStdOut("Add to classpath: " +
+                    channels.writeToStdOut("Add to classpath: " +
                             ANSI.start().fgGreen().text(adr.getLocalFile().getAbsolutePath()).reset().build() + "\n");
                     javaEngine.getShell().addToClasspath(adr.getLocalFile().getAbsolutePath());
                 }
@@ -75,7 +75,7 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public Suggestions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Suggestions complete(Channels channels, MagicSnippet snippet) {
         return null;
     }
 }

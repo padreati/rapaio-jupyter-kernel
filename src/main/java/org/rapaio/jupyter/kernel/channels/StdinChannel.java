@@ -16,15 +16,15 @@ public final class StdinChannel extends AbstractChannel {
 
     private static final Logger LOGGER = Logger.getLogger(StdinChannel.class.getSimpleName());
 
-    public StdinChannel(ZMQ.Context context, HMACDigest hmacGenerator) {
-        super("StdinChannel", context, SocketType.ROUTER, hmacGenerator);
+    public StdinChannel(Channels channels, ZMQ.Context context, HMACDigest hmacGenerator) {
+        super(channels, "StdinChannel", context, SocketType.ROUTER, hmacGenerator);
     }
 
     @Override
     public void bind(ConnectionProperties connProps) {
         String addr = connProps.formatAddress(connProps.stdinPort());
 
-        LOGGER.info(logPrefix + String.format("Binding stdin to %s.", addr));
+        LOGGER.info(logPrefix + "Binding stdin to " + addr);
         socket.bind(addr);
     }
 

@@ -94,6 +94,11 @@ public final class ANSI {
         return this;
     }
 
+    public ANSI fgRed() {
+        sb.append(escape(FG_RED));
+        return this;
+    }
+
     public ANSI fgColor(int index) {
         sb.append(escape(FG_COLOR, COLOR_SET_8_BIT, index));
         return this;
@@ -120,6 +125,7 @@ public final class ANSI {
     }
 
     public String build() {
+        reset();
         return sb.toString();
     }
 
@@ -137,9 +143,24 @@ public final class ANSI {
     }
 
     private static final String CODE_LINE_PROMPT = "|    ";
+    private static final String CODE_LINE_POINTER = "|--> ";
 
     public static List<String> errorTypeHeader(String errorType) {
         return List.of(ANSI.start().codes(BOLD, FG_RED).text(errorType).text(":").build());
+    }
+
+    public static List<String> sourceCode(String code, int lineNumber) {
+        List<String> lines = new ArrayList<>();
+        int no = 1;
+        for (String line : code.split("\\R")) {
+            if (lineNumber != no) {
+                lines.add(ANSI.start().reset().bold().text(CODE_LINE_PROMPT).text(line).build());
+            } else {
+                lines.add(ANSI.start().reset().bold().text(CODE_LINE_POINTER).text(line).build());
+            }
+            no++;
+        }
+        return lines;
     }
 
     public static List<String> sourceCode(String code) {
@@ -173,7 +194,8 @@ public final class ANSI {
 
                     if (startMark == endMark) {
                         String underline =
-                                " ".repeat(startMark - start + CODE_LINE_PROMPT.length()) + "^" + " ".repeat(Math.min(0, line.length() - startMark + start + 1));
+                                " ".repeat(startMark - start + CODE_LINE_PROMPT.length()) + "^" + " ".repeat(
+                                        Math.min(0, line.length() - startMark + start + 1));
                         lines.add(ANSI.start().bold().text(underline).build());
                     }
                 }
@@ -187,7 +209,7 @@ public final class ANSI {
         List<String> lines = new ArrayList<>();
         for (String line : errorMessage.split("\\R")) {
             if (!line.trim().startsWith("location:")) {
-                lines.add(new ANSI().reset().codes(BOLD, FG_BLUE).text(line).build());
+                lines.add(ANSI.start().bold().fgBlue().text(line).build());
             }
         }
         return lines;

@@ -15,11 +15,11 @@ public final class ControlChannel extends AbstractChannel {
     private static final long LOOP_SLEEP = 50;
     private static final AtomicInteger ID = new AtomicInteger();
 
-    private final JupyterChannels channels;
+    private final Channels channels;
     private volatile LoopThread loopThread;
 
-    public ControlChannel(ZMQ.Context context, HMACDigest hmacGenerator, JupyterChannels channels) {
-        super("ControlChannel", context, SocketType.ROUTER, hmacGenerator);
+    public ControlChannel(Channels channels, ZMQ.Context context, HMACDigest hmacGenerator) {
+        super(channels, "ControlChannel", context, SocketType.ROUTER, hmacGenerator);
         this.channels = channels;
     }
 
@@ -33,7 +33,7 @@ public final class ControlChannel extends AbstractChannel {
         String channelThreadName = "Shell-" + ID.getAndIncrement();
         String addr = connProps.formatAddress(connProps.controlPort());
 
-        LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
+        LOGGER.info(logPrefix + "Binding to " + addr);
         socket.bind(addr);
 
         ZMQ.Poller poller = ctx.poller(1);
@@ -46,16 +46,16 @@ public final class ControlChannel extends AbstractChannel {
                 MessageHandler handler = channels.getHandler(type);
                 if (handler != null) {
                     LOGGER.info(logPrefix + "Handling message: " + type.getName());
-                    ReplyEnv env = channels.newReplyEnv(message.getContext());
+                    channels.setContext(message.getContext());
                     try {
-                        handler.handle(env, message);
+                        handler.handle(message);
                     } catch (Exception e) {
                         LOGGER.severe(logPrefix + "Exception handling " + type.getName() + ". " +
                                 e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
                     } finally {
-                        env.runDelayedActions();
+                        channels.runDelayedActions();
                     }
-                    if (env.isMarkedForShutdown()) {
+                    if (channels.isMarkedForShutdown()) {
                         LOGGER.info(channelThreadName + " shutting down connection marked for shutdown.");
                         channels.close();
                     }

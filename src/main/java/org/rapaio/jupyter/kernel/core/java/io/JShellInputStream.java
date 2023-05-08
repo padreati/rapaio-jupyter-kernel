@@ -5,31 +5,28 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.util.Objects;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 
 public class JShellInputStream extends InputStream {
     private static final Charset encoding = StandardCharsets.UTF_8;
 
     private final DynamicFIFOByteBuffer buffer = new DynamicFIFOByteBuffer();
-    private ReplyEnv env;
+    private Channels channels;
     private boolean enabled;
 
-    public JShellInputStream() {
-    }
-
-    public void bindEnv(ReplyEnv env, boolean enabled) {
-        this.env = env;
+    public void bindChannels(Channels channels, boolean enabled) {
+        this.channels = channels;
         this.enabled = enabled;
     }
 
-    public void unbindEnv() {
-        this.env = null;
+    public void unbindChannels() {
+        this.channels = null;
         this.enabled = false;
     }
 
     private void readFromFrontend() {
         if (enabled) {
-            byte[] read = env.readFromStdIn().getBytes(encoding);
+            byte[] read = channels.readFromStdIn().getBytes(encoding);
             buffer.feed(read, read.length);
         }
     }

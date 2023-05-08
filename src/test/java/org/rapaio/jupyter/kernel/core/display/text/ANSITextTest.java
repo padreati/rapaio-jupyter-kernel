@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
@@ -24,7 +26,7 @@ public class ANSITextTest {
                 y=12;
             }
             """;
-        JavaEngine engine = JavaEngine.builder(new JShellConsole()).build();
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole()).build();
         CompilerException ce = assertThrows(CompilerException.class, () -> engine.eval(code));
 
         List<String> msgs = new ArrayList<>();

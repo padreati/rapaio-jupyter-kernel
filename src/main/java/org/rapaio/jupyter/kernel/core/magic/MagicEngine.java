@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -14,7 +14,7 @@ import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.LoadMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.MavenCoordinates;
 
-public class MagicEvaluator {
+public class MagicEngine {
 
     private static final List<MagicHandler> magicHandlers = new LinkedList<>();
 
@@ -29,14 +29,14 @@ public class MagicEvaluator {
 
     private final JavaEngine javaEngine;
 
-    public MagicEvaluator(JavaEngine javaEngine) {
+    public MagicEngine(JavaEngine javaEngine) {
         this.javaEngine = javaEngine;
     }
 
     private record MagicPair(MagicSnippet snippet, MagicHandler handler) {
     }
 
-    public MagicEvalResult eval(ReplyEnv env, String expr) throws MagicParseException, MagicEvalException {
+    public MagicEvalResult eval(Channels channels, String expr) throws MagicParseException, MagicEvalException {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parseSnippets(expr, -1);
@@ -64,14 +64,14 @@ public class MagicEvaluator {
         // if everything is fine then execute handlers
         Object lastResult = null;
         for (var pair : magicPairs) {
-            lastResult = pair.handler.eval(this, javaEngine, env, pair.snippet);
+            lastResult = pair.handler.eval(this, javaEngine, channels, pair.snippet);
         }
 
         // return last result
         return new MagicEvalResult(true, lastResult);
     }
 
-    public MagicInspectResult inspect(ReplyEnv env, String expr, int cursorPosition) {
+    public MagicInspectResult inspect(Channels channels, String expr, int cursorPosition) {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parseSnippets(expr, cursorPosition);
@@ -103,7 +103,7 @@ public class MagicEvaluator {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                DisplayData dd = handler.inspect(env, snippet);
+                DisplayData dd = handler.inspect(channels, snippet);
                 return new MagicInspectResult(true, dd);
             }
         }
@@ -112,7 +112,7 @@ public class MagicEvaluator {
         return new MagicInspectResult(true, null);
     }
 
-    public MagicCompleteResult complete(ReplyEnv env, String expr, int cursorPosition) {
+    public MagicCompleteResult complete(Channels channels, String expr, int cursorPosition) {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parseSnippets(expr, cursorPosition);
@@ -144,7 +144,7 @@ public class MagicEvaluator {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                Suggestions replacementOptions = handler.complete(env, snippet);
+                Suggestions replacementOptions = handler.complete(channels, snippet);
                 return new MagicCompleteResult(true, replacementOptions);
             }
         }

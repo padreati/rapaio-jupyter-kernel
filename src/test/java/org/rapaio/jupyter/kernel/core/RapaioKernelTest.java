@@ -3,7 +3,11 @@ package org.rapaio.jupyter.kernel.core;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
 import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 
 public class RapaioKernelTest {

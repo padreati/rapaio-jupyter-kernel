@@ -28,10 +28,12 @@ public abstract sealed class AbstractChannel extends Thread
 
     protected final HMACDigest hmacGenerator;
     protected final String channelName;
+    protected final Channels channels;
     protected final String logPrefix;
     protected boolean closed;
 
-    protected AbstractChannel(String channelName, ZMQ.Context ctx, SocketType type, HMACDigest hmacGenerator) {
+    protected AbstractChannel(Channels channels, String channelName, ZMQ.Context ctx, SocketType type, HMACDigest hmacGenerator) {
+        this.channels = channels;
         this.ctx = ctx;
         this.socket = ctx.socket(type);
         this.channelName = channelName;

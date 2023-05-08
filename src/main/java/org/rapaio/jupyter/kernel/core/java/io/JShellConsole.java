@@ -1,8 +1,11 @@
 package org.rapaio.jupyter.kernel.core.java.io;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-public final class JShellConsole {
+import org.rapaio.jupyter.kernel.channels.Channels;
+
+public class JShellConsole {
 
     private final JShellOutputStream out;
     private final JShellOutputStream err;
@@ -14,16 +17,16 @@ public final class JShellConsole {
         this.in = new JShellInputStream();
     }
 
-    public void bindEnv(ReplyEnv env, boolean inputEnabled) {
-        out.bindEnv(env);
-        err.bindEnv(env);
-        in.bindEnv(env, inputEnabled);
+    public void bindChannels(Channels channels, boolean inputEnabled) {
+        in.bindChannels(channels, inputEnabled);
+        out.bindChannels(channels);
+        err.bindChannels(channels);
     }
 
-    public void unbindEnv() {
-        out.unbindEnv();
-        err.unbindEnv();
-        in.unbindEnv();
+    public void unbindChannels() {
+        in.unbindChannels();
+        out.unbindChannels();
+        err.unbindChannels();
     }
 
     public void flush() {
@@ -31,15 +34,15 @@ public final class JShellConsole {
         err.flush();
     }
 
-    public JShellInputStream getIn() {
+    public InputStream getIn() {
         return in;
     }
 
-    public JShellOutputStream getOut() {
+    public OutputStream getOut() {
         return out;
     }
 
-    public JShellOutputStream getErr() {
+    public OutputStream getErr() {
         return err;
     }
 }

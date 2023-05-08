@@ -5,11 +5,11 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.jshell.ImportsHandler;
@@ -73,22 +73,22 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(MagicEvaluator magicEvaluator, JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicEvalException {
+    public Object eval(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
         String expr = snippet.lines().get(0).code().trim();
         for (var entry : handlerMap.entrySet()) {
             if (expr.trim().matches(entry.getKey())) {
-                return entry.getValue().eval(magicEvaluator, javaEngine, env, snippet, expr.trim());
+                return entry.getValue().eval(magicEvaluator, javaEngine, channels, snippet, expr.trim());
             }
         }
-        env.writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
+        channels.writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
         return null;
     }
 
     @Override
-    public Suggestions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Suggestions complete(Channels channels, MagicSnippet snippet) {
         return null;
     }
 }

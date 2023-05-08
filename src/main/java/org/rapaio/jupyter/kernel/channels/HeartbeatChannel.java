@@ -17,8 +17,8 @@ public final class HeartbeatChannel extends AbstractChannel {
 
     private volatile LoopThread loopThread;
 
-    public HeartbeatChannel(ZMQ.Context context, HMACDigest hmacGenerator) {
-        super("HeartbeatChannel", context, SocketType.REP, hmacGenerator);
+    public HeartbeatChannel(Channels channels, ZMQ.Context context, HMACDigest hmacGenerator) {
+        super(channels, "HeartbeatChannel", context, SocketType.REP, hmacGenerator);
     }
 
     @Override
@@ -30,7 +30,7 @@ public final class HeartbeatChannel extends AbstractChannel {
         String channelThreadName = "Heartbeat-" + ID.getAndIncrement();
         String addr = connProps.formatAddress(connProps.hbPort());
 
-        LOGGER.info(logPrefix + String.format("Binding %s to %s.", channelThreadName, addr));
+        LOGGER.info(logPrefix + "Binding to " + addr);
         socket.bind(addr);
 
         ZMQ.Poller poller = ctx.poller(1);
@@ -42,11 +42,11 @@ public final class HeartbeatChannel extends AbstractChannel {
                 byte[] msg = socket.recv();
                 if (msg == null) {
                     // ignore errors, just show them
-                    LOGGER.severe(logPrefix + "Poll returned 1 event but could not read the echo string");
+                    LOGGER.severe(logPrefix + "Could not read reply");
                     return;
                 }
                 if (!socket.send(msg)) {
-                    LOGGER.severe(logPrefix + "Could not send heartbeat reply");
+                    LOGGER.severe(logPrefix + "Could not send reply");
                 }
             }
         });

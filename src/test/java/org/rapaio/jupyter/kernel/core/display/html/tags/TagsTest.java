@@ -11,9 +11,9 @@ import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import jdk.jshell.SourceCodeAnalysis;
 
@@ -22,7 +22,7 @@ public class TagsTest {
     @Test
     void tagsTest() {
 
-        JavaEngine engine = JavaEngine.builder(new JShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
 

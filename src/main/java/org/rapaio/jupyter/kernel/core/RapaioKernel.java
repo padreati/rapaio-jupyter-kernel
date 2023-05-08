@@ -11,9 +11,8 @@ import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
-import org.rapaio.jupyter.kernel.channels.JupyterChannels;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.channels.MessageHandler;
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
 import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
@@ -21,8 +20,8 @@ import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
 import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
@@ -70,21 +69,18 @@ public class RapaioKernel {
     private static final Logger LOGGER = Logger.getLogger(RapaioKernel.class.getSimpleName());
     private static final AtomicInteger executionCount = new AtomicInteger(1);
 
-    private final Map<MessageType<?>, MessageHandler> messageHandlers = new HashMap<>();
-    JupyterChannels channels;
-
     private final Renderer renderer;
     private final JavaEngine javaEngine;
-    private final MagicEvaluator magicEvaluator;
+    private final MagicEngine magicEngine;
+    private final JShellConsole shellConsole;
 
-    ReplyEnv currentReplyEnv;
-    private final JShellConsole shellConsole = new JShellConsole();
+    private Channels channels;
 
     public RapaioKernel() {
 
         KernelEnv kernelEnv = new KernelEnv();
 
-        this.renderer = new DefaultRenderer();
+        this.shellConsole = new JShellConsole();
         this.javaEngine = JavaEngine.builder(shellConsole)
                 .withCompilerOptions(kernelEnv.compilerOptions())
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
@@ -92,12 +88,21 @@ public class RapaioKernel {
                 .withTimeoutMillis(kernelEnv.timeoutMillis())
                 .build();
         this.javaEngine.initialize();
-        this.magicEvaluator = new MagicEvaluator(javaEngine);
+        this.magicEngine = new MagicEngine(javaEngine);
+        this.renderer = new DefaultRenderer();
     }
 
-    @SuppressWarnings("unchecked")
-    public <T> MessageHandler<T> getHandler(MessageType<T> type) {
-        return messageHandlers.get(type);
+
+    public Channels getChannels() {
+        return channels;
+    }
+
+    public JavaEngine getJavaEngine() {
+        return javaEngine;
+    }
+
+    public MagicEngine getMagicEngine() {
+        return magicEngine;
     }
 
     public Renderer getRenderer() {
@@ -105,8 +110,8 @@ public class RapaioKernel {
     }
 
     public void display(DisplayData dd) {
-        if (currentReplyEnv != null) {
-            currentReplyEnv.publish(new IOPubDisplayData(dd));
+        if (channels.hasContext()) {
+            channels.publish(new IOPubDisplayData(dd));
         }
     }
 
@@ -116,11 +121,11 @@ public class RapaioKernel {
     }
 
     public void updateDisplay(DisplayData dd) {
-        if (currentReplyEnv != null) {
+        if (channels.hasContext()) {
             if (!dd.hasDisplayId()) {
                 throw new IllegalArgumentException("Cannot update a display without display_id.");
             }
-            currentReplyEnv.publish(new IOPubUpdateDisplayData(dd));
+            channels.publish(new IOPubUpdateDisplayData(dd));
         }
     }
 
@@ -147,12 +152,10 @@ public class RapaioKernel {
     }
 
     public MagicEvalResult evalMagic(String expr) throws Exception {
-        // try first the magic
-        return magicEvaluator.eval(currentReplyEnv, expr);
+        return magicEngine.eval(channels, expr);
     }
 
     public DisplayData eval(String expr) throws Exception {
-        // if not handled try the java engine
         return transformEval(javaEngine.eval(expr));
     }
 
@@ -166,37 +169,33 @@ public class RapaioKernel {
         return null;
     }
 
-    //
-    // MESSAGE HANDLERS
-    //
-
-    public void registerChannels(JupyterChannels channels) {
+    public Map<MessageType<?>, MessageHandler> registerChannels(Channels channels) {
         this.channels = channels;
-        messageHandlers.put(MessageType.SHELL_EXECUTE_REQUEST, this::handleExecuteRequest);
-        messageHandlers.put(MessageType.SHELL_INSPECT_REQUEST, this::handleInspectRequest);
-        messageHandlers.put(MessageType.SHELL_COMPLETE_REQUEST, this::handleCompleteRequest);
-        messageHandlers.put(MessageType.SHELL_HISTORY_REQUEST, this::handleHistoryRequest);
-        messageHandlers.put(MessageType.SHELL_IS_COMPLETE_REQUEST, this::handleIsCompleteRequest);
-        messageHandlers.put(MessageType.SHELL_KERNEL_INFO_REQUEST, this::handleKernelInfoRequest);
-        messageHandlers.put(MessageType.CONTROL_SHUTDOWN_REQUEST, this::handleShutdownRequest);
-        messageHandlers.put(MessageType.CONTROL_INTERRUPT_REQUEST, this::handleInterruptRequest);
 
-        messageHandlers.put(MessageType.CUSTOM_COMM_OPEN, this::handleCommOpenCommand);
-        messageHandlers.put(MessageType.CUSTOM_COMM_MSG, this::handleCommMsgCommand);
-        messageHandlers.put(MessageType.CUSTOM_COMM_CLOSE, this::handleCommCloseCommand);
-        messageHandlers.put(MessageType.SHELL_COMM_INFO_REQUEST, this::handleCommInfoRequest);
+        Map<MessageType<?>, MessageHandler> handlers = new HashMap<>();
+        handlers.put(MessageType.SHELL_EXECUTE_REQUEST, this::handleExecuteRequest);
+        handlers.put(MessageType.SHELL_INSPECT_REQUEST, this::handleInspectRequest);
+        handlers.put(MessageType.SHELL_COMPLETE_REQUEST, this::handleCompleteRequest);
+        handlers.put(MessageType.SHELL_HISTORY_REQUEST, this::handleHistoryRequest);
+        handlers.put(MessageType.SHELL_IS_COMPLETE_REQUEST, this::handleIsCompleteRequest);
+        handlers.put(MessageType.SHELL_KERNEL_INFO_REQUEST, this::handleKernelInfoRequest);
+        handlers.put(MessageType.CONTROL_SHUTDOWN_REQUEST, this::handleShutdownRequest);
+        handlers.put(MessageType.CONTROL_INTERRUPT_REQUEST, this::handleInterruptRequest);
+        handlers.put(MessageType.CUSTOM_COMM_OPEN, this::handleCommOpenCommand);
+        handlers.put(MessageType.CUSTOM_COMM_MSG, this::handleCommMsgCommand);
+        handlers.put(MessageType.CUSTOM_COMM_CLOSE, this::handleCommCloseCommand);
+        handlers.put(MessageType.SHELL_COMM_INFO_REQUEST, this::handleCommInfoRequest);
+        return handlers;
     }
 
-    private void handleExecuteRequest(ReplyEnv env, Message<ShellExecuteRequest> executeRequestMessage) {
+    private void handleExecuteRequest(Message<ShellExecuteRequest> executeRequestMessage) {
         ShellExecuteRequest request = executeRequestMessage.content();
 
         int count = executionCount.getAndIncrement();
 
-        env.busyThenIdle();
-        env.publish(new IOPubExecuteInput(request.code(), count));
-
-        currentReplyEnv = env;
-        env.delay(() -> currentReplyEnv = null);
+        channels.delay(channels::freeContext);
+        channels.busyThenIdle();
+        channels.publish(new IOPubExecuteInput(request.code(), count));
 
         // before binding IO try to do evaluation of magic.
         // if magic handled the request then this is it, everything remains here
@@ -205,15 +204,15 @@ public class RapaioKernel {
             MagicEvalResult magicResult = evalMagic(request.code());
             if (magicResult.handled()) {
                 if (magicResult.result() != null) {
-                    env.publish(new IOPubExecuteResult(count, transformEval(magicResult.result())));
+                    channels.publish(new IOPubExecuteResult(count, transformEval(magicResult.result())));
                 }
-                env.delay(()-> env.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
+                channels.delay(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
                 return;
             }
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
-            env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            env.delay(() -> env.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
+            channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
+            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
             return;
         }
 
@@ -229,32 +228,30 @@ public class RapaioKernel {
         System.setOut(new PrintStream(shellConsole.getOut(), true, StandardCharsets.UTF_8));
         System.setErr(new PrintStream(shellConsole.getErr(), true, StandardCharsets.UTF_8));
 
-        shellConsole.bindEnv(env, allowStdin);
+        shellConsole.bindChannels(channels, allowStdin);
 
         // push on stack restore streams
-        env.delay(() -> {
+        channels.delay(() -> {
             System.setOut(oldStdOut);
             System.setErr(oldStdErr);
             System.setIn(oldStdIn);
         });
 
         // unbind environment
-        env.delay(shellConsole::unbindEnv);
+        channels.delay(shellConsole::unbindChannels);
         // flush before restoring
-        env.delay(shellConsole::flush);
+        channels.delay(shellConsole::flush);
 
         try {
             DisplayData out = eval(request.code());
-
             if (out != null) {
-                env.publish(new IOPubExecuteResult(count, out));
+                channels.publish(new IOPubExecuteResult(count, out));
             }
-
-            env.delay(()->env.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
+            channels.delay(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
         } catch (Exception e) {
             ErrorReply error = ErrorReply.of(e, count);
-            env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            env.delay(()-> env.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
+            channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
+            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
         }
     }
 
@@ -262,9 +259,9 @@ public class RapaioKernel {
     public static final String IS_COMPLETE_STATUS_BAD = "invalid";
     public static final String IS_COMPLETE_STATUS_MAYBE = "unknown";
 
-    private void handleIsCompleteRequest(ReplyEnv env, Message<ShellIsCompleteRequest> message) {
+    private void handleIsCompleteRequest(Message<ShellIsCompleteRequest> message) {
         ShellIsCompleteRequest request = message.content();
-        env.busyThenIdle();
+        channels.busyThenIdle();
 
         String result = javaEngine.isComplete(request.code());
 
@@ -274,53 +271,53 @@ public class RapaioKernel {
             case IS_COMPLETE_STATUS_MAYBE -> ShellIsCompleteReply.UNKNOWN;
             default -> ShellIsCompleteReply.getIncompleteReplyWithIndent(result);
         };
-        env.reply(reply);
+        channels.reply(reply);
     }
 
-    private void handleInspectRequest(ReplyEnv env, Message<ShellInspectRequest> message) {
+    private void handleInspectRequest(Message<ShellInspectRequest> message) {
         ShellInspectRequest request = message.content();
-        env.busyThenIdle();
+        channels.busyThenIdle();
         try {
 
-            MagicInspectResult magicResult = magicEvaluator.inspect(currentReplyEnv, request.code(), request.cursorPos());
+            MagicInspectResult magicResult = magicEngine.inspect(channels, request.code(), request.cursorPos());
             if (magicResult.handled()) {
                 DisplayData inspection = magicResult.displayData();
-                env.reply(new ShellInspectReply(inspection != null, inspection));
+                channels.reply(new ShellInspectReply(inspection != null, inspection));
                 return;
             }
 
             // request.detailLevel() is not used since we do not get the source as required
             // for detail level above 0
             DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
-            env.reply(new ShellInspectReply(inspection != null, inspection));
+            channels.reply(new ShellInspectReply(inspection != null, inspection));
         } catch (Exception e) {
-            env.replyError(MessageType.SHELL_INSPECT_REPLY.error(), ErrorReply.of(e, 0));
+            channels.replyError(MessageType.SHELL_INSPECT_REPLY.error(), ErrorReply.of(e, 0));
         }
     }
 
-    private void handleCompleteRequest(ReplyEnv env, Message<ShellCompleteRequest> message) {
+    private void handleCompleteRequest(Message<ShellCompleteRequest> message) {
         ShellCompleteRequest request = message.content();
-        env.busyThenIdle();
+        channels.busyThenIdle();
         try {
-            MagicCompleteResult magicResult = magicEvaluator.complete(currentReplyEnv, request.code(), request.cursorPos());
+            MagicCompleteResult magicResult = magicEngine.complete(channels, request.code(), request.cursorPos());
 
             Suggestions options = magicResult.handled()
                     ? magicResult.replacementOptions()
                     : javaEngine.complete(request.code(), request.cursorPos());
 
             if (options == null) {
-                env.reply(new ShellCompleteReply(Collections.emptyList(), request.cursorPos(), request.cursorPos(),
+                channels.reply(new ShellCompleteReply(Collections.emptyList(), request.cursorPos(), request.cursorPos(),
                         Collections.emptyMap()));
             } else {
-                env.reply(new ShellCompleteReply(options.replacements(), options.start(), options.end(),
+                channels.reply(new ShellCompleteReply(options.replacements(), options.start(), options.end(),
                         Collections.emptyMap()));
             }
         } catch (Exception e) {
-            env.replyError(MessageType.SHELL_COMPLETE_REPLY.error(), ErrorReply.of(e, 0));
+            channels.replyError(MessageType.SHELL_COMPLETE_REPLY.error(), ErrorReply.of(e, 0));
         }
     }
 
-    private void handleHistoryRequest(ReplyEnv env, Message<ShellHistoryRequest> message) {
+    private void handleHistoryRequest(Message<ShellHistoryRequest> message) {
         /*
         Note from specifications:
         Most of the history messaging options are not used by Jupyter frontends, and many kernels do not implement them.
@@ -331,48 +328,48 @@ public class RapaioKernel {
         LOGGER.info("ShellHistoryRequest not implemented.");
     }
 
-    private void handleKernelInfoRequest(ReplyEnv env, Message<ShellKernelInfoRequest> ignored) {
-        env.busyThenIdle();
-        env.reply(getKernelInfo());
+    private void handleKernelInfoRequest(Message<ShellKernelInfoRequest> ignored) {
+        channels.busyThenIdle();
+        channels.reply(getKernelInfo());
     }
 
-    private void handleShutdownRequest(ReplyEnv env, Message<ControlShutdownRequest> shutdownRequestMessage) {
+    private void handleShutdownRequest(Message<ControlShutdownRequest> shutdownRequestMessage) {
         ControlShutdownRequest request = shutdownRequestMessage.content();
-        env.busyThenIdle();
+        channels.busyThenIdle();
 
-        env.delay(()->env.reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN));
+        channels.delay(() -> channels.reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN));
 
         // request.restart() is no use for now, but might be used in the end
         onShutdown();
-        env.runDelayedActions();
+        channels.runDelayedActions();
         // this will determine the connections to shut down
-        env.markForShutdown();
+        channels.markForShutdown();
     }
 
-    private void handleInterruptRequest(ReplyEnv env, Message<ControlInterruptRequest> interruptRequestMessage) {
-        env.busyThenIdle();
-        env.reply(new ControlInterruptReply());
+    private void handleInterruptRequest(Message<ControlInterruptRequest> interruptRequestMessage) {
+        channels.busyThenIdle();
+        channels.reply(new ControlInterruptReply());
         interrupt();
     }
 
     // custom communication is not implemented, however, we have to behave properly
 
-    private void handleCommOpenCommand(ReplyEnv env, Message<CustomCommOpen> message) {
+    private void handleCommOpenCommand(Message<CustomCommOpen> message) {
         String id = message.content().commId();
-        env.busyThenIdle();
-        env.publish(new CustomCommClose(id, Transform.EMPTY_JSON_OBJ));
+        channels.busyThenIdle();
+        channels.publish(new CustomCommClose(id, Transform.EMPTY_JSON_OBJ));
     }
 
-    private void handleCommMsgCommand(ReplyEnv env, Message<CustomCommMsg> ignored) {
+    private void handleCommMsgCommand(Message<CustomCommMsg> ignored) {
         // no-op
     }
 
-    private void handleCommCloseCommand(ReplyEnv env, Message<CustomCommClose> ignored) {
+    private void handleCommCloseCommand(Message<CustomCommClose> ignored) {
         // no-op
     }
 
-    private void handleCommInfoRequest(ReplyEnv env, Message<ShellCommInfoRequest> message) {
-        env.busyThenIdle();
-        env.reply(new ShellCommInfoReply(new LinkedHashMap<>()));
+    private void handleCommInfoRequest(Message<ShellCommInfoRequest> message) {
+        channels.busyThenIdle();
+        channels.reply(new ShellCommInfoReply(new LinkedHashMap<>()));
     }
 }

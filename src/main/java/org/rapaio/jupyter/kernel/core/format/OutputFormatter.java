@@ -5,16 +5,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Optional;
 
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 
 import jdk.jshell.DeclarationSnippet;
+import jdk.jshell.EvalException;
+import jdk.jshell.JShellException;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
 
@@ -61,23 +62,59 @@ public final class OutputFormatter {
                 msgs.addAll(ANSI.errorMessages(e.getMessage()));
                 return msgs;
             });
-            exFormatters.put(MagicParseException.class, (JavaEngine engine, MagicParseException e) -> {
-                // todo: something better
-                return List.of(e.getMessage());
-            });
-            exFormatters.put(MagicEvalException.class, (JavaEngine engine, MagicEvalException e) -> {
-                // todo: something better
-                return List.of(e.getMessage());
+            exFormatters.put(EvalException.class, (JavaEngine engine, EvalException e) -> {
+                String exceptionClassName = e.getExceptionClassName();
+                StackTraceElement[] stackTrace = e.getStackTrace();
+                JShellException shellException = e.getCause();
+
+                List<String> output = new ArrayList<>();
+                output.add(ANSI.start().bold().fgRed().text(exceptionClassName + ": " + e.getMessage() + "\n").build());
+                if (shellException != null) {
+                    output.add(ANSI.start().fgRed()
+                            .text("Cause: " + shellException.getClass().getSimpleName() + ": " + shellException.getMessage()).build());
+                }
+                for (var stackElement : stackTrace) {
+                    output.add(String.join("\n", ANSI.errorMessages("   at " + stackElement)));
+                    if (stackElement.getFileName() != null && stackElement.getFileName().startsWith("#")) {
+                        String id = stackElement.getFileName().substring(1);
+                        Optional<Snippet> optional = engine.getShell().snippets().filter(s -> s.id().equals(id)).findAny();
+                        optional.ifPresent(snippet -> output.addAll(ANSI.sourceCode(snippet.source(), stackElement.getLineNumber())));
+                    }
+                }
+                return output;
             });
         }
     }
 
+    private static List<String> genericFormatException(JavaEngine engine, Throwable throwable) {
+        List<String> output = new ArrayList<>();
+        while (true) {
+            output.add(
+                    ANSI.start().bold().fgRed().text(throwable.getClass().getSimpleName() + ": " + throwable.getMessage() + "\n").build());
+            StackTraceElement[] stackTrace = throwable.getStackTrace();
+            for (var stackElement : stackTrace) {
+                output.add(String.join("\n", ANSI.errorMessages("   at " + stackElement)));
+                if (stackElement.getFileName() != null && stackElement.getFileName().startsWith("#")) {
+                    String id = stackElement.getFileName().substring(1);
+                    Optional<Snippet> optional = engine.getShell().snippets().filter(s -> s.id().equals(id)).findAny();
+                    optional.ifPresent(snippet -> output.addAll(ANSI.sourceCode(snippet.source(), stackElement.getLineNumber())));
+                }
+            }
+            Throwable th = throwable.getCause();
+            if (th == null || th == throwable) {
+                break;
+            }
+            throwable = th;
+        }
+        return output;
+    }
+
     @SuppressWarnings("unchecked")
-    public static <T extends Exception> List<String> exceptionFormat(JavaEngine javaEngine, T e) {
+    public static <T extends Throwable> List<String> exceptionFormat(JavaEngine javaEngine, T e) {
         ExceptionFormatter<T> formatter = (ExceptionFormatter<T>) exFormatters.get(e.getClass());
         if (formatter != null) {
             return formatter.format(javaEngine, e);
         }
-        return List.of(e.getMessage());
+        return genericFormatException(javaEngine, e);
     }
 }

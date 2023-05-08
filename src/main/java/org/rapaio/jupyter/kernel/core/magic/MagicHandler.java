@@ -10,7 +10,7 @@ import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -25,10 +25,10 @@ public interface MagicHandler {
 
     boolean canHandleSnippet(MagicSnippet snippet);
 
-    Object eval(MagicEvaluator magicEvaluator, JavaEngine engine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException,
+    Object eval(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException;
 
-    default DisplayData inspect(ReplyEnv env, MagicSnippet snippet) {
+    default DisplayData inspect(Channels channels, MagicSnippet snippet) {
         return DisplayData.withHtml(
                 join(
                         p(texts("Syntax: "), br(),
@@ -39,5 +39,5 @@ public interface MagicHandler {
         );
     }
 
-    Suggestions complete(ReplyEnv env, MagicSnippet snippet);
+    Suggestions complete(Channels channels, MagicSnippet snippet);
 }

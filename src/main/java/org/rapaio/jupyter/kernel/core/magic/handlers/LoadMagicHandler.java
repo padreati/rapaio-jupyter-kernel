@@ -6,13 +6,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -48,7 +48,7 @@ public class LoadMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(MagicEvaluator magicEvaluator, JavaEngine engine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException,
+    public Object eval(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
@@ -62,9 +62,9 @@ public class LoadMagicHandler implements MagicHandler {
             try {
                 String content = Files.readString(Path.of(file.getAbsolutePath()));
                 if (path.endsWith(".ipynb")) {
-                    return evalNotebook(magicEvaluator, engine, env, snippet, content);
+                    return evalNotebook(magicEvaluator, engine, channels, snippet, content);
                 } else {
-                    return evalShellScript(engine, env, content);
+                    return evalShellScript(engine, channels, content);
                 }
             } catch (IOException ex) {
                 throw new MagicParseException("LoadMagicHandler",
@@ -76,7 +76,7 @@ public class LoadMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Suggestions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Suggestions complete(Channels channels, MagicSnippet snippet) {
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || f.getName().endsWith(".ipynb") || f.getName().endsWith(".jshell"));
     }
@@ -102,7 +102,7 @@ public class LoadMagicHandler implements MagicHandler {
     /**
      * For parsing notebook files follow the format specified in: <a href="http://ipython.org/ipython-doc/3/notebook/nbformat.html">nbformat</a>
      */
-    Object evalNotebook(MagicEvaluator magicEvaluator, JavaEngine engine, ReplyEnv env, MagicSnippet snippet, String content) throws
+    Object evalNotebook(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet, String content) throws
             MagicEvalException {
         JsonElement root = JsonParser.parseString(content);
 
@@ -133,23 +133,23 @@ public class LoadMagicHandler implements MagicHandler {
             }
             String cellCode = sb.toString();
             try {
-                MagicEvalResult magicResult = magicEvaluator.eval(env, cellCode);
+                MagicEvalResult magicResult = magicEvaluator.eval(channels, cellCode);
                 if (!magicResult.handled()) {
                     engine.eval(cellCode);
                 }
             } catch (Exception e) {
-                env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
+                channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
                 return null;
             }
         }
         return null;
     }
 
-    private Object evalShellScript(JavaEngine engine, ReplyEnv env, String content) {
+    private Object evalShellScript(JavaEngine engine, Channels channels, String content) {
         try {
             return engine.eval(content);
         } catch (Exception e) {
-            env.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
+            channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
             return null;
         }
     }

@@ -2,12 +2,12 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.ReplyEnv;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.Suggestions;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvaluator;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -47,7 +47,7 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(MagicEvaluator magicEvaluator, JavaEngine javaEngine, ReplyEnv env, MagicSnippet snippet) throws MagicParseException {
+    public Object eval(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
@@ -61,7 +61,7 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Suggestions complete(ReplyEnv env, MagicSnippet snippet) {
+    public Suggestions complete(Channels channels, MagicSnippet snippet) {
         return null;
     }
 

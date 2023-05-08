@@ -1,6 +1,8 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
 import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.TestUtils;
+import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
 public class MagicEvaluatorTest {
