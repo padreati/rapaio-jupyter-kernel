@@ -3,15 +3,10 @@ package org.rapaio.jupyter.kernel.core.format;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
-import org.rapaio.jupyter.kernel.TestUtils;
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
 import jdk.jshell.EvalException;
@@ -34,7 +29,7 @@ public class OutputFormatterTest {
                 };
                 g(0);"""));
         assertNotNull(e);
-        List<String> output = OutputFormatter.exceptionFormat(kernel.getJavaEngine(), e);
+        List<String> output = OutputFormatter.exceptionFormat(kernel.javaEngine(), e);
         assertNotNull(output);
 
         for (String line : output) {

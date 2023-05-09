@@ -32,10 +32,6 @@ public class EvaluationTimeoutException extends Exception {
         this.source = source;
     }
 
-    public long getDuration() {
-        return duration;
-    }
-
     public String getSource() {
         return source;
     }

@@ -8,12 +8,10 @@ import java.util.Map;
 
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.Header;
-import org.rapaio.jupyter.kernel.message.KernelTimestamp;
 import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.adapters.ExpressionValueAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.HeaderAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.HistoryRequestAdapter;
-import org.rapaio.jupyter.kernel.message.adapters.KernelTimestampAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.MessageTypeAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.PublishStatusAdapter;
 import org.rapaio.jupyter.kernel.message.adapters.ReplyTypeAdapter;
@@ -44,7 +42,6 @@ public class Transform {
             .create();
 
     private static final Gson gson = new GsonBuilder()
-            .registerTypeAdapter(KernelTimestamp.class, KernelTimestampAdapter.INSTANCE)
             .registerTypeAdapter(Header.class, HeaderAdapter.INSTANCE)
             .registerTypeAdapter(MessageType.class, MessageTypeAdapter.INSTANCE)
             .registerTypeAdapter(IOPubStatus.class, PublishStatusAdapter.INSTANCE)

@@ -4,15 +4,12 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.channels.MessageHandler;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
@@ -52,7 +49,6 @@ import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
 import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
 
-@SuppressWarnings("rawtypes")
 public class RapaioKernel {
 
     public static final String RJK_TIMEOUT_MILLIS = "RJK_TIMEOUT_MILLIS";
@@ -92,24 +88,24 @@ public class RapaioKernel {
     }
 
 
-    public Channels getChannels() {
+    public Channels channels() {
         return channels;
     }
 
-    public JavaEngine getJavaEngine() {
+    public JavaEngine javaEngine() {
         return javaEngine;
     }
 
-    public MagicEngine getMagicEngine() {
+    public MagicEngine magicEngine() {
         return magicEngine;
     }
 
-    public Renderer getRenderer() {
+    public Renderer renderer() {
         return renderer;
     }
 
     public void display(DisplayData dd) {
-        if (channels.hasContext()) {
+        if (channels.hasMsgId()) {
             channels.publish(new IOPubDisplayData(dd));
         }
     }
@@ -120,7 +116,7 @@ public class RapaioKernel {
     }
 
     public void updateDisplay(DisplayData dd) {
-        if (channels.hasContext()) {
+        if (channels.hasMsgId()) {
             if (!dd.hasDisplayId()) {
                 throw new IllegalArgumentException("Cannot update a display without display_id.");
             }
@@ -128,7 +124,7 @@ public class RapaioKernel {
         }
     }
 
-    private ShellKernelInfoReply getKernelInfo() {
+    private ShellKernelInfoReply kernelInfo() {
 
         String kernelName = "rapaio-jupyter-kernel";
         String kernelVersion = "0.2.0";
@@ -168,31 +164,16 @@ public class RapaioKernel {
         return null;
     }
 
-    public Map<MessageType<?>, MessageHandler> registerChannels(Channels channels) {
+    public void registerChannels(Channels channels) {
         this.channels = channels;
-
-        Map<MessageType<?>, MessageHandler> handlers = new HashMap<>();
-        handlers.put(MessageType.SHELL_EXECUTE_REQUEST, this::handleExecuteRequest);
-        handlers.put(MessageType.SHELL_INSPECT_REQUEST, this::handleInspectRequest);
-        handlers.put(MessageType.SHELL_COMPLETE_REQUEST, this::handleCompleteRequest);
-        handlers.put(MessageType.SHELL_HISTORY_REQUEST, this::handleHistoryRequest);
-        handlers.put(MessageType.SHELL_IS_COMPLETE_REQUEST, this::handleIsCompleteRequest);
-        handlers.put(MessageType.SHELL_KERNEL_INFO_REQUEST, this::handleKernelInfoRequest);
-        handlers.put(MessageType.CONTROL_SHUTDOWN_REQUEST, this::handleShutdownRequest);
-        handlers.put(MessageType.CONTROL_INTERRUPT_REQUEST, this::handleInterruptRequest);
-        handlers.put(MessageType.CUSTOM_COMM_OPEN, this::handleCommOpenCommand);
-        handlers.put(MessageType.CUSTOM_COMM_MSG, this::handleCommMsgCommand);
-        handlers.put(MessageType.CUSTOM_COMM_CLOSE, this::handleCommCloseCommand);
-        handlers.put(MessageType.SHELL_COMM_INFO_REQUEST, this::handleCommInfoRequest);
-        return handlers;
     }
 
-    private void handleExecuteRequest(Message<ShellExecuteRequest> executeRequestMessage) {
-        ShellExecuteRequest request = executeRequestMessage.content();
+    public void handleExecuteRequest(Message<ShellExecuteRequest> message) {
+        ShellExecuteRequest request = message.content();
 
         int count = executionCount.getAndIncrement();
 
-        channels.delay(channels::freeContext);
+        channels.scheduleAfter(channels::freeMsgId);
         channels.busyThenIdle();
         channels.publish(new IOPubExecuteInput(request.code(), count));
 
@@ -205,12 +186,12 @@ public class RapaioKernel {
                 if (magicResult.result() != null) {
                     channels.publish(new IOPubExecuteResult(count, transformEval(magicResult.result())));
                 }
-                channels.delay(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
+                channels.scheduleAfter(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
                 return;
             }
         } catch (Exception e) {
             channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
+            channels.scheduleAfter(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
             return;
         }
 
@@ -220,7 +201,7 @@ public class RapaioKernel {
         InputStream oldStdIn = System.in;
 
         // some clients don't allow asking input
-        boolean allowStdin = executeRequestMessage.content().stdinEnabled();
+        boolean allowStdin = message.content().stdinEnabled();
         // hook system io to allow execution to output into notebook
         System.setIn(shellConsole.getIn());
         System.setOut(new PrintStream(shellConsole.getOut(), true, StandardCharsets.UTF_8));
@@ -229,26 +210,26 @@ public class RapaioKernel {
         shellConsole.bindChannels(channels, allowStdin);
 
         // push on stack restore streams
-        channels.delay(() -> {
+        channels.scheduleAfter(() -> {
             System.setOut(oldStdOut);
             System.setErr(oldStdErr);
             System.setIn(oldStdIn);
         });
 
         // unbind environment
-        channels.delay(shellConsole::unbindChannels);
+        channels.scheduleAfter(shellConsole::unbindChannels);
         // flush before restoring
-        channels.delay(shellConsole::flush);
+        channels.scheduleAfter(shellConsole::flush);
 
         try {
             DisplayData out = eval(request.code());
             if (out != null) {
                 channels.publish(new IOPubExecuteResult(count, out));
             }
-            channels.delay(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
+            channels.scheduleAfter(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
         } catch (Exception e) {
             channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
+            channels.scheduleAfter(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
         }
     }
 
@@ -256,7 +237,7 @@ public class RapaioKernel {
     public static final String IS_COMPLETE_STATUS_BAD = "invalid";
     public static final String IS_COMPLETE_STATUS_MAYBE = "unknown";
 
-    private void handleIsCompleteRequest(Message<ShellIsCompleteRequest> message) {
+    public void handleIsCompleteRequest(Message<ShellIsCompleteRequest> message) {
         ShellIsCompleteRequest request = message.content();
         channels.busyThenIdle();
 
@@ -271,7 +252,7 @@ public class RapaioKernel {
         channels.reply(reply);
     }
 
-    private void handleInspectRequest(Message<ShellInspectRequest> message) {
+    public void handleInspectRequest(Message<ShellInspectRequest> message) {
         ShellInspectRequest request = message.content();
         channels.busyThenIdle();
         try {
@@ -291,7 +272,7 @@ public class RapaioKernel {
         }
     }
 
-    private void handleCompleteRequest(Message<ShellCompleteRequest> message) {
+    public void handleCompleteRequest(Message<ShellCompleteRequest> message) {
         ShellCompleteRequest request = message.content();
         channels.busyThenIdle();
         try {
@@ -311,7 +292,7 @@ public class RapaioKernel {
         }
     }
 
-    private void handleHistoryRequest(Message<ShellHistoryRequest> message) {
+    public void handleHistoryRequest(Message<ShellHistoryRequest> message) {
         /*
         Note from specifications:
         Most of the history messaging options are not used by Jupyter frontends, and many kernels do not implement them.
@@ -322,25 +303,25 @@ public class RapaioKernel {
         LOGGER.info("ShellHistoryRequest not implemented.");
     }
 
-    private void handleKernelInfoRequest(Message<ShellKernelInfoRequest> ignored) {
+    public void handleKernelInfoRequest(Message<ShellKernelInfoRequest> ignored) {
         channels.busyThenIdle();
-        channels.reply(getKernelInfo());
+        channels.reply(kernelInfo());
     }
 
-    private void handleShutdownRequest(Message<ControlShutdownRequest> shutdownRequestMessage) {
-        ControlShutdownRequest request = shutdownRequestMessage.content();
+    public void handleShutdownRequest(Message<ControlShutdownRequest> message) {
+        ControlShutdownRequest request = message.content();
         channels.busyThenIdle();
 
-        channels.delay(() -> channels.reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN));
+        channels.scheduleAfter(() -> channels.reply(request.restart() ? ControlShutdownReply.SHUTDOWN_AND_RESTART : ControlShutdownReply.SHUTDOWN));
 
         // request.restart() is no use for now, but might be used in the end
         onShutdown();
-        channels.runDelayedActions();
+        channels.runAfterActions();
         // this will determine the connections to shut down
         channels.markForShutdown();
     }
 
-    private void handleInterruptRequest(Message<ControlInterruptRequest> interruptRequestMessage) {
+    public void handleInterruptRequest(Message<ControlInterruptRequest> message) {
         channels.busyThenIdle();
         channels.reply(new ControlInterruptReply());
         interrupt();
@@ -348,21 +329,21 @@ public class RapaioKernel {
 
     // custom communication is not implemented, however, we have to behave properly
 
-    private void handleCommOpenCommand(Message<CustomCommOpen> message) {
+    public void handleCommOpenCommand(Message<CustomCommOpen> message) {
         String id = message.content().commId();
         channels.busyThenIdle();
         channels.publish(new CustomCommClose(id, Transform.EMPTY_JSON_OBJ));
     }
 
-    private void handleCommMsgCommand(Message<CustomCommMsg> ignored) {
+    public void handleCommMsgCommand(Message<CustomCommMsg> ignored) {
         // no-op
     }
 
-    private void handleCommCloseCommand(Message<CustomCommClose> ignored) {
+    public void handleCommCloseCommand(Message<CustomCommClose> ignored) {
         // no-op
     }
 
-    private void handleCommInfoRequest(Message<ShellCommInfoRequest> message) {
+    public void handleCommInfoRequest(Message<ShellCommInfoRequest> message) {
         channels.busyThenIdle();
         channels.reply(new ShellCommInfoReply(new LinkedHashMap<>()));
     }

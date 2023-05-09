@@ -4,7 +4,7 @@ import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
-import org.rapaio.jupyter.kernel.message.MessageContext;
+import org.rapaio.jupyter.kernel.message.MessageId;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.messages.StdinInputReply;
@@ -28,7 +28,7 @@ public final class StdinChannel extends AbstractChannel {
         socket.bind(addr);
     }
 
-    public synchronized String getInput(MessageContext<?> context, String prompt, boolean isPasswordRequest) {
+    public synchronized String getInput(MessageId<?> context, String prompt, boolean isPasswordRequest) {
         StdinInputRequest content = new StdinInputRequest(prompt, isPasswordRequest);
         Message<StdinInputRequest> request = new Message<>(context, MessageType.STDIN_INPUT_REQUEST, null, content, null);
         sendMessage(request);

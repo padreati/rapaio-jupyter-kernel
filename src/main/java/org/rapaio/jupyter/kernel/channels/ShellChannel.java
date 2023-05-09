@@ -47,14 +47,14 @@ public final class ShellChannel extends AbstractChannel {
                 MessageHandler handler = connection.getHandler(type);
                 if (handler != null) {
                     LOGGER.info(logPrefix + "Handling message: " + type.name());
-                    connection.setContext(message.getContext());
+                    connection.setMsgId(message.getId());
                     try {
                         handler.handle(message);
                     } catch (Exception e) {
                         LOGGER.severe(logPrefix + "Exception handling " + type.name() + ". " +
                                 e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
                     } finally {
-                        channels.runDelayedActions();
+                        channels.runAfterActions();
                     }
                     if (channels.isMarkedForShutdown()) {
                         LOGGER.info(logPrefix + "Shutting down connection marked for shutdown.");

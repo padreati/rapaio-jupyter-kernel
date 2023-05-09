@@ -46,14 +46,14 @@ public final class ControlChannel extends AbstractChannel {
                 MessageHandler handler = channels.getHandler(type);
                 if (handler != null) {
                     LOGGER.info(logPrefix + "Handling message: " + type.name());
-                    channels.setContext(message.getContext());
+                    channels.setMsgId(message.getId());
                     try {
                         handler.handle(message);
                     } catch (Exception e) {
                         LOGGER.severe(logPrefix + "Exception handling " + type.name() + ". " +
                                 e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
                     } finally {
-                        channels.runDelayedActions();
+                        channels.runAfterActions();
                     }
                     if (channels.isMarkedForShutdown()) {
                         LOGGER.info(channelThreadName + " shutting down connection marked for shutdown.");

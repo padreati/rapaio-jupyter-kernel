@@ -17,8 +17,6 @@ public record ShellCompleteReply(
         @SerializedName("cursor_end") int cursorEnd,
         @SerializedName("metadata") Map<String, Object> metadata) implements ContentType<ShellCompleteReply> {
 
-    private static final String STATUS = "ok";
-
     public static ShellCompleteReply empty(int pos) {
         return new ShellCompleteReply(STATUS, Collections.emptyList(), pos, pos, Collections.emptyMap());
     }
@@ -26,6 +24,8 @@ public record ShellCompleteReply(
     public static ShellCompleteReply from(CompleteMatches matches) {
         return new ShellCompleteReply(STATUS, matches.replacements(), matches.start(), matches.end(), Collections.emptyMap());
     }
+
+    private static final String STATUS = "ok";
 
     @Override
     public MessageType<ShellCompleteReply> type() {

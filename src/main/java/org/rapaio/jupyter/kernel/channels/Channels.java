@@ -2,6 +2,7 @@ package org.rapaio.jupyter.kernel.channels;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
@@ -11,7 +12,7 @@ import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.HMACDigest;
 import org.rapaio.jupyter.kernel.message.Message;
-import org.rapaio.jupyter.kernel.message.MessageContext;
+import org.rapaio.jupyter.kernel.message.MessageId;
 import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
 import org.rapaio.jupyter.kernel.message.messages.IOPubStatus;
@@ -32,10 +33,10 @@ public final class Channels {
     private final IOPubChannel iopub;
 
     private final Set<AbstractChannel> channels;
-    private final Stack<Runnable> delayedActions = new Stack<>();
+    private final Stack<Runnable> afterActions = new Stack<>();
 
-    private Map<MessageType<?>, MessageHandler> messageHandlers;
-    private MessageContext<?> context;
+    private Map<MessageType<?>, MessageHandler> handlers;
+    private MessageId<?> msgId;
 
     private boolean isConnected = false;
     private boolean requestShutdown = false;
@@ -59,13 +60,28 @@ public final class Channels {
         if (!isConnected) {
             channels.forEach(s -> s.bind(connProps));
             iopub.sendMessage(new Message<>(null, MessageType.IOPUB_STATUS, null, IOPubStatus.STARTING, null));
-            messageHandlers = kernel.registerChannels(this);
+            kernel.registerChannels(this);
+
+            handlers = new HashMap<>();
+            handlers.put(MessageType.SHELL_EXECUTE_REQUEST, kernel::handleExecuteRequest);
+            handlers.put(MessageType.SHELL_INSPECT_REQUEST, kernel::handleInspectRequest);
+            handlers.put(MessageType.SHELL_COMPLETE_REQUEST, kernel::handleCompleteRequest);
+            handlers.put(MessageType.SHELL_HISTORY_REQUEST, kernel::handleHistoryRequest);
+            handlers.put(MessageType.SHELL_IS_COMPLETE_REQUEST, kernel::handleIsCompleteRequest);
+            handlers.put(MessageType.SHELL_KERNEL_INFO_REQUEST, kernel::handleKernelInfoRequest);
+            handlers.put(MessageType.CONTROL_SHUTDOWN_REQUEST, kernel::handleShutdownRequest);
+            handlers.put(MessageType.CONTROL_INTERRUPT_REQUEST, kernel::handleInterruptRequest);
+            handlers.put(MessageType.CUSTOM_COMM_OPEN, kernel::handleCommOpenCommand);
+            handlers.put(MessageType.CUSTOM_COMM_MSG, kernel::handleCommMsgCommand);
+            handlers.put(MessageType.CUSTOM_COMM_CLOSE, kernel::handleCommCloseCommand);
+            handlers.put(MessageType.SHELL_COMM_INFO_REQUEST, kernel::handleCommInfoRequest);
+
             isConnected = true;
         }
     }
 
     public <T> MessageHandler<T> getHandler(MessageType<T> type) {
-        return messageHandlers.get(type);
+        return handlers.get(type);
     }
 
     public void close() {
@@ -77,16 +93,16 @@ public final class Channels {
         channels.forEach(AbstractChannel::joinUntilClose);
     }
 
-    public boolean hasContext() {
-        return context != null;
+    public boolean hasMsgId() {
+        return msgId != null;
     }
 
-    public void setContext(MessageContext<?> context) {
-        this.context = context;
+    public void setMsgId(MessageId<?> msgId) {
+        this.msgId = msgId;
     }
 
-    public void freeContext() {
-        this.context = null;
+    public void freeMsgId() {
+        this.msgId = null;
     }
 
     public void markForShutdown() {
@@ -106,33 +122,33 @@ public final class Channels {
     }
 
     public String readFromStdIn() {
-        return stdin.getInput(context, "", false);
+        return stdin.getInput(msgId, "", false);
     }
 
     public <T extends ContentType<T>> void publish(T content) {
-        iopub.sendMessage(new Message<>(context, content.type(), null, content, null));
+        iopub.sendMessage(new Message<>(msgId, content.type(), null, content, null));
     }
 
     public <T extends ContentType<T>> void reply(T content) {
-        shell.sendMessage(new Message<>(context, content.type(), null, content, null));
+        shell.sendMessage(new Message<>(msgId, content.type(), null, content, null));
     }
 
     public void replyError(MessageType<?> type, ErrorReply error) {
-        shell.sendMessage(new Message(context, type, null, error, null));
+        shell.sendMessage(new Message(msgId, type, null, error, null));
     }
 
-    public void delay(Runnable action) {
-        delayedActions.push(action);
+    public void scheduleAfter(Runnable action) {
+        afterActions.push(action);
     }
 
-    public void runDelayedActions() {
-        while (!delayedActions.isEmpty()) {
-            delayedActions.pop().run();
+    public void runAfterActions() {
+        while (!afterActions.isEmpty()) {
+            afterActions.pop().run();
         }
     }
 
     public void busyThenIdle() {
         publish(IOPubStatus.BUSY);
-        delay(() -> publish(IOPubStatus.IDLE));
+        scheduleAfter(() -> publish(IOPubStatus.IDLE));
     }
 }

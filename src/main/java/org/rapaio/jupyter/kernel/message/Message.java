@@ -13,7 +13,7 @@ public record Message<T>(
         List<byte[]> blobs) {
 
 
-    public Message(MessageContext<?> ctx, MessageType<T> type, Map<String, Object> metadata, T content, List<byte[]> blobs) {
+    public Message(MessageId<?> ctx, MessageType<T> type, Map<String, Object> metadata, T content, List<byte[]> blobs) {
         this(
                 ctx != null ? ctx.identities() : Collections.emptyList(),
                 new Header<>(ctx, type),
@@ -24,7 +24,7 @@ public record Message<T>(
         );
     }
 
-    public MessageContext<T> getContext() {
-        return new MessageContext<>(identities, header);
+    public MessageId<T> getId() {
+        return new MessageId<>(identities, header);
     }
 }

@@ -2,7 +2,6 @@ package org.rapaio.jupyter.kernel.message.adapters;
 
 import java.lang.reflect.Type;
 
-import org.rapaio.jupyter.kernel.message.KernelTimestamp;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.MessageType;
 
@@ -27,7 +26,7 @@ public class HeaderAdapter implements JsonSerializer<Header<?>>, JsonDeserialize
                 object.get("msg_id").getAsString(),
                 object.get("username").getAsString(),
                 object.get("session").getAsString(),
-                ctx.deserialize(object.get("date"), KernelTimestamp.class),
+                object.get("date").getAsString(),
                 ctx.deserialize(object.get("msg_type"), MessageType.class),
                 object.get("version").getAsString()
         );
@@ -40,7 +39,7 @@ public class HeaderAdapter implements JsonSerializer<Header<?>>, JsonDeserialize
         object.addProperty("msg_id", header.id());
         object.addProperty("username", header.username());
         object.addProperty("session", header.sessionId());
-        object.add("date", ctx.serialize(header.timestamp()));
+        object.addProperty("date", header.timestamp());
         object.add("msg_type", ctx.serialize(header.type()));
         object.addProperty("version", header.version());
 
