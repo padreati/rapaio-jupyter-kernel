@@ -1,9 +1,9 @@
 package org.rapaio.jupyter.kernel.message.messages;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
+import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
+import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 
@@ -20,14 +20,12 @@ public record ErrorReply(
         return MessageType.UNKNOWN;
     }
 
-    public static ErrorReply of(Exception exception, int executionCount) {
+    public static ErrorReply of(JavaEngine javaEngine, Exception exception, int executionCount) {
+
         String name = exception.getClass().getSimpleName();
         String msg = exception.getLocalizedMessage();
-        List<String> stacktrace = Arrays.stream(exception.getStackTrace())
-                .map(StackTraceElement::toString)
-                .collect(Collectors.toList());
 
-        return new ErrorReply(name, msg == null ? "" : msg, stacktrace, executionCount);
+        return new ErrorReply(name, msg == null ? "" : msg, OutputFormatter.exceptionFormat(javaEngine, exception), executionCount);
     }
 
     public ErrorReply(String errName, String errMsg, List<String> stacktrace, int executionCount) {

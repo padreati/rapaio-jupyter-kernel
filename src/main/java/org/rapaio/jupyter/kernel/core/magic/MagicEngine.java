@@ -5,7 +5,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
@@ -144,7 +144,7 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                Suggestions replacementOptions = handler.complete(channels, snippet);
+                CompleteMatches replacementOptions = handler.complete(channels, snippet);
                 return new MagicCompleteResult(true, replacementOptions);
             }
         }

@@ -18,14 +18,7 @@ public class ShellHistoryRequest implements ContentType<ShellHistoryRequest> {
         @SerializedName("search") SEARCH,
     }
 
-    /**
-     * If true, include the output associated with the inputs.
-     */
     protected final boolean output;
-
-    /**
-     * If true, return the raw input history, else the transformed input.
-     */
     protected final boolean raw;
 
     @SerializedName("hist_access_type")

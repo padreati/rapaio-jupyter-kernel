@@ -25,7 +25,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
@@ -168,7 +168,7 @@ public class JavaEngine {
         };
     }
 
-    public Suggestions complete(String code, int at) {
+    public CompleteMatches complete(String code, int at) {
         int[] anchor = new int[1];
         List<SourceCodeAnalysis.Suggestion> suggestions = sourceAnalysis.completionSuggestions(code, at, anchor);
         if (suggestions == null || suggestions.isEmpty()) {
@@ -183,7 +183,7 @@ public class JavaEngine {
                 .distinct()
                 .collect(Collectors.toList());
 
-        return new Suggestions(options, anchor[0], at);
+        return new CompleteMatches(options, anchor[0], at);
     }
 
     public DisplayData inspect(String source, int pos) {

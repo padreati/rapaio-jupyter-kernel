@@ -24,6 +24,6 @@ public class MessageTypeAdapter implements JsonSerializer<MessageType<?>>, JsonD
 
     @Override
     public JsonElement serialize(MessageType<?> messageType, Type type, JsonSerializationContext ctx) {
-        return new JsonPrimitive(messageType.getName());
+        return new JsonPrimitive(messageType.name());
     }
 }

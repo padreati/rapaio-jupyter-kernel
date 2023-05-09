@@ -7,8 +7,8 @@ import org.rapaio.jupyter.kernel.core.display.DisplayData;
 
 public final class Global {
 
-    public static String display(Object o, String... args) {
-        DisplayData displayData = (o instanceof DisplayData dd) ? dd : MainApp.kernel.getRenderer().render(o, args);
+    public static String display(Object o) {
+        DisplayData displayData = (o instanceof DisplayData dd) ? dd : MainApp.kernel.getRenderer().render(o);
 
         String id = displayData.getDisplayId();
         if (id == null) {
@@ -19,8 +19,8 @@ public final class Global {
         return id;
     }
 
-    public static void updateDisplay(String id, Object o, String... args) {
-        DisplayData data = MainApp.kernel.getRenderer().render(o, args);
+    public static void updateDisplay(String id, Object o) {
+        DisplayData data = MainApp.kernel.getRenderer().render(o);
         MainApp.kernel.updateDisplay(id, data);
     }
 }

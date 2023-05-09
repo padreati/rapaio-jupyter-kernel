@@ -28,11 +28,11 @@ import jdk.jshell.SnippetEvent;
 public class CompilerException extends Exception {
     private final SnippetEvent badSnippetCompilation;
 
-    public CompilerException(SnippetEvent badSnippetCompilation) {
-        this.badSnippetCompilation = badSnippetCompilation;
+    public CompilerException(SnippetEvent badSnippet) {
+        this.badSnippetCompilation = badSnippet;
     }
 
-    public SnippetEvent getBadSnippetCompilation() {
+    public SnippetEvent badSnippet() {
         return badSnippetCompilation;
     }
 }

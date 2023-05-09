@@ -30,7 +30,7 @@ public final class OutputFormatter {
         {
             exFormatters.put(CompilerException.class, (JavaEngine engine, CompilerException e) -> {
                 List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("Compile error"));
-                SnippetEvent event = e.getBadSnippetCompilation();
+                SnippetEvent event = e.badSnippet();
                 Snippet snippet = event.snippet();
                 var diagnostics = engine.getShell().diagnostics(snippet).toList();
                 for (var d : diagnostics) {

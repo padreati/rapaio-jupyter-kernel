@@ -1,8 +1,10 @@
 package org.rapaio.jupyter.kernel.message.messages;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 
@@ -17,6 +19,14 @@ public record ShellCompleteReply(
 
     private static final String STATUS = "ok";
 
+    public static ShellCompleteReply empty(int pos) {
+        return new ShellCompleteReply(STATUS, Collections.emptyList(), pos, pos, Collections.emptyMap());
+    }
+
+    public static ShellCompleteReply from(CompleteMatches matches) {
+        return new ShellCompleteReply(STATUS, matches.replacements(), matches.start(), matches.end(), Collections.emptyMap());
+    }
+
     @Override
     public MessageType<ShellCompleteReply> type() {
         return MessageType.SHELL_COMPLETE_REPLY;
@@ -26,9 +36,5 @@ public record ShellCompleteReply(
         if (!STATUS.equals(status)) {
             throw new IllegalArgumentException();
         }
-    }
-
-    public ShellCompleteReply(List<String> matches, int cursorStart, int cursorEnd, Map<String, Object> metadata) {
-        this(STATUS, matches, cursorStart, cursorEnd, metadata);
     }
 }

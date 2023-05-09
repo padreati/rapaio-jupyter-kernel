@@ -42,6 +42,6 @@ public class EvaluationTimeoutException extends Exception {
 
     @Override
     public String getMessage() {
-        return String.format("Evaluator timed out after %d millis", this.duration);
+        return "Evaluator timed out after " + duration + " millis";
     }
 }

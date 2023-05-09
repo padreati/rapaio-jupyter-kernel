@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
@@ -88,7 +88,7 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Suggestions complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
         return null;
     }
 }

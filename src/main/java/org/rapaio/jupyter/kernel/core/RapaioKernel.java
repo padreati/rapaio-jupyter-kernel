@@ -13,7 +13,6 @@ import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.channels.MessageHandler;
-import org.rapaio.jupyter.kernel.core.display.DefaultRenderer;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
@@ -89,7 +88,7 @@ public class RapaioKernel {
                 .build();
         this.javaEngine.initialize();
         this.magicEngine = new MagicEngine(javaEngine);
-        this.renderer = new DefaultRenderer();
+        this.renderer = new Renderer();
     }
 
 
@@ -132,7 +131,7 @@ public class RapaioKernel {
     private ShellKernelInfoReply getKernelInfo() {
 
         String kernelName = "rapaio-jupyter-kernel";
-        String kernelVersion = "0.1.0";
+        String kernelVersion = "0.2.0";
         LanguageInfo languageInfo = LanguageInfo.kernelLanguageInfo();
         String banner = languageInfo.name() + " " + languageInfo.version();
 
@@ -210,9 +209,8 @@ public class RapaioKernel {
                 return;
             }
         } catch (Exception e) {
-            ErrorReply error = ErrorReply.of(e, count);
             channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
+            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
             return;
         }
 
@@ -249,9 +247,8 @@ public class RapaioKernel {
             }
             channels.delay(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
         } catch (Exception e) {
-            ErrorReply error = ErrorReply.of(e, count);
             channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.error(), error));
+            channels.delay(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
         }
     }
 
@@ -278,7 +275,6 @@ public class RapaioKernel {
         ShellInspectRequest request = message.content();
         channels.busyThenIdle();
         try {
-
             MagicInspectResult magicResult = magicEngine.inspect(channels, request.code(), request.cursorPos());
             if (magicResult.handled()) {
                 DisplayData inspection = magicResult.displayData();
@@ -291,7 +287,7 @@ public class RapaioKernel {
             DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
             channels.reply(new ShellInspectReply(inspection != null, inspection));
         } catch (Exception e) {
-            channels.replyError(MessageType.SHELL_INSPECT_REPLY.error(), ErrorReply.of(e, 0));
+            channels.replyError(MessageType.SHELL_INSPECT_REPLY.newError(), ErrorReply.of(javaEngine, e, 0));
         }
     }
 
@@ -301,19 +297,17 @@ public class RapaioKernel {
         try {
             MagicCompleteResult magicResult = magicEngine.complete(channels, request.code(), request.cursorPos());
 
-            Suggestions options = magicResult.handled()
+            CompleteMatches options = magicResult.handled()
                     ? magicResult.replacementOptions()
                     : javaEngine.complete(request.code(), request.cursorPos());
 
             if (options == null) {
-                channels.reply(new ShellCompleteReply(Collections.emptyList(), request.cursorPos(), request.cursorPos(),
-                        Collections.emptyMap()));
+                channels.reply(ShellCompleteReply.empty(request.cursorPos()));
             } else {
-                channels.reply(new ShellCompleteReply(options.replacements(), options.start(), options.end(),
-                        Collections.emptyMap()));
+                channels.reply(ShellCompleteReply.from(options));
             }
         } catch (Exception e) {
-            channels.replyError(MessageType.SHELL_COMPLETE_REPLY.error(), ErrorReply.of(e, 0));
+            channels.replyError(MessageType.SHELL_COMPLETE_REPLY.newError(), ErrorReply.of(javaEngine, e, 0));
         }
     }
 

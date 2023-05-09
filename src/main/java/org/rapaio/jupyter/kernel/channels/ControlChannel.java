@@ -45,12 +45,12 @@ public final class ControlChannel extends AbstractChannel {
                 var type = message.header().type();
                 MessageHandler handler = channels.getHandler(type);
                 if (handler != null) {
-                    LOGGER.info(logPrefix + "Handling message: " + type.getName());
+                    LOGGER.info(logPrefix + "Handling message: " + type.name());
                     channels.setContext(message.getContext());
                     try {
                         handler.handle(message);
                     } catch (Exception e) {
-                        LOGGER.severe(logPrefix + "Exception handling " + type.getName() + ". " +
+                        LOGGER.severe(logPrefix + "Exception handling " + type.name() + ". " +
                                 e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
                     } finally {
                         channels.runDelayedActions();
@@ -60,7 +60,7 @@ public final class ControlChannel extends AbstractChannel {
                         channels.close();
                     }
                 } else {
-                    LOGGER.severe(logPrefix + "Unhandled message: " + type.getName());
+                    LOGGER.severe(logPrefix + "Unhandled message: " + type.name());
                 }
             }
         });

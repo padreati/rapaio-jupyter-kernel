@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 
 public final class HandlerUtils {
@@ -14,7 +14,7 @@ public final class HandlerUtils {
     private HandlerUtils() {
     }
 
-    public static Suggestions oneLinePathComplete(String prefix, MagicSnippet snippet, FileFilter fileFilter) {
+    public static CompleteMatches oneLinePathComplete(String prefix, MagicSnippet snippet, FileFilter fileFilter) {
         var line = snippet.lines().get(0);
         if (!line.hasPosition()) {
             return null;
@@ -33,7 +33,7 @@ public final class HandlerUtils {
                     List<String> options =
                             new ArrayList<>(Arrays.stream(children).map(f -> f.isDirectory() ? f.getName() + '/' : f.getName()).toList());
                     options.sort(String::compareTo);
-                    return new Suggestions(options,
+                    return new CompleteMatches(options,
                             line.globalPosition() - line.relativePosition() + prefix.length() + path.length(),
                             line.globalPosition() - line.relativePosition() + line.code().length());
                 }

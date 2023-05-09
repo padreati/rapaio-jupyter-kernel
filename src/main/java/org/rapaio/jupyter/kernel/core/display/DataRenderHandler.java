@@ -6,5 +6,5 @@ package org.rapaio.jupyter.kernel.core.display;
  */
 public interface DataRenderHandler {
 
-    DataRendererResponse render(Object object, String... args);
+    DataRendererResponse render(Object object);
 }

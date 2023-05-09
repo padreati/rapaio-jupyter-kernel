@@ -13,6 +13,6 @@ public class EvaluationInterruptedException extends Exception {
 
     @Override
     public String getMessage() {
-        return String.format("Evaluator was interrupted while executing: '%s'", this.source);
+        return "Evaluator was interrupted while executing: " + source;
     }
 }

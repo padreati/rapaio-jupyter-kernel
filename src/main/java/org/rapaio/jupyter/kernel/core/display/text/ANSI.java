@@ -179,16 +179,16 @@ public final class ANSI {
                 int end = start + line.length();
 
                 if (end < startPosition || start > endPosition) {
-                    lines.add(new ANSI().reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).build());
+                    lines.add(ANSI.start().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line).build());
                 } else {
                     int startMark = Math.max(start, startPosition);
                     int endMark = Math.min(end, endPosition);
 
                     String highlight = line.substring(startMark - start, endMark - start);
-                    lines.add(ANSI.start()
-                            .reset().codes(BOLD, FG_BLACK).text(CODE_LINE_PROMPT).text(line.substring(0, startMark - start))
-                            .reset().codes(BOLD, BG_RED).fgColor(Color.YELLOW).text(highlight)
-                            .reset().codes(BOLD, FG_BLACK).text(line.substring(endMark - start))
+                    lines.add(ANSI
+                            .start().bold().text(CODE_LINE_PROMPT).text(line.substring(0, startMark - start))
+                            .reset().bold().bgColor(new Color(235, 145, 148)).text(highlight)
+                            .reset().bold().text(line.substring(endMark - start))
                             .build()
                     );
 

@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
@@ -75,7 +75,7 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public Suggestions complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
         return null;
     }
 }

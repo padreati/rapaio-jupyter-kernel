@@ -9,8 +9,8 @@ package org.rapaio.jupyter.kernel.core.java.io;
 public class DynamicFIFOByteBuffer {
 
     private byte[] buffer = new byte[1024];
-    private int start = 0;
-    private int end = 0;
+    private int start;
+    private int end;
 
     public DynamicFIFOByteBuffer() {
     }

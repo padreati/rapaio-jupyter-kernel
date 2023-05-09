@@ -11,7 +11,7 @@ import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 
@@ -39,5 +39,5 @@ public interface MagicHandler {
         );
     }
 
-    Suggestions complete(Channels channels, MagicSnippet snippet);
+    CompleteMatches complete(Channels channels, MagicSnippet snippet);
 }

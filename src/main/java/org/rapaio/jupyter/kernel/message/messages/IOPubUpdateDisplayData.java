@@ -15,7 +15,7 @@ public class IOPubUpdateDisplayData extends DisplayData implements ContentType<I
         super(data.data(), data.metadata(), data.transientData());
 
         if (!data.hasDisplayId()) {
-            throw new IllegalArgumentException("In order to update a display, the data must have a display_id.");
+            throw new IllegalArgumentException("display_id is required for update");
         }
     }
 }

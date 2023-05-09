@@ -3,7 +3,7 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.Suggestions;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -61,7 +61,7 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Suggestions complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
         return null;
     }
 

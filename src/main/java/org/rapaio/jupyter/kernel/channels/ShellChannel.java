@@ -46,12 +46,12 @@ public final class ShellChannel extends AbstractChannel {
                 var type = message.header().type();
                 MessageHandler handler = connection.getHandler(type);
                 if (handler != null) {
-                    LOGGER.info(logPrefix + "Handling message: " + type.getName());
+                    LOGGER.info(logPrefix + "Handling message: " + type.name());
                     connection.setContext(message.getContext());
                     try {
                         handler.handle(message);
                     } catch (Exception e) {
-                        LOGGER.severe(logPrefix + "Exception handling " + type.getName() + ". " +
+                        LOGGER.severe(logPrefix + "Exception handling " + type.name() + ". " +
                                 e.getClass().getSimpleName() + ": " + e.getLocalizedMessage());
                     } finally {
                         channels.runDelayedActions();
@@ -61,7 +61,7 @@ public final class ShellChannel extends AbstractChannel {
                         connection.close();
                     }
                 } else {
-                    LOGGER.severe(logPrefix + "Unhandled message: " + type.getName());
+                    LOGGER.severe(logPrefix + "Unhandled message: " + type.name());
                 }
             }
         });

@@ -18,7 +18,7 @@ import org.rapaio.jupyter.kernel.core.display.MIMEType;
 public class ImageHandler implements DataRenderHandler {
 
     @Override
-    public DataRendererResponse render(Object object, String... args) {
+    public DataRendererResponse render(Object object) {
         if (object instanceof RenderedImage image) {
             ByteArrayOutputStream out = new ByteArrayOutputStream();
 

@@ -80,10 +80,10 @@ public abstract sealed class AbstractChannel extends Thread
         Header<?> header = Transform.fromJson(headerRaw, Header.class);
         Header<?> parentHeader = Transform.fromJsonNull(parentHeaderRaw, Header.class);
         Map<String, Object> metadata = Transform.fromJsonMap(metadataRaw);
-        Object content = Transform.fromJson(contentRaw, header.type().getContentType());
+        Object content = Transform.fromJson(contentRaw, header.type().contentType());
         if (content instanceof ErrorReply) {
             header = new Header<>(header.id(), header.username(), header.sessionId(), header.timestamp(),
-                    header.type().error(), header.version());
+                    header.type().newError(), header.version());
         }
         return new Message(identities, header, parentHeader, metadata, content, blobs);
     }

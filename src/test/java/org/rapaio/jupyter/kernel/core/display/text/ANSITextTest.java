@@ -7,11 +7,9 @@ import java.util.List;
 import java.util.Locale;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Snippet;
@@ -30,7 +28,7 @@ public class ANSITextTest {
         CompilerException ce = assertThrows(CompilerException.class, () -> engine.eval(code));
 
         List<String> msgs = new ArrayList<>();
-        SnippetEvent event = ce.getBadSnippetCompilation();
+        SnippetEvent event = ce.badSnippet();
         Snippet snippet = event.snippet();
         var diagnostics = engine.getShell().diagnostics(snippet).toList();
         for (var d : diagnostics) {

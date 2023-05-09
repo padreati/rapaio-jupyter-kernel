@@ -27,11 +27,11 @@ public class IncompleteSourceException extends Exception {
     private final String source;
 
     public IncompleteSourceException(String source) {
-        super(source);
+        super("Incomplete source snippet.");
         this.source = source;
     }
 
-    public String getSource() {
+    public String source() {
         return source;
     }
 }
