@@ -13,6 +13,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.maven.DepCoordinates;
 import org.rapaio.jupyter.kernel.core.magic.maven.IvyDependencies;
 
@@ -26,8 +27,18 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public List<String> syntax() {
-        return List.of("%maven group_id:artifact_id:version");
+    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+        return List.of(
+                OneLineMagicHandler.builder()
+                        .syntaxMatcher("%maven .*")
+                        .syntaxHelp("%maven group_id:artifact_id:version")
+                        .documentation(List.of())
+                        .canHandlePredicate(this::canHandleSnippet)
+                        .evalFunction(this::evalLine)
+                        .inspectFunction((channels, magicSnippet) -> null)
+                        .completeFunction(this::complete)
+                        .build()
+        );
     }
 
     @Override
@@ -47,8 +58,7 @@ public class MavenCoordinates implements MagicHandler {
         return snippet.lines().get(0).code().startsWith(HEADER);
     }
 
-    @Override
-    public Object eval(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicParseException {
+    public Object evalLine(MagicEngine magicEngine, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }

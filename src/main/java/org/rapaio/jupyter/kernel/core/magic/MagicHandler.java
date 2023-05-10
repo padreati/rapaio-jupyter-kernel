@@ -17,24 +17,40 @@ import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 
 public interface MagicHandler {
 
+    /**
+     * @return name of the magic handler useful in help messages
+     */
     String name();
 
-    List<String> syntax();
-
+    /**
+     * General help documentation lines.
+     *
+     * @return general documentation lines
+     */
     List<String> helpMessage();
+
+    List<OneLineMagicHandler> oneLineMagicHandlers();
 
     boolean canHandleSnippet(MagicSnippet snippet);
 
-    Object eval(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
-            MagicEvalException;
+    default Object eval(MagicEngine magicEngine, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
+            MagicEvalException {
+        for(OneLineMagicHandler handler : oneLineMagicHandlers()) {
+            if(handler.canHandlePredicate().test(snippet)) {
+                return handler.evalFunction().eval(magicEngine, engine, channels, snippet);
+            }
+        }
+        throw new MagicEvalException(snippet, "Counld nou find handler for command.");
+    }
 
     default DisplayData inspect(Channels channels, MagicSnippet snippet) {
         return DisplayData.withHtml(
                 join(
+                        p(each(helpMessage(), line -> p(texts(line)))),
                         p(texts("Syntax: "), br(),
-                                each(syntax(), syntaxLine -> b(space(4), texts(syntaxLine)))
-                        ),
-                        p(each(helpMessage(), line -> p(texts(line))))
+                                each(oneLineMagicHandlers(), handler -> join(texts(handler.syntaxHelp()), br(),
+                                        each(handler.documentation(), line -> b(space(4), texts(line)))))
+                        )
                 ).render()
         );
     }

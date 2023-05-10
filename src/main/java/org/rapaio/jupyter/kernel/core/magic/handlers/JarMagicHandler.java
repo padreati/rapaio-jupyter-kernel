@@ -7,11 +7,12 @@ import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 
 public class JarMagicHandler implements MagicHandler {
 
@@ -23,8 +24,20 @@ public class JarMagicHandler implements MagicHandler {
     }
 
     @Override
-    public List<String> syntax() {
-        return List.of(PREFIX + "path_to_jar_or_folder_of_jars");
+    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+        return List.of(
+                OneLineMagicHandler.builder()
+                        .syntaxMatcher("%jar .*")
+                        .syntaxHelp("%jar path_to_jar_or_folder_of_jars")
+                        .documentation(List.of(
+                                "Adds to the classpath a jar or all jar archives from a directory"
+                        ))
+                        .canHandlePredicate(this::canHandleSnippet)
+                        .evalFunction(this::evalLine)
+                        .inspectFunction((channels, magicSnippet) -> null)
+                        .completeFunction(this::complete)
+                        .build()
+        );
     }
 
     @Override
@@ -40,8 +53,7 @@ public class JarMagicHandler implements MagicHandler {
         return snippet.oneLine() && snippet.lines().size() == 1 && snippet.lines().get(0).code().startsWith(PREFIX);
     }
 
-    @Override
-    public Object eval(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
+    public Object evalLine(MagicEngine magicEngine, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Snippet cannot be handled by this magic handler.");

@@ -10,12 +10,13 @@ import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 import org.rapaio.jupyter.kernel.message.messages.IOPubError;
 
 import com.google.gson.JsonElement;
@@ -31,8 +32,18 @@ public class LoadMagicHandler implements MagicHandler {
     }
 
     @Override
-    public List<String> syntax() {
-        return List.of("%load path_to_script_or_notebook");
+    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+        return List.of(
+                OneLineMagicHandler.builder()
+                        .syntaxMatcher("%load .*")
+                        .syntaxHelp("%load path_to_script_or_notebook")
+                        .documentation(List.of())
+                        .canHandlePredicate(this::canHandleSnippet)
+                        .evalFunction(this::evalLine)
+                        .inspectFunction((channels, magicSnippet) -> null)
+                        .completeFunction(this::complete)
+                        .build()
+        );
     }
 
     @Override
@@ -47,8 +58,7 @@ public class LoadMagicHandler implements MagicHandler {
         return snippet.oneLine() && snippet.lines().size() == 1 && snippet.line(0).code().startsWith(PREFIX);
     }
 
-    @Override
-    public Object eval(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
+    public Object evalLine(MagicEngine magicEngine, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
@@ -62,7 +72,7 @@ public class LoadMagicHandler implements MagicHandler {
             try {
                 String content = Files.readString(Path.of(file.getAbsolutePath()));
                 if (path.endsWith(".ipynb")) {
-                    return evalNotebook(magicEvaluator, engine, channels, snippet, content);
+                    return evalNotebook(magicEngine, engine, channels, snippet, content);
                 } else {
                     return evalShellScript(engine, channels, content);
                 }
