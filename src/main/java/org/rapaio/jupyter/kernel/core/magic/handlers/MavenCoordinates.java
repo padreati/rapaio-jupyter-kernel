@@ -46,8 +46,8 @@ public class MavenCoordinates implements MagicHandler {
 
         return List.of("Find and resolve a maven dependency using the standard maven coordinates: group_id, artifact_id"
                         + " and version id.",
-                "The maven public repositories are searched for dependencies. Additionally, any maven repository declared with "
-                        + "magic handlers are included in search.");
+                "The maven public repositories are searched for dependencies. Additionally, any maven transitive dependency declared with "
+                        + "magic handlers are included in classpath.");
     }
 
     @Override

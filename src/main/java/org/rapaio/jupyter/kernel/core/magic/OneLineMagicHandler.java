@@ -22,14 +22,20 @@ public record OneLineMagicHandler(
         return new Builder();
     }
 
+
     public static final class Builder {
         private String syntaxMatcher;
         private String syntaxHelp;
         private List<String> documentation;
         private Predicate<MagicSnippet> canHandlePredicate;
         private OneLineMagicEvalFunction evalFunction;
-        private BiFunction<Channels, MagicSnippet, DisplayData> inspectFunction;
+        private BiFunction<Channels, MagicSnippet, DisplayData> inspectFunction = this::defaultInspect;
         private BiFunction<Channels, MagicSnippet, CompleteMatches> completeFunction;
+
+        private DisplayData defaultInspect(Channels channels, MagicSnippet magicSnippet) {
+            String html = "";
+            return DisplayData.withHtml(html);
+        }
 
         public Builder syntaxMatcher(String syntaxMatcher) {
             this.syntaxMatcher = syntaxMatcher;

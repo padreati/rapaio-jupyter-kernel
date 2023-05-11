@@ -35,21 +35,26 @@ public interface MagicHandler {
 
     default Object eval(MagicEngine magicEngine, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {
-        for(OneLineMagicHandler handler : oneLineMagicHandlers()) {
-            if(handler.canHandlePredicate().test(snippet)) {
+        for (OneLineMagicHandler handler : oneLineMagicHandlers()) {
+            if (handler.canHandlePredicate().test(snippet)) {
                 return handler.evalFunction().eval(magicEngine, engine, channels, snippet);
             }
         }
-        throw new MagicEvalException(snippet, "Counld nou find handler for command.");
+        throw new MagicEvalException(snippet, "Couldn't nou find handler for command.");
     }
 
     default DisplayData inspect(Channels channels, MagicSnippet snippet) {
         return DisplayData.withHtml(
                 join(
+                        p(b(texts(name()))),
                         p(each(helpMessage(), line -> p(texts(line)))),
                         p(texts("Syntax: "), br(),
-                                each(oneLineMagicHandlers(), handler -> join(texts(handler.syntaxHelp()), br(),
-                                        each(handler.documentation(), line -> b(space(4), texts(line)))))
+                                each(oneLineMagicHandlers(), handler -> join(
+                                                b(texts(handler.syntaxHelp())),
+                                                br(),
+                                                each(handler.documentation(), line -> join(space(4), texts(line), br()))
+                                        )
+                                )
                         )
                 ).render()
         );

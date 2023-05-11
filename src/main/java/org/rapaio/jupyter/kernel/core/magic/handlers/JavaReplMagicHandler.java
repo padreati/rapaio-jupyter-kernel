@@ -28,7 +28,15 @@ public class JavaReplMagicHandler implements MagicHandler {
 
     @Override
     public String name() {
-        return "JShell commands.";
+        return "JShell commands";
+    }
+
+    @Override
+    public List<String> helpMessage() {
+        return List.of("Magic handler which runs command against JShell REPL and displays the results.",
+                "Not all JShell commands are implemented, since some of them does not make sense with "
+                        + "notebooks (for example edit cell is handled simply by editing the corresponding "
+                        + "code cell and run).");
     }
 
     @Override
@@ -37,73 +45,61 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /methods")
                         .syntaxHelp("%jshell /methods")
-                        .documentation(List.of())
+                        .documentation(List.of("List all active methods."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /methods"))
                         .evalFunction(this::evalMethods)
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /vars")
                         .syntaxHelp("%jshell /vars")
-                        .documentation(List.of())
+                        .documentation(List.of("List all active variables, with type and value."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /vars"))
                         .evalFunction(this::evalVars)
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /imports")
                         .syntaxHelp("%jshell /imports")
-                        .documentation(List.of())
+                        .documentation(List.of("List all active import statements."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /imports"))
                         .evalFunction(this::evalImports)
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /types")
                         .syntaxHelp("%jshell /types")
-                        .documentation(List.of())
+                        .documentation(List.of("List all active types: classes, interfaces, enums and annotations."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /types"))
                         .evalFunction(this::evalTypes)
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
 
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list -all")
                         .syntaxHelp("%jshell /list -all")
-                        .documentation(List.of())
+                        .documentation(List.of("List all code snippets, either active, inactive or erroneous."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list -all"))
                         .evalFunction((magicEngine, javaEngine, channels, snippet) -> evalAllList(javaEngine))
-                        .inspectFunction((channels, magicSnippet) -> null)
-                        .completeFunction((channels, magicSnippet) -> null)
-                        .build(),
-                OneLineMagicHandler.builder()
-                        .syntaxMatcher("%jshell /list")
-                        .syntaxHelp("%jshell /list")
-                        .documentation(List.of())
-                        .canHandlePredicate(snippet -> canHandleSnippet(snippet, "%jshell /list"))
-                        .evalFunction((magicEngine, javaEngine, channels, snippet) -> evalSimpleList(javaEngine))
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list \\w")
                         .syntaxHelp("%jshell /list [id]")
-                        .documentation(List.of())
+                        .documentation(List.of("List snippet with the given id."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list "))
                         .evalFunction((magicEngine, javaEngine, channels, magicSnippet) -> evalIdList(javaEngine, magicSnippet))
-                        .inspectFunction((channels, magicSnippet) -> null)
+                        .completeFunction((channels, magicSnippet) -> null)
+                        .build(),
+                OneLineMagicHandler.builder()
+                        .syntaxMatcher("%jshell /list")
+                        .syntaxHelp("%jshell /list")
+                        .documentation(List.of("List all active code snippets."))
+                        .canHandlePredicate(snippet -> canHandleSnippet(snippet, "%jshell /list"))
+                        .evalFunction((magicEngine, javaEngine, channels, snippet) -> evalSimpleList(javaEngine))
                         .completeFunction((channels, magicSnippet) -> null)
                         .build()
         );
-    }
-
-    @Override
-    public List<String> helpMessage() {
-        return List.of("Runs the given command against JShell REPL and displays the results.");
     }
 
     @Override

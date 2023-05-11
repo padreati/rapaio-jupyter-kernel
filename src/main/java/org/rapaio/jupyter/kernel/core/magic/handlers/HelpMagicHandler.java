@@ -1,6 +1,7 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
@@ -57,7 +58,8 @@ public class HelpMagicHandler implements MagicHandler {
         return text.startsWith(MAGIC_HELP_PREFIX_FIXED);
     }
 
-    private Object evalLine(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicParseException {
+    private Object evalLine(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws
+            MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
@@ -83,15 +85,13 @@ public class HelpMagicHandler implements MagicHandler {
             sb.append("\n");
             sb.append(ANSI.start().bold().fgBlue().text(handler.name()).reset().build()).append("\n");
 
+            sb.append(ANSI.start().bold().text("Documentation:\n").build());
+            sb.append(handler.helpMessage().stream().map(s -> "    " + s).collect(Collectors.joining("\n")));
+
             sb.append(ANSI.start().bold().text("Syntax:\n").build());
-            for(var oneLiner : handler.oneLineMagicHandlers()) {
+            for (var oneLiner : handler.oneLineMagicHandlers()) {
                 sb.append("    ").append(ANSI.start().bold().fgGreen().text(oneLiner.syntaxHelp()).build()).append("\n");
                 sb.append("    ").append(String.join("\n", oneLiner.documentation())).append("\n");
-            }
-
-            sb.append(ANSI.start().bold().text("Documentation:\n").build());
-            for (var helpLine : handler.helpMessage()) {
-                sb.append("    ").append(helpLine).append("\n");
             }
         }
         return DisplayData.withText(sb.toString());
