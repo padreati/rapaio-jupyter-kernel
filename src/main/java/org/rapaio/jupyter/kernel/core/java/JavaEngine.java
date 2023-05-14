@@ -24,10 +24,11 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import jdk.jshell.EvalException;
@@ -205,17 +206,27 @@ public class JavaEngine {
             return null;
         }
 
-        return DisplayData.withHtml(
-                join(
-                        each(documentations, doc -> p(join(
-                                b(texts(doc.signature())),
-                                iif(doc.javadoc() != null,
-                                        br(),
-                                        texts(JavadocTools.javadocPreprocess(doc.javadoc()))
-                                )
-                        )))
-                ).render()
-        );
+        String html = join(
+                each(documentations, doc -> p(join(
+                        b(texts(doc.signature())),
+                        iif(doc.javadoc() != null,
+                                br(),
+                                texts(JavadocTools.javadocPreprocess(doc.javadoc()))
+                        )
+                )))
+        ).render();
+        StringBuilder sb = new StringBuilder();
+        for (var doc : documentations) {
+            sb.append(ANSI.start().bold().text(doc.signature()).render()).append("\n");
+            if (doc.javadoc() != null) {
+                sb.append(doc.javadoc()).append("\n");
+            }
+            sb.append("\n");
+        }
+
+        DisplayData dd = DisplayData.withHtml(html);
+        dd.putText(sb.toString());
+        return dd;
     }
 
     public static Builder builder(JShellConsole shellConsole) {

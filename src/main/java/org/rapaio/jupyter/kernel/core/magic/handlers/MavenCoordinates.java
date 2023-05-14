@@ -7,9 +7,8 @@ import java.util.List;
 import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -58,7 +57,7 @@ public class MavenCoordinates implements MagicHandler {
         return snippet.lines().get(0).code().startsWith(HEADER);
     }
 
-    public Object evalLine(MagicEngine magicEngine, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws MagicParseException {
+    public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }
@@ -67,15 +66,15 @@ public class MavenCoordinates implements MagicHandler {
 
         try {
             DepCoordinates dc = new DepCoordinates(args);
-            channels.writeToStdOut("Solving dependencies for " + ANSI.start().bold().fgGreen().text(dc.toString()).reset().build() + "\n");
+            kernel.channels().writeToStdOut("Solving dependencies for " + ANSI.start().bold().fgGreen().text(dc.toString()).reset().render() + "\n");
             ResolveReport resolveReport = IvyDependencies.getInstance().resolve(dc);
             var adrs = resolveReport.getAllArtifactsReports();
-            channels.writeToStdOut("Found dependencies count: " + adrs.length + "\n");
+            kernel.channels().writeToStdOut("Found dependencies count: " + adrs.length + "\n");
             for (var adr : adrs) {
                 if (adr.getExt().equalsIgnoreCase("jar") && adr.getType().equalsIgnoreCase("jar")) {
-                    channels.writeToStdOut("Add to classpath: " +
-                            ANSI.start().fgGreen().text(adr.getLocalFile().getAbsolutePath()).reset().build() + "\n");
-                    javaEngine.getShell().addToClasspath(adr.getLocalFile().getAbsolutePath());
+                    kernel.channels().writeToStdOut("Add to classpath: " +
+                            ANSI.start().fgGreen().text(adr.getLocalFile().getAbsolutePath()).reset().render() + "\n");
+                    kernel.javaEngine().getShell().addToClasspath(adr.getLocalFile().getAbsolutePath());
                 }
             }
         } catch (ParseException | IOException e) {

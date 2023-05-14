@@ -6,8 +6,8 @@ import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
@@ -27,20 +27,29 @@ public class MagicEngine {
         magicHandlers.add(new HelpMagicHandler(magicHandlers));
     }
 
-    private final JavaEngine javaEngine;
+    private final MagicParser parser = new MagicParser();
+    private final RapaioKernel kernel;
 
-    public MagicEngine(JavaEngine javaEngine) {
-        this.javaEngine = javaEngine;
+    public MagicEngine(RapaioKernel kernel) {
+        this.kernel = kernel;
     }
 
     private record MagicPair(MagicSnippet snippet, MagicHandler handler) {
     }
 
-    public MagicEvalResult eval(Channels channels, String expr) throws MagicParseException, MagicEvalException {
+    public MagicEvalResult eval(String expr) throws MagicParseException, MagicEvalException {
 
         // parse magic snippets
-        List<MagicSnippet> snippets = parseSnippets(expr, -1);
+        List<MagicSnippet> snippets = parser.parseSnippets(expr, -1);
         if (snippets == null) {
+            return new MagicEvalResult(false, null);
+        }
+
+        if (parser.containsMixedSnippets(snippets)) {
+            throw new MagicParseException("Magic parser", expr, "Mixed code with Magic and Java snippets.");
+        }
+
+        if (!parser.canHandleByMagic(snippets)) {
             return new MagicEvalResult(false, null);
         }
 
@@ -64,17 +73,17 @@ public class MagicEngine {
         // if everything is fine then execute handlers
         Object lastResult = null;
         for (var pair : magicPairs) {
-            lastResult = pair.handler.eval(this, javaEngine, channels, pair.snippet);
+            lastResult = pair.handler.eval(kernel, pair.snippet);
         }
 
         // return last result
         return new MagicEvalResult(true, lastResult);
     }
 
-    public MagicInspectResult inspect(Channels channels, String expr, int cursorPosition) {
+    public MagicInspectResult inspect(String expr, int cursorPosition) {
 
         // parse magic snippets
-        List<MagicSnippet> snippets = parseSnippets(expr, cursorPosition);
+        List<MagicSnippet> snippets = parser.parseSnippets(expr, cursorPosition);
         if (snippets == null) {
             return new MagicInspectResult(false, null);
         }
@@ -93,6 +102,10 @@ public class MagicEngine {
             return new MagicInspectResult(true, null);
         }
 
+        if(snippet.type()== MagicSnippet.Type.NON_MAGIC) {
+            return new MagicInspectResult(false, null);
+        }
+
         // identify the code line which contains position
         MagicSnippet.CodeLine codeLine = snippet.lines().stream().filter(MagicSnippet.CodeLine::hasPosition).findAny().orElse(null);
         if (codeLine == null) {
@@ -103,7 +116,7 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                DisplayData dd = handler.inspect(channels, snippet);
+                DisplayData dd = handler.inspect(kernel.channels(), snippet);
                 return new MagicInspectResult(true, dd);
             }
         }
@@ -115,7 +128,7 @@ public class MagicEngine {
     public MagicCompleteResult complete(Channels channels, String expr, int cursorPosition) {
 
         // parse magic snippets
-        List<MagicSnippet> snippets = parseSnippets(expr, cursorPosition);
+        List<MagicSnippet> snippets = parser.parseSnippets(expr, cursorPosition);
         if (snippets == null) {
             return new MagicCompleteResult(false, null);
         }
@@ -153,77 +166,5 @@ public class MagicEngine {
         return new MagicCompleteResult(true, null);
     }
 
-    private boolean hasLineMarker(String line) {
-        if (line.length() < 2) {
-            return false;
-        }
-        return line.charAt(0) == '%' && line.charAt(1) != '%' && !line.substring(1).trim().isEmpty();
-    }
-
-    private boolean hasCellMarker(String line) {
-        if (line.length() < 2) {
-            return false;
-        }
-        return line.charAt(0) == '%' && line.charAt(1) == '%' && !line.substring(2).trim().isEmpty();
-    }
-
-    private boolean hasComment(String line) {
-        return line.startsWith("//");
-    }
-
-    private boolean isEmpty(String line) {
-        return line.trim().isEmpty();
-    }
-
-    private List<MagicSnippet> parseSnippets(String sourceCode, int position) {
-        String[] lines = sourceCode.split("\\R");
-
-        List<MagicSnippet> snippets = new ArrayList<>();
-
-        List<MagicSnippet.CodeLine> cellLines = null;
-
-        int startLen = 0;
-        for (String line : lines) {
-
-            int endLen = startLen + line.length();
-            boolean hasPosition = false;
-            int relativePosition = -1;
-            if (position >= startLen && position <= endLen) {
-                hasPosition = true;
-                relativePosition = position - startLen;
-            }
-            startLen += line.length() + 1;
-
-            // skip empty lines and comments
-            if (isEmpty(line) || hasComment(line)) {
-                continue;
-            }
-
-            if (hasLineMarker(line)) {
-                if (cellLines != null) {
-                    snippets.add(new MagicSnippet(false, cellLines));
-                    cellLines = null;
-                }
-                snippets.add(new MagicSnippet(true, List.of(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position))));
-                continue;
-            }
-
-            if (hasCellMarker(line)) {
-                cellLines = new ArrayList<>();
-                cellLines.add(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position));
-                continue;
-            }
-
-            if (cellLines == null) {
-                return null;
-            }
-
-            cellLines.add(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position));
-        }
-        if (cellLines != null) {
-            snippets.add(new MagicSnippet(false, cellLines));
-        }
-        return snippets;
-    }
 
 }

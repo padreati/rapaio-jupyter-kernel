@@ -8,9 +8,8 @@ import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -58,7 +57,7 @@ public class LoadMagicHandler implements MagicHandler {
         return snippet.oneLine() && snippet.lines().size() == 1 && snippet.line(0).code().startsWith(PREFIX);
     }
 
-    public Object evalLine(MagicEngine magicEngine, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
+    public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
@@ -72,9 +71,9 @@ public class LoadMagicHandler implements MagicHandler {
             try {
                 String content = Files.readString(Path.of(file.getAbsolutePath()));
                 if (path.endsWith(".ipynb")) {
-                    return evalNotebook(magicEngine, engine, channels, snippet, content);
+                    return evalNotebook(kernel, snippet, content);
                 } else {
-                    return evalShellScript(engine, channels, content);
+                    return evalShellScript(kernel, content);
                 }
             } catch (IOException ex) {
                 throw new MagicParseException("LoadMagicHandler",
@@ -112,8 +111,7 @@ public class LoadMagicHandler implements MagicHandler {
     /**
      * For parsing notebook files follow the format specified in: <a href="http://ipython.org/ipython-doc/3/notebook/nbformat.html">nbformat</a>
      */
-    Object evalNotebook(MagicEngine magicEvaluator, JavaEngine engine, Channels channels, MagicSnippet snippet, String content) throws
-            MagicEvalException {
+    Object evalNotebook(RapaioKernel kernel, MagicSnippet snippet, String content) throws MagicEvalException {
         JsonElement root = JsonParser.parseString(content);
 
         boolean checkLanguage = checkLanguage(root);
@@ -143,23 +141,23 @@ public class LoadMagicHandler implements MagicHandler {
             }
             String cellCode = sb.toString();
             try {
-                MagicEvalResult magicResult = magicEvaluator.eval(channels, cellCode);
+                MagicEvalResult magicResult = kernel.magicEngine().eval(cellCode);
                 if (!magicResult.handled()) {
-                    engine.eval(cellCode);
+                    kernel.javaEngine().eval(cellCode);
                 }
             } catch (Exception e) {
-                channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
+                kernel.channels().publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(kernel.javaEngine(), ex)));
                 return null;
             }
         }
         return null;
     }
 
-    private Object evalShellScript(JavaEngine engine, Channels channels, String content) {
+    private Object evalShellScript(RapaioKernel kernel, String content) {
         try {
-            return engine.eval(content);
+            return kernel.javaEngine().eval(content);
         } catch (Exception e) {
-            channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(engine, ex)));
+            kernel.channels().publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(kernel.javaEngine(), ex)));
             return null;
         }
     }

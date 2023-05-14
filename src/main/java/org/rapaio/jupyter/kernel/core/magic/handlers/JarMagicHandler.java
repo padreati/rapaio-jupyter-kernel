@@ -5,9 +5,8 @@ import java.util.List;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
@@ -53,8 +52,7 @@ public class JarMagicHandler implements MagicHandler {
         return snippet.oneLine() && snippet.lines().size() == 1 && snippet.lines().get(0).code().startsWith(PREFIX);
     }
 
-    public Object evalLine(MagicEngine magicEngine, JavaEngine engine, Channels channels, MagicSnippet snippet) throws MagicParseException,
-            MagicEvalException {
+    public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException, MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Snippet cannot be handled by this magic handler.");
         }
@@ -68,20 +66,20 @@ public class JarMagicHandler implements MagicHandler {
         if (file.isDirectory()) {
             File[] jars = file.listFiles(f -> f.getName().endsWith(".jar"));
             if (jars == null) {
-                channels.writeToStdOut(ANSI.start().bold().fgGreen().text("No jar files were found.\n").build());
+                kernel.channels().writeToStdOut(ANSI.start().bold().fgGreen().text("No jar files were found.\n").render());
                 return null;
             }
-            channels.writeToStdOut(ANSI.start().fgGreen().text("Found " + jars.length + " jar files.\n").build());
+            kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Found " + jars.length + " jar files.\n").render());
             for (File jar : jars) {
-                engine.getShell().addToClasspath(jar.getAbsolutePath());
-                channels.writeToStdOut(ANSI.start().fgGreen().text("Add " + jar.getAbsolutePath() + " to classpath\n").build());
+                kernel.javaEngine().getShell().addToClasspath(jar.getAbsolutePath());
+                kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + jar.getAbsolutePath() + " to classpath\n").render());
             }
         } else {
             if (!file.getName().endsWith(".jar")) {
                 throw new MagicEvalException(snippet, "Provided input is not a jar file.");
             }
-            engine.getShell().addToClasspath(file.getAbsolutePath());
-            channels.writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath").build());
+            kernel.javaEngine().getShell().addToClasspath(file.getAbsolutePath());
+            kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath").render());
         }
         return null;
     }

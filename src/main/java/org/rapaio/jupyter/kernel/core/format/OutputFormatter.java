@@ -68,10 +68,10 @@ public final class OutputFormatter {
                 JShellException shellException = e.getCause();
 
                 List<String> output = new ArrayList<>();
-                output.add(ANSI.start().bold().fgRed().text(exceptionClassName + ": " + e.getMessage() + "\n").build());
+                output.add(ANSI.start().bold().fgRed().text(exceptionClassName + ": " + e.getMessage() + "\n").render());
                 if (shellException != null) {
                     output.add(ANSI.start().fgRed()
-                            .text("Cause: " + shellException.getClass().getSimpleName() + ": " + shellException.getMessage()).build());
+                            .text("Cause: " + shellException.getClass().getSimpleName() + ": " + shellException.getMessage()).render());
                 }
                 for (var stackElement : stackTrace) {
                     output.add(String.join("\n", ANSI.errorMessages("   at " + stackElement)));
@@ -90,7 +90,7 @@ public final class OutputFormatter {
         List<String> output = new ArrayList<>();
         while (true) {
             output.add(
-                    ANSI.start().bold().fgRed().text(throwable.getClass().getSimpleName() + ": " + throwable.getMessage() + "\n").build());
+                    ANSI.start().bold().fgRed().text(throwable.getClass().getSimpleName() + ": " + throwable.getMessage() + "\n").render());
             StackTraceElement[] stackTrace = throwable.getStackTrace();
             for (var stackElement : stackTrace) {
                 output.add(String.join("\n", ANSI.errorMessages("   at " + stackElement)));

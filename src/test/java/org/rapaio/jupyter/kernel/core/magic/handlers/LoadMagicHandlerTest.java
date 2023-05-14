@@ -3,16 +3,15 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 
 public class LoadMagicHandlerTest {
@@ -190,19 +189,20 @@ public class LoadMagicHandlerTest {
     @Test
     void testHandler() {
         LoadMagicHandler handler = new LoadMagicHandler();
-        MagicSnippet snippet = new MagicSnippet(true, List.of(new MagicSnippet.CodeLine("%load /", true, 7, 7)));
+        MagicSnippet snippet = new MagicSnippet(MagicSnippet.Type.MAGIC_ONELINE,
+                true, List.of(new MagicSnippet.CodeLine("%load /", true, 7, 7)));
         var options = handler.complete(null, snippet);
         assertNotNull(options);
     }
 
     @Test
-    void loadNotebook() throws MagicEvalException {
+    void loadNotebook() throws MagicEvalException, NoSuchAlgorithmException, InvalidKeyException {
         LoadMagicHandler handler = new LoadMagicHandler();
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole()).build();
-        MagicEngine magicEvaluator = new MagicEngine(engine);
-        Channels env = mock(Channels.class);
+        RapaioKernel kernel = new RapaioKernel();
+        Channels channels = new Channels(TestUtils.testConnectionProperties());
+        kernel.registerChannels(channels);
         MagicSnippet snippet = mock(MagicSnippet.class);
 
-        handler.evalNotebook(magicEvaluator, engine, env, snippet, content1);
+        handler.evalNotebook(kernel, snippet, content1);
     }
 }

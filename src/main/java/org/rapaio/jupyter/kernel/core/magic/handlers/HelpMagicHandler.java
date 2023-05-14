@@ -5,10 +5,9 @@ import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -58,8 +57,7 @@ public class HelpMagicHandler implements MagicHandler {
         return text.startsWith(MAGIC_HELP_PREFIX_FIXED);
     }
 
-    private Object evalLine(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws
-            MagicParseException {
+    private Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
@@ -79,18 +77,18 @@ public class HelpMagicHandler implements MagicHandler {
 
     private DisplayData help() {
         StringBuilder sb = new StringBuilder();
-        sb.append(ANSI.start().bold().fgBlue().text("Information about registered magic handlers.\n").reset().build());
+        sb.append(ANSI.start().bold().fgBlue().text("Information about registered magic handlers.\n").reset().render());
         for (var handler : magicHandlers) {
 
             sb.append("\n");
-            sb.append(ANSI.start().bold().fgBlue().text(handler.name()).reset().build()).append("\n");
+            sb.append(ANSI.start().bold().fgBlue().text(handler.name()).reset().render()).append("\n");
 
-            sb.append(ANSI.start().bold().text("Documentation:\n").build());
+            sb.append(ANSI.start().bold().text("Documentation:\n").render());
             sb.append(handler.helpMessage().stream().map(s -> "    " + s).collect(Collectors.joining("\n")));
 
-            sb.append(ANSI.start().bold().text("Syntax:\n").build());
+            sb.append(ANSI.start().bold().text("Syntax:\n").render());
             for (var oneLiner : handler.oneLineMagicHandlers()) {
-                sb.append("    ").append(ANSI.start().bold().fgGreen().text(oneLiner.syntaxHelp()).build()).append("\n");
+                sb.append("    ").append(ANSI.start().bold().fgGreen().text(oneLiner.syntaxHelp()).render()).append("\n");
                 sb.append("    ").append(String.join("\n", oneLiner.documentation())).append("\n");
             }
         }

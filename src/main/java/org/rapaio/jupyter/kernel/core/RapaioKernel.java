@@ -83,7 +83,7 @@ public class RapaioKernel {
                 .withTimeoutMillis(kernelEnv.timeoutMillis())
                 .build();
         this.javaEngine.initialize();
-        this.magicEngine = new MagicEngine(javaEngine);
+        this.magicEngine = new MagicEngine(this);
         this.renderer = new Renderer();
     }
 
@@ -147,7 +147,7 @@ public class RapaioKernel {
     }
 
     public MagicEvalResult evalMagic(String expr) throws Exception {
-        return magicEngine.eval(channels, expr);
+        return magicEngine.eval(expr);
     }
 
     public DisplayData eval(String expr) throws Exception {
@@ -256,7 +256,7 @@ public class RapaioKernel {
         ShellInspectRequest request = message.content();
         channels.busyThenIdle();
         try {
-            MagicInspectResult magicResult = magicEngine.inspect(channels, request.code(), request.cursorPos());
+            MagicInspectResult magicResult = magicEngine.inspect(request.code(), request.cursorPos());
             if (magicResult.handled()) {
                 DisplayData inspection = magicResult.displayData();
                 channels.reply(new ShellInspectReply(inspection != null, inspection));

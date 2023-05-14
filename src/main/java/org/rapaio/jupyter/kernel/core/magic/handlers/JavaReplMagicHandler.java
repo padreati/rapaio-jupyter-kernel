@@ -6,10 +6,9 @@ import java.util.Optional;
 
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
@@ -80,7 +79,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .syntaxHelp("%jshell /list -all")
                         .documentation(List.of("List all code snippets, either active, inactive or erroneous."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list -all"))
-                        .evalFunction((magicEngine, javaEngine, channels, snippet) -> evalAllList(javaEngine))
+                        .evalFunction(this::evalAllList)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
@@ -88,7 +87,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .syntaxHelp("%jshell /list [id]")
                         .documentation(List.of("List snippet with the given id."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list "))
-                        .evalFunction((magicEngine, javaEngine, channels, magicSnippet) -> evalIdList(javaEngine, magicSnippet))
+                        .evalFunction(this::evalIdList)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
@@ -96,7 +95,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .syntaxHelp("%jshell /list")
                         .documentation(List.of("List all active code snippets."))
                         .canHandlePredicate(snippet -> canHandleSnippet(snippet, "%jshell /list"))
-                        .evalFunction((magicEngine, javaEngine, channels, snippet) -> evalSimpleList(javaEngine))
+                        .evalFunction(this::evalSimpleList)
                         .completeFunction((channels, magicSnippet) -> null)
                         .build()
         );
@@ -124,17 +123,16 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public Object eval(MagicEngine magicEngine, JavaEngine javaEngine, Channels channels, MagicSnippet snippet) throws
-            MagicEvalException, MagicParseException {
+    public Object eval(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException, MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
         for (var oneLineMagic : oneLineMagicHandlers()) {
             if (oneLineMagic.canHandlePredicate().test(snippet)) {
-                return oneLineMagic.evalFunction().eval(magicEngine, javaEngine, channels, snippet);
+                return oneLineMagic.evalFunction().eval(kernel, snippet);
             }
         }
-        channels.writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
+        kernel.channels().writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
         return null;
     }
 
@@ -143,15 +141,15 @@ public class JavaReplMagicHandler implements MagicHandler {
         return null;
     }
 
-    private Object evalSimpleList(JavaEngine javaEngine) {
-        List<Snippet> snippets = javaEngine.getShell().snippets()
-                .filter(s -> javaEngine.getShell().status(s).isActive())
+    private Object evalSimpleList(RapaioKernel kernel, MagicSnippet magicSnippet) {
+        List<Snippet> snippets = kernel.javaEngine().getShell().snippets()
+                .filter(s -> kernel.javaEngine().getShell().status(s).isActive())
                 .toList();
         StringBuilder sb = new StringBuilder();
         for (Snippet snippet : snippets) {
             sb.append(ANSI.start().bold().text("id:").fgGreen().text(snippet.id()).reset().text(" ")
                     .bold().text("type:").fgGreen().text(snippet.kind().name()).text("\n")
-                    .build());
+                    .render());
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
@@ -159,13 +157,13 @@ public class JavaReplMagicHandler implements MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalAllList(JavaEngine javaEngine) {
-        List<Snippet> snippets = javaEngine.getShell().snippets().toList();
+    private Object evalAllList(RapaioKernel kernel, MagicSnippet magicSnippet) {
+        List<Snippet> snippets = kernel.javaEngine().getShell().snippets().toList();
         StringBuilder sb = new StringBuilder();
         for (Snippet snippet : snippets) {
             sb.append(ANSI.start().bold().text("id:").fgGreen().text(snippet.id()).reset().text(" ")
                     .bold().text("type:").fgGreen().text(snippet.kind().name()).text("\n")
-                    .build());
+                    .render());
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
@@ -173,16 +171,16 @@ public class JavaReplMagicHandler implements MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalIdList(JavaEngine javaEngine, MagicSnippet magicSnippet) throws
+    private Object evalIdList(RapaioKernel kernel, MagicSnippet magicSnippet) throws
             MagicEvalException {
         String id = magicSnippet.line(0).code().trim().substring("%jshell /list ".length()).trim();
-        Optional<Snippet> optional = javaEngine.getShell().snippets().filter(s -> s.id().equals(id.trim())).findAny();
+        Optional<Snippet> optional = kernel.javaEngine().getShell().snippets().filter(s -> s.id().equals(id.trim())).findAny();
         if (optional.isPresent()) {
             Snippet snippet = optional.get();
             StringBuilder sb = new StringBuilder();
             sb.append(ANSI.start().bold().text("id:").fgGreen().text(snippet.id()).reset().text(" ")
                     .bold().text("type:").fgGreen().text(snippet.kind().name()).text("\n")
-                    .build());
+                    .render());
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
@@ -191,7 +189,7 @@ public class JavaReplMagicHandler implements MagicHandler {
         throw new MagicEvalException(magicSnippet, "No snippet with id: " + id + " was found.");
     }
 
-    private Object evalMethods(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet magicSnippet) throws
+    private Object evalMethods(RapaioKernel kernel, MagicSnippet magicSnippet) throws
             MagicEvalException {
         String command = magicSnippet.line(0).code().trim().substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
         String options = command.substring("/methods".length()).trim();
@@ -200,8 +198,8 @@ public class JavaReplMagicHandler implements MagicHandler {
             throw new MagicEvalException(magicSnippet, "%jshell /methods command does not have arguments.");
         }
 
-        List<MethodSnippet> snippets = javaEngine.getShell().methods()
-                .filter(s -> javaEngine.getShell().status(s).isActive())
+        List<MethodSnippet> snippets = kernel.javaEngine().getShell().methods()
+                .filter(s -> kernel.javaEngine().getShell().status(s).isActive())
                 .toList();
         StringBuilder sb = new StringBuilder();
         for (MethodSnippet snippet : snippets) {
@@ -215,8 +213,7 @@ public class JavaReplMagicHandler implements MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalVars(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet magicSnippet)
-            throws MagicEvalException {
+    private Object evalVars(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         String line = magicSnippet.line(0).code().trim();
         String command = line.substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
         String options = command.substring("/vars".length()).trim();
@@ -225,20 +222,20 @@ public class JavaReplMagicHandler implements MagicHandler {
             throw new MagicEvalException(magicSnippet, "%jshell /vars command does not have arguments.");
         }
 
-        List<VarSnippet> snippets = javaEngine.getShell().variables()
-                .filter(s -> javaEngine.getShell().status(s).isActive())
+        List<VarSnippet> snippets = kernel.javaEngine().getShell().variables()
+                .filter(s -> kernel.javaEngine().getShell().status(s).isActive())
                 .toList();
         StringBuilder sb = new StringBuilder();
         for (VarSnippet snippet : snippets) {
             sb.append(ANSI.start().text("|    ").bold().text(snippet.typeName() + " ").fgGreen().text(snippet.name())
                     .reset().text(" = ")
-                    .reset().text(javaEngine.getShell().varValue(snippet)).text("\n")
-                    .build());
+                    .reset().text(kernel.javaEngine().getShell().varValue(snippet)).text("\n")
+                    .render());
         }
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalImports(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet magicSnippet) throws
+    private Object evalImports(RapaioKernel kernel, MagicSnippet magicSnippet) throws
             MagicEvalException {
         String line = magicSnippet.line(0).code().trim();
         String command = line.substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
@@ -248,20 +245,19 @@ public class JavaReplMagicHandler implements MagicHandler {
             throw new MagicEvalException(magicSnippet, "%jshell /imports command does not have arguments.");
         }
 
-        List<ImportSnippet> snippets = javaEngine.getShell().imports()
-                .filter(s -> javaEngine.getShell().status(s).isActive())
+        List<ImportSnippet> snippets = kernel.javaEngine().getShell().imports()
+                .filter(s -> kernel.javaEngine().getShell().status(s).isActive())
                 .toList();
         StringBuilder sb = new StringBuilder();
         for (ImportSnippet snippet : snippets) {
-            for(String sourceLine : ANSI.sourceCode((snippet.isStatic() ? "static " : "") + snippet.fullname())) {
+            for (String sourceLine : ANSI.sourceCode((snippet.isStatic() ? "static " : "") + snippet.fullname())) {
                 sb.append(sourceLine).append("\n");
             }
         }
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalTypes(MagicEngine magicEvaluator, JavaEngine javaEngine, Channels channels, MagicSnippet magicSnippet) throws
-            MagicEvalException {
+    private Object evalTypes(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         String line = magicSnippet.line(0).code().trim();
         String command = line.substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
         String options = command.substring("/types".length()).trim();
@@ -270,8 +266,8 @@ public class JavaReplMagicHandler implements MagicHandler {
             throw new MagicEvalException(magicSnippet, "%jshell /types command does not have arguments.");
         }
 
-        List<TypeDeclSnippet> snippets = javaEngine.getShell().types()
-                .filter(s -> javaEngine.getShell().status(s).isActive())
+        List<TypeDeclSnippet> snippets = kernel.javaEngine().getShell().types()
+                .filter(s -> kernel.javaEngine().getShell().status(s).isActive())
                 .toList();
         StringBuilder sb = new StringBuilder();
         for (TypeDeclSnippet snippet : snippets) {
