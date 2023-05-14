@@ -9,7 +9,6 @@ import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
@@ -43,7 +42,16 @@ public interface MagicHandler {
         throw new MagicEvalException(snippet, "Couldn't nou find handler for command.");
     }
 
-    default DisplayData inspect(Channels channels, MagicSnippet snippet) {
+    default DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) {
+        // if we can be more specific, than do it
+        if (oneLineMagicHandlers().size() > 1) {
+            for(var handler : oneLineMagicHandlers()) {
+                if(handler.canHandlePredicate().test(magicSnippet)) {
+                    return handler.inspectFunction().apply(kernel, magicSnippet);
+                }
+            }
+        }
+        // otherwise show generic help
         String inspectHtml = join(
                 b(texts(name())),
                 br(),
@@ -61,9 +69,9 @@ public interface MagicHandler {
         sb.append(ANSI.start().bold().text(name()).render()).append("\n\n");
         sb.append(String.join("\n", helpMessage())).append("\n\n");
         sb.append("Syntax:\n");
-        for(var handler : oneLineMagicHandlers()) {
+        for (var handler : oneLineMagicHandlers()) {
             sb.append(ANSI.start().bold().text(handler.syntaxHelp()).render()).append("\n");
-            for(var line : handler.documentation()) {
+            for (var line : handler.documentation()) {
                 sb.append("    ").append(line).append("\n");
             }
         }
@@ -73,5 +81,5 @@ public interface MagicHandler {
         return dd;
     }
 
-    CompleteMatches complete(Channels channels, MagicSnippet snippet);
+    CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet);
 }

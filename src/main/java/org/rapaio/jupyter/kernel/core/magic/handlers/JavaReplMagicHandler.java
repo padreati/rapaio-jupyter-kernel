@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
@@ -47,7 +46,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List all active methods."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /methods"))
                         .evalFunction(this::evalMethods)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /vars")
@@ -55,7 +54,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List all active variables, with type and value."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /vars"))
                         .evalFunction(this::evalVars)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /imports")
@@ -63,7 +62,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List all active import statements."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /imports"))
                         .evalFunction(this::evalImports)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /types")
@@ -71,7 +70,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List all active types: classes, interfaces, enums and annotations."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /types"))
                         .evalFunction(this::evalTypes)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
 
                 OneLineMagicHandler.builder()
@@ -80,7 +79,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List all code snippets, either active, inactive or erroneous."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list -all"))
                         .evalFunction(this::evalAllList)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list \\w")
@@ -88,7 +87,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List snippet with the given id."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list "))
                         .evalFunction(this::evalIdList)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list")
@@ -96,7 +95,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                         .documentation(List.of("List all active code snippets."))
                         .canHandlePredicate(snippet -> canHandleSnippet(snippet, "%jshell /list"))
                         .evalFunction(this::evalSimpleList)
-                        .completeFunction((channels, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build()
         );
     }
@@ -137,7 +136,7 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
         return null;
     }
 

@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -84,7 +83,7 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
         return null;
     }
 }

@@ -3,7 +3,6 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
@@ -71,7 +70,7 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
         return null;
     }
 

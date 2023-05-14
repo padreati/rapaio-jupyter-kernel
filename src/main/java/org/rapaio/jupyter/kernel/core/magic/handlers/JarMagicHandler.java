@@ -3,7 +3,6 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import java.io.File;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -85,7 +84,7 @@ public class JarMagicHandler implements MagicHandler {
     }
 
     @Override
-    public CompleteMatches complete(Channels channels, MagicSnippet snippet) {
+    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> (f.isDirectory() || f.getName().endsWith(".jar")));
     }

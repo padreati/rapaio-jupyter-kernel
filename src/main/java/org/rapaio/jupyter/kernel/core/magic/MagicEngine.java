@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
@@ -116,7 +115,7 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                DisplayData dd = handler.inspect(kernel.channels(), snippet);
+                DisplayData dd = handler.inspect(kernel, snippet);
                 return new MagicInspectResult(true, dd);
             }
         }
@@ -125,7 +124,7 @@ public class MagicEngine {
         return new MagicInspectResult(true, null);
     }
 
-    public MagicCompleteResult complete(Channels channels, String expr, int cursorPosition) {
+    public MagicCompleteResult complete(RapaioKernel kernel, String expr, int cursorPosition) {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parser.parseSnippets(expr, cursorPosition);
@@ -157,7 +156,7 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                CompleteMatches replacementOptions = handler.complete(channels, snippet);
+                CompleteMatches replacementOptions = handler.complete(kernel, snippet);
                 return new MagicCompleteResult(true, replacementOptions);
             }
         }

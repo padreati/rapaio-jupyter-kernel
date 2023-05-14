@@ -1,12 +1,20 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.space;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
+
 import java.util.List;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
 public record OneLineMagicHandler(
         String syntaxMatcher,
@@ -14,8 +22,8 @@ public record OneLineMagicHandler(
         List<String> documentation,
         Predicate<MagicSnippet> canHandlePredicate,
         OneLineMagicEvalFunction evalFunction,
-        BiFunction<Channels, MagicSnippet, DisplayData> inspectFunction,
-        BiFunction<Channels, MagicSnippet, CompleteMatches> completeFunction
+        BiFunction<RapaioKernel, MagicSnippet, DisplayData> inspectFunction,
+        BiFunction<RapaioKernel, MagicSnippet, CompleteMatches> completeFunction
 ) {
 
     public static Builder builder() {
@@ -29,13 +37,8 @@ public record OneLineMagicHandler(
         private List<String> documentation;
         private Predicate<MagicSnippet> canHandlePredicate;
         private OneLineMagicEvalFunction evalFunction;
-        private BiFunction<Channels, MagicSnippet, DisplayData> inspectFunction = this::defaultInspect;
-        private BiFunction<Channels, MagicSnippet, CompleteMatches> completeFunction;
-
-        private DisplayData defaultInspect(Channels channels, MagicSnippet magicSnippet) {
-            String html = "";
-            return DisplayData.withHtml(html);
-        }
+        private BiFunction<RapaioKernel, MagicSnippet, DisplayData> inspectFunction = null;
+        private BiFunction<RapaioKernel, MagicSnippet, CompleteMatches> completeFunction;
 
         public Builder syntaxMatcher(String syntaxMatcher) {
             this.syntaxMatcher = syntaxMatcher;
@@ -62,19 +65,43 @@ public record OneLineMagicHandler(
             return this;
         }
 
-        public Builder inspectFunction(BiFunction<Channels, MagicSnippet, DisplayData> inspectFunction) {
+        public Builder inspectFunction(BiFunction<RapaioKernel, MagicSnippet, DisplayData> inspectFunction) {
             this.inspectFunction = inspectFunction;
             return this;
         }
 
-        public Builder completeFunction(BiFunction<Channels, MagicSnippet, CompleteMatches> completeFunction) {
+        public Builder completeFunction(BiFunction<RapaioKernel, MagicSnippet, CompleteMatches> completeFunction) {
             this.completeFunction = completeFunction;
             return this;
         }
 
         public OneLineMagicHandler build() {
-            return new OneLineMagicHandler(syntaxMatcher, syntaxHelp, documentation, canHandlePredicate, evalFunction, inspectFunction,
+            return new OneLineMagicHandler(syntaxMatcher, syntaxHelp, documentation, canHandlePredicate, evalFunction,
+                    inspectFunction != null ? inspectFunction : this::defaultInspect,
                     completeFunction);
         }
+
+        private DisplayData defaultInspect(RapaioKernel kernel, MagicSnippet magicSnippet) {
+            String html = join(
+                    texts("Syntax: "), br(),
+                    join(
+                            b(texts(syntaxHelp)),
+                            br(),
+                            each(documentation, line -> join(space(4), texts(line), br()))
+                    )
+            ).render();
+
+            StringBuilder sb = new StringBuilder();
+            sb.append("Syntax:\n");
+            sb.append(ANSI.start().bold().text(syntaxHelp).render()).append("\n");
+            for (var line : documentation) {
+                sb.append("    ").append(line).append("\n");
+            }
+
+            DisplayData dd = DisplayData.withHtml(html);
+            dd.putText(sb.toString());
+            return dd;
+        }
+
     }
 }

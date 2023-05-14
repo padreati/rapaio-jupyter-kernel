@@ -276,7 +276,7 @@ public class RapaioKernel {
         ShellCompleteRequest request = message.content();
         channels.busyThenIdle();
         try {
-            MagicCompleteResult magicResult = magicEngine.complete(channels, request.code(), request.cursorPos());
+            MagicCompleteResult magicResult = magicEngine.complete(this, request.code(), request.cursorPos());
 
             CompleteMatches options = magicResult.handled()
                     ? magicResult.replacementOptions()
