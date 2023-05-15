@@ -3,8 +3,8 @@ package org.rapaio.jupyter.kernel.core.magic;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
 @FunctionalInterface
-public interface OneLineMagicEvalFunction {
+public interface MagicFunction<T> {
 
-    Object eval(RapaioKernel kernel, MagicSnippet snippet) throws
+    T apply(RapaioKernel kernel, MagicSnippet snippet) throws
             MagicEvalException, MagicParseException;
 }

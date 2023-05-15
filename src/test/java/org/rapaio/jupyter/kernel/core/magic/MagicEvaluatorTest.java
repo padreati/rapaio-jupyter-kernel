@@ -23,13 +23,13 @@ public class MagicEvaluatorTest {
     }
 
     @Test
-    void magicInspectJavaCodeTest() {
+    void magicInspectJavaCodeTest() throws MagicEvalException, MagicParseException {
         var result = kernel.magicEngine().inspect("System.out.print(\"test\");", 3);
         assertFalse(result.handled());
     }
 
     @Test
-    void magicInspectMagicCode() {
+    void magicInspectMagicCode() throws MagicEvalException, MagicParseException {
         var result = kernel.magicEngine().inspect("%load", 3);
         assertTrue(result.handled());
     }

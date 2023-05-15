@@ -4,7 +4,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -43,6 +42,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /methods")
                         .syntaxHelp("%jshell /methods")
+                        .syntaxPrefix("%jshell /methods")
                         .documentation(List.of("List all active methods."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /methods"))
                         .evalFunction(this::evalMethods)
@@ -51,6 +51,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /vars")
                         .syntaxHelp("%jshell /vars")
+                        .syntaxPrefix("%jshell /vars")
                         .documentation(List.of("List all active variables, with type and value."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /vars"))
                         .evalFunction(this::evalVars)
@@ -59,6 +60,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /imports")
                         .syntaxHelp("%jshell /imports")
+                        .syntaxPrefix("%jshell /imports")
                         .documentation(List.of("List all active import statements."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /imports"))
                         .evalFunction(this::evalImports)
@@ -67,6 +69,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /types")
                         .syntaxHelp("%jshell /types")
+                        .syntaxPrefix("%jshell /types")
                         .documentation(List.of("List all active types: classes, interfaces, enums and annotations."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /types"))
                         .evalFunction(this::evalTypes)
@@ -76,6 +79,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list -all")
                         .syntaxHelp("%jshell /list -all")
+                        .syntaxPrefix("%jshell /list -all")
                         .documentation(List.of("List all code snippets, either active, inactive or erroneous."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list -all"))
                         .evalFunction(this::evalAllList)
@@ -84,6 +88,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list \\w")
                         .syntaxHelp("%jshell /list [id]")
+                        .syntaxPrefix("%jshell /list ")
                         .documentation(List.of("List snippet with the given id."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list "))
                         .evalFunction(this::evalIdList)
@@ -92,6 +97,7 @@ public class JavaReplMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list")
                         .syntaxHelp("%jshell /list")
+                        .syntaxPrefix("%jshell /list")
                         .documentation(List.of("List all active code snippets."))
                         .canHandlePredicate(snippet -> canHandleSnippet(snippet, "%jshell /list"))
                         .evalFunction(this::evalSimpleList)
@@ -128,15 +134,10 @@ public class JavaReplMagicHandler implements MagicHandler {
         }
         for (var oneLineMagic : oneLineMagicHandlers()) {
             if (oneLineMagic.canHandlePredicate().test(snippet)) {
-                return oneLineMagic.evalFunction().eval(kernel, snippet);
+                return oneLineMagic.evalFunction().apply(kernel, snippet);
             }
         }
         kernel.channels().writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
-        return null;
-    }
-
-    @Override
-    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
         return null;
     }
 

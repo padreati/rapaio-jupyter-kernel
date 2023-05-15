@@ -27,6 +27,7 @@ public class JarMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%jar .*")
                         .syntaxHelp("%jar path_to_jar_or_folder_of_jars")
+                        .syntaxPrefix("%jar ")
                         .documentation(List.of(
                                 "Adds to the classpath a jar or all jar archives from a directory"
                         ))

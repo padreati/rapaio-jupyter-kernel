@@ -3,7 +3,6 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -38,6 +37,7 @@ public class HelpMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%help")
                         .syntaxHelp("%help")
+                        .syntaxPrefix("%help")
                         .documentation(List.of("Display help for all magic handlers."))
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
@@ -67,11 +67,6 @@ public class HelpMagicHandler implements MagicHandler {
             return help();
         }
         throw new MagicParseException(name(), expr, "Help magic syntax is incorrect.");
-    }
-
-    @Override
-    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
-        return null;
     }
 
     private DisplayData help() {

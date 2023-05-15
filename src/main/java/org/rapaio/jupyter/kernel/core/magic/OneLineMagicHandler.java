@@ -8,7 +8,7 @@ import static org.rapaio.jupyter.kernel.core.display.html.Tags.space;
 import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 
 import java.util.List;
-import java.util.function.BiFunction;
+import java.util.Objects;
 import java.util.function.Predicate;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
@@ -19,11 +19,12 @@ import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 public record OneLineMagicHandler(
         String syntaxMatcher,
         String syntaxHelp,
+        String syntaxPrefix,
         List<String> documentation,
         Predicate<MagicSnippet> canHandlePredicate,
-        OneLineMagicEvalFunction evalFunction,
-        BiFunction<RapaioKernel, MagicSnippet, DisplayData> inspectFunction,
-        BiFunction<RapaioKernel, MagicSnippet, CompleteMatches> completeFunction
+        MagicFunction<Object> evalFunction,
+        MagicFunction<DisplayData> inspectFunction,
+        MagicFunction<CompleteMatches> completeFunction
 ) {
 
     public static Builder builder() {
@@ -34,11 +35,12 @@ public record OneLineMagicHandler(
     public static final class Builder {
         private String syntaxMatcher;
         private String syntaxHelp;
+        private String syntaxPrefix;
         private List<String> documentation;
         private Predicate<MagicSnippet> canHandlePredicate;
-        private OneLineMagicEvalFunction evalFunction;
-        private BiFunction<RapaioKernel, MagicSnippet, DisplayData> inspectFunction = null;
-        private BiFunction<RapaioKernel, MagicSnippet, CompleteMatches> completeFunction;
+        private MagicFunction<Object> evalFunction;
+        private MagicFunction<DisplayData> inspectFunction = null;
+        private MagicFunction<CompleteMatches> completeFunction;
 
         public Builder syntaxMatcher(String syntaxMatcher) {
             this.syntaxMatcher = syntaxMatcher;
@@ -47,6 +49,11 @@ public record OneLineMagicHandler(
 
         public Builder syntaxHelp(String syntaxHelp) {
             this.syntaxHelp = syntaxHelp;
+            return this;
+        }
+
+        public Builder syntaxPrefix(String syntaxPrefix) {
+            this.syntaxPrefix = syntaxPrefix;
             return this;
         }
 
@@ -60,23 +67,34 @@ public record OneLineMagicHandler(
             return this;
         }
 
-        public Builder evalFunction(OneLineMagicEvalFunction evalFunction) {
+        public Builder evalFunction(MagicFunction<Object> evalFunction) {
             this.evalFunction = evalFunction;
             return this;
         }
 
-        public Builder inspectFunction(BiFunction<RapaioKernel, MagicSnippet, DisplayData> inspectFunction) {
+        public Builder inspectFunction(MagicFunction<DisplayData> inspectFunction) {
             this.inspectFunction = inspectFunction;
             return this;
         }
 
-        public Builder completeFunction(BiFunction<RapaioKernel, MagicSnippet, CompleteMatches> completeFunction) {
+        public Builder completeFunction(MagicFunction<CompleteMatches> completeFunction) {
             this.completeFunction = completeFunction;
             return this;
         }
 
         public OneLineMagicHandler build() {
-            return new OneLineMagicHandler(syntaxMatcher, syntaxHelp, documentation, canHandlePredicate, evalFunction,
+
+            Objects.requireNonNull(syntaxMatcher);
+            Objects.requireNonNull(syntaxHelp);
+            Objects.requireNonNull(syntaxPrefix);
+            Objects.requireNonNull(documentation);
+            Objects.requireNonNull(canHandlePredicate);
+            Objects.requireNonNull(evalFunction);
+
+            return new OneLineMagicHandler(
+                    syntaxMatcher, syntaxHelp, syntaxPrefix,
+                    documentation, canHandlePredicate,
+                    evalFunction,
                     inspectFunction != null ? inspectFunction : this::defaultInspect,
                     completeFunction);
         }

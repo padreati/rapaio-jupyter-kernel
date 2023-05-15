@@ -36,13 +36,13 @@ public interface MagicHandler {
             MagicEvalException {
         for (OneLineMagicHandler handler : oneLineMagicHandlers()) {
             if (handler.canHandlePredicate().test(snippet)) {
-                return handler.evalFunction().eval(kernel, snippet);
+                return handler.evalFunction().apply(kernel, snippet);
             }
         }
         throw new MagicEvalException(snippet, "Couldn't nou find handler for command.");
     }
 
-    default DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) {
+    default DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException, MagicParseException {
         // if we can be more specific, than do it
         if (oneLineMagicHandlers().size() > 1) {
             for(var handler : oneLineMagicHandlers()) {
@@ -81,5 +81,7 @@ public interface MagicHandler {
         return dd;
     }
 
-    CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet);
+    default CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
+        return null;
+    }
 }

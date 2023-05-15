@@ -35,6 +35,7 @@ public class LoadMagicHandler implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%load .*")
                         .syntaxHelp("%load path_to_script_or_notebook")
+                        .syntaxPrefix("%load ")
                         .documentation(List.of())
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)

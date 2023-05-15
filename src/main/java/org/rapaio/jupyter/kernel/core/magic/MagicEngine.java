@@ -3,6 +3,7 @@ package org.rapaio.jupyter.kernel.core.magic;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
@@ -79,7 +80,7 @@ public class MagicEngine {
         return new MagicEvalResult(true, lastResult);
     }
 
-    public MagicInspectResult inspect(String expr, int cursorPosition) {
+    public MagicInspectResult inspect(String expr, int cursorPosition) throws MagicEvalException, MagicParseException {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parser.parseSnippets(expr, cursorPosition);
@@ -101,7 +102,7 @@ public class MagicEngine {
             return new MagicInspectResult(true, null);
         }
 
-        if(snippet.type()== MagicSnippet.Type.NON_MAGIC) {
+        if (snippet.type() == MagicSnippet.Type.NON_MAGIC) {
             return new MagicInspectResult(false, null);
         }
 
@@ -120,7 +121,7 @@ public class MagicEngine {
             }
         }
 
-        // TODO: we should not arrive here
+        // we should not arrive here
         return new MagicInspectResult(true, null);
     }
 
@@ -131,22 +132,26 @@ public class MagicEngine {
         if (snippets == null) {
             return new MagicCompleteResult(false, null);
         }
-
-        // we have magic snippets, check if some of them contains position
-        MagicSnippet snippet = null;
-        for (var s : snippets) {
-            if (s.lines().stream().anyMatch(MagicSnippet.CodeLine::hasPosition)) {
-                snippet = s;
-                break;
-            }
+        if (parser.containsMixedSnippets(snippets)) {
+            // TOD: maybe better
+            return new MagicCompleteResult(true, null);
+        }
+        if (!parser.canHandleByMagic(snippets)) {
+            return new MagicCompleteResult(false, null);
         }
 
-        // we have a magic code, but position is not found in an interesting snippet
-        if (snippet == null) {
+        // we have magic snippets, check if some of them contains position
+        Optional<MagicSnippet> optionalMagicSnippet =
+                snippets.stream().filter(s -> s.lines().stream().anyMatch(MagicSnippet.CodeLine::hasPosition))
+                        .findFirst();
+
+        // valid magic code, but position is not found in an interesting snippet
+        if (optionalMagicSnippet.isEmpty()) {
             return new MagicCompleteResult(true, null);
         }
 
         // identify the code line which contains position
+        MagicSnippet snippet = optionalMagicSnippet.get();
         MagicSnippet.CodeLine codeLine = snippet.lines().stream().filter(MagicSnippet.CodeLine::hasPosition).findAny().orElse(null);
         if (codeLine == null) {
             return new MagicCompleteResult(true, null);
@@ -156,13 +161,30 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                CompleteMatches replacementOptions = handler.complete(kernel, snippet);
-                return new MagicCompleteResult(true, replacementOptions);
+                CompleteMatches matches = handler.complete(kernel, snippet);
+                if (matches == null) {
+                    break;
+                }
+                return new MagicCompleteResult(true, matches);
             }
         }
 
-        // TODO: we should not arrive here
-        return new MagicCompleteResult(true, null);
+        // if none give a specific answer, then use prefixes
+        List<String> prefixes = new ArrayList<>();
+        String line = codeLine.code();
+        String linePrefix = line.substring(0, codeLine.relativePosition());
+        for (var handler : magicHandlers) {
+            for (var oneLineHandler : handler.oneLineMagicHandlers()) {
+                String prefix = oneLineHandler.syntaxPrefix();
+                if (prefix.startsWith(linePrefix) && !prefix.equals(linePrefix)) {
+                    prefixes.add(prefix);
+                }
+            }
+        }
+        prefixes.sort(String::compareTo);
+        CompleteMatches matches = new CompleteMatches(prefixes, codeLine.globalPosition() - codeLine.relativePosition(),
+                codeLine.globalPosition() + codeLine.code().length() - codeLine.relativePosition());
+        return new MagicCompleteResult(true, matches);
     }
 
 

@@ -5,7 +5,6 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -30,6 +29,7 @@ public class MavenCoordinates implements MagicHandler {
                 OneLineMagicHandler.builder()
                         .syntaxMatcher("%maven .*")
                         .syntaxHelp("%maven group_id:artifact_id:version")
+                        .syntaxPrefix("%maven ")
                         .documentation(List.of())
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
@@ -79,11 +79,6 @@ public class MavenCoordinates implements MagicHandler {
         } catch (ParseException | IOException e) {
             throw new RuntimeException(e);
         }
-        return null;
-    }
-
-    @Override
-    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
         return null;
     }
 }
