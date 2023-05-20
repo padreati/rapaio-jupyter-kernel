@@ -8,13 +8,12 @@ import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.maven.DepCoordinates;
 import org.rapaio.jupyter.kernel.core.magic.maven.IvyDependencies;
 
-public class MavenCoordinates implements MagicHandler {
+public class MavenCoordinates extends MagicHandler {
 
     private static final String HEADER = "%maven ";
 
@@ -33,15 +32,12 @@ public class MavenCoordinates implements MagicHandler {
                         .documentation(List.of())
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
-                        .inspectFunction((channels, magicSnippet) -> null)
-                        .completeFunction(this::complete)
                         .build()
         );
     }
 
     @Override
     public List<String> helpMessage() {
-
         return List.of("Find and resolve a maven dependency using the standard maven coordinates: group_id, artifact_id"
                         + " and version id.",
                 "The maven public repositories are searched for dependencies. Additionally, any maven transitive dependency declared with "
@@ -56,7 +52,7 @@ public class MavenCoordinates implements MagicHandler {
         return magicSnippet.lines().get(0).code().startsWith(HEADER);
     }
 
-    public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }

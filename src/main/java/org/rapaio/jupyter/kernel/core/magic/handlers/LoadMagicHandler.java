@@ -20,7 +20,7 @@ import org.rapaio.jupyter.kernel.message.messages.IOPubError;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
-public class LoadMagicHandler implements MagicHandler {
+public class LoadMagicHandler extends MagicHandler {
 
     private static final String PREFIX = "%load ";
 
@@ -40,7 +40,7 @@ public class LoadMagicHandler implements MagicHandler {
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
                         .inspectFunction((channels, magicSnippet) -> null)
-                        .completeFunction(this::complete)
+                        .completeFunction(this::completeLine)
                         .build()
         );
     }
@@ -57,7 +57,7 @@ public class LoadMagicHandler implements MagicHandler {
         return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.line(0).code().startsWith(PREFIX);
     }
 
-    public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
@@ -84,8 +84,7 @@ public class LoadMagicHandler implements MagicHandler {
         return null;
     }
 
-    @Override
-    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
+    CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || f.getName().endsWith(".ipynb") || f.getName().endsWith(".jshell"));
     }
@@ -153,7 +152,7 @@ public class LoadMagicHandler implements MagicHandler {
         return null;
     }
 
-    private Object evalShellScript(RapaioKernel kernel, String content) {
+    Object evalShellScript(RapaioKernel kernel, String content) {
         try {
             return kernel.javaEngine().eval(content);
         } catch (Exception e) {

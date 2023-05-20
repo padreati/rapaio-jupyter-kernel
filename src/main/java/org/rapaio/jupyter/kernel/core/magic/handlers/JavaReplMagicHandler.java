@@ -9,7 +9,6 @@ import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 
@@ -19,7 +18,7 @@ import jdk.jshell.Snippet;
 import jdk.jshell.TypeDeclSnippet;
 import jdk.jshell.VarSnippet;
 
-public class JavaReplMagicHandler implements MagicHandler {
+public class JavaReplMagicHandler extends MagicHandler {
 
     public static final String LINE_PREFIX = "%jshell";
 
@@ -125,20 +124,6 @@ public class JavaReplMagicHandler implements MagicHandler {
         }
         String expr = snippet.lines().get(0).code();
         return expr.startsWith(prefix);
-    }
-
-    @Override
-    public Object eval(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException, MagicParseException {
-        if (!canHandleSnippet(snippet)) {
-            throw new RuntimeException("Try to execute a magic snippet to improper handler.");
-        }
-        for (var oneLineMagic : oneLineMagicHandlers()) {
-            if (oneLineMagic.canHandlePredicate().test(snippet)) {
-                return oneLineMagic.evalFunction().apply(kernel, snippet);
-            }
-        }
-        kernel.channels().writeToStdErr("Command not executed either because there is no handler or due to a syntax error.");
-        return null;
     }
 
     private Object evalSimpleList(RapaioKernel kernel, MagicSnippet magicSnippet) {

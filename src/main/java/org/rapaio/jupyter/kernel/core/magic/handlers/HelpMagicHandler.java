@@ -11,7 +11,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 
-public class HelpMagicHandler implements MagicHandler {
+public class HelpMagicHandler extends MagicHandler {
 
     private static final String MAGIC_HELP_PREFIX_FIXED = "%help";
 
@@ -41,8 +41,6 @@ public class HelpMagicHandler implements MagicHandler {
                         .documentation(List.of("Display help for all magic handlers."))
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
-                        .completeFunction((channels, magicSnippet) -> null)
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .build()
         );
     }
@@ -56,7 +54,7 @@ public class HelpMagicHandler implements MagicHandler {
         return text.startsWith(MAGIC_HELP_PREFIX_FIXED);
     }
 
-    private Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }

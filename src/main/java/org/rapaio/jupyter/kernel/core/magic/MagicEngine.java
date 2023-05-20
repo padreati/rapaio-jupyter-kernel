@@ -127,7 +127,8 @@ public class MagicEngine {
         return new MagicInspectResult(true, null);
     }
 
-    public MagicCompleteResult complete(RapaioKernel kernel, String expr, int cursorPosition) {
+    public MagicCompleteResult complete(RapaioKernel kernel, String expr, int cursorPosition) throws MagicEvalException,
+            MagicParseException {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parser.parseSnippets(expr, cursorPosition);
@@ -163,11 +164,20 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                CompleteMatches matches = handler.complete(kernel, snippet);
-                if (matches == null) {
+                boolean handled = false;
+                for (var oneLineHandler : handler.oneLineMagicHandlers()) {
+                    if (oneLineHandler.canHandlePredicate().test(snippet)) {
+                        CompleteMatches matches = oneLineHandler.completeFunction().apply(kernel, snippet);
+                        if (matches == null) {
+                            handled = true;
+                            break;
+                        }
+                        return new MagicCompleteResult(true, matches);
+                    }
+                }
+                if (handled) {
                     break;
                 }
-                return new MagicCompleteResult(true, matches);
             }
         }
 

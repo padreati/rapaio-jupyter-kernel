@@ -24,7 +24,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 
-public class ImageMagicHandler implements MagicHandler {
+public class ImageMagicHandler extends MagicHandler {
 
     private static final String PREFIX = "%image ";
 
@@ -47,8 +47,8 @@ public class ImageMagicHandler implements MagicHandler {
                         .syntaxPrefix("%image ")
                         .documentation(List.of("Display an image from a local file or from an URL"))
                         .canHandlePredicate(this::canHandleSnippet)
-                        .evalFunction(this::eval)
-                        .completeFunction(this::complete)
+                        .evalFunction(this::evalLine)
+                        .completeFunction(this::completeLine)
                         .build()
         );
     }
@@ -58,7 +58,7 @@ public class ImageMagicHandler implements MagicHandler {
         return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(PREFIX);
     }
 
-    public Object eval(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Cannot handle an unmatched snippet.");
         }
@@ -84,8 +84,7 @@ public class ImageMagicHandler implements MagicHandler {
         }
     }
 
-    @Override
-    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
+    CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
         Set<String> fileSuffixes = Arrays.stream(ImageIO.getReaderFileSuffixes()).map(String::toLowerCase).collect(Collectors.toSet());
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || fileSuffixes.contains(f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase()));

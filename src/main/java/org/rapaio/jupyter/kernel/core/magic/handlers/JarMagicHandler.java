@@ -12,7 +12,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 
-public class JarMagicHandler implements MagicHandler {
+public class JarMagicHandler extends MagicHandler {
 
     private static final String PREFIX = "%jar ";
 
@@ -34,7 +34,7 @@ public class JarMagicHandler implements MagicHandler {
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
                         .inspectFunction((channels, magicSnippet) -> null)
-                        .completeFunction(this::complete)
+                        .completeFunction(this::completeLine)
                         .build()
         );
     }
@@ -52,7 +52,7 @@ public class JarMagicHandler implements MagicHandler {
         return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(PREFIX);
     }
 
-    public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException, MagicEvalException {
+    private Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException, MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Snippet cannot be handled by this magic handler.");
         }
@@ -84,8 +84,7 @@ public class JarMagicHandler implements MagicHandler {
         return null;
     }
 
-    @Override
-    public CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
+    private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
         return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
                 f -> (f.isDirectory() || f.getName().endsWith(".jar")));
     }

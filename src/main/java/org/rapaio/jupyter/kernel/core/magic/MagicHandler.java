@@ -9,40 +9,41 @@ import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
-public interface MagicHandler {
+public abstract class MagicHandler {
 
     /**
      * @return name of the magic handler useful in help messages
      */
-    String name();
+    public abstract String name();
 
     /**
      * General help documentation lines.
      *
      * @return general documentation lines
      */
-    List<String> helpMessage();
+    public abstract List<String> helpMessage();
 
-    List<OneLineMagicHandler> oneLineMagicHandlers();
+    public abstract List<OneLineMagicHandler> oneLineMagicHandlers();
 
-    boolean canHandleSnippet(MagicSnippet magicSnippet);
+    public abstract boolean canHandleSnippet(MagicSnippet magicSnippet);
 
-    default Object eval(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
-            MagicEvalException {
+    public final Object eval(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+        if (!canHandleSnippet(magicSnippet)) {
+            throw new RuntimeException("Try to execute a magic snippet to improper handler.");
+        }
         for (OneLineMagicHandler handler : oneLineMagicHandlers()) {
-            if (handler.canHandlePredicate().test(snippet)) {
-                return handler.evalFunction().apply(kernel, snippet);
+            if (handler.canHandlePredicate().test(magicSnippet)) {
+                return handler.evalFunction().apply(kernel, magicSnippet);
             }
         }
-        throw new MagicEvalException(snippet, "Couldn't nou find handler for command.");
+        throw new MagicEvalException(magicSnippet, "Command not executed either because there is no handler or due to a syntax error.");
     }
 
-    default DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException, MagicParseException {
+    public final DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException, MagicParseException {
         // if we can be more specific, than do it
         if (oneLineMagicHandlers().size() > 1) {
             for(var handler : oneLineMagicHandlers()) {
@@ -79,9 +80,5 @@ public interface MagicHandler {
         DisplayData dd = DisplayData.withHtml(inspectHtml);
         dd.putText(sb.toString());
         return dd;
-    }
-
-    default CompleteMatches complete(RapaioKernel kernel, MagicSnippet snippet) {
-        return null;
     }
 }

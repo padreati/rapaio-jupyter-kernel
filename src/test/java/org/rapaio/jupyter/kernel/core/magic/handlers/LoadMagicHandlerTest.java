@@ -12,6 +12,7 @@ import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
+import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 
 public class LoadMagicHandlerTest {
@@ -187,11 +188,11 @@ public class LoadMagicHandlerTest {
             """;
 
     @Test
-    void testHandler() {
+    void testHandler() throws MagicEvalException, MagicParseException {
         LoadMagicHandler handler = new LoadMagicHandler();
         MagicSnippet snippet = new MagicSnippet(MagicSnippet.Type.MAGIC_ONELINE,
                 true, List.of(new MagicSnippet.CodeLine("%load /", true, 7, 7)));
-        var options = handler.complete(null, snippet);
+        var options = handler.oneLineMagicHandlers().get(0).completeFunction().apply(null, snippet);
         assertNotNull(options);
     }
 
