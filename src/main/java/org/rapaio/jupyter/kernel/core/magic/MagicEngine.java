@@ -9,6 +9,7 @@ import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.ImageMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.LoadMagicHandler;
@@ -24,6 +25,7 @@ public class MagicEngine {
         magicHandlers.add(new MavenCoordinates());
         magicHandlers.add(new JarMagicHandler());
         magicHandlers.add(new LoadMagicHandler());
+        magicHandlers.add(new ImageMagicHandler());
         magicHandlers.add(new HelpMagicHandler(magicHandlers));
     }
 
@@ -186,6 +188,4 @@ public class MagicEngine {
                 codeLine.globalPosition() + codeLine.code().length() - codeLine.relativePosition());
         return new MagicCompleteResult(true, matches);
     }
-
-
 }

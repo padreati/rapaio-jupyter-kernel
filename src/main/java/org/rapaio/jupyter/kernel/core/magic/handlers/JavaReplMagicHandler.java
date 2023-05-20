@@ -107,11 +107,11 @@ public class JavaReplMagicHandler implements MagicHandler {
     }
 
     @Override
-    public boolean canHandleSnippet(MagicSnippet snippet) {
-        if (snippet == null || !snippet.oneLine() || snippet.lines().size() != 1 || snippet.lines().get(0).code().trim().isEmpty()) {
+    public boolean canHandleSnippet(MagicSnippet magicSnippet) {
+        if (magicSnippet == null || !magicSnippet.oneLine() || magicSnippet.lines().size() != 1 || magicSnippet.lines().get(0).code().trim().isEmpty()) {
             return false;
         }
-        String expr = snippet.lines().get(0).code();
+        String expr = magicSnippet.lines().get(0).code();
         List<String> tokens = Arrays.stream(expr.trim().split("\\s")).filter(s -> !s.isEmpty()).toList();
         if (tokens.isEmpty()) {
             return false;

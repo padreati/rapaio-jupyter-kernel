@@ -23,7 +23,7 @@ public class HelpMagicHandler implements MagicHandler {
 
     @Override
     public String name() {
-        return "HelpHandler";
+        return "Help";
     }
 
     @Override
@@ -48,11 +48,11 @@ public class HelpMagicHandler implements MagicHandler {
     }
 
     @Override
-    public boolean canHandleSnippet(MagicSnippet snippet) {
-        if (!snippet.oneLine() || snippet.lines().size() != 1) {
+    public boolean canHandleSnippet(MagicSnippet magicSnippet) {
+        if (!magicSnippet.oneLine() || magicSnippet.lines().size() != 1) {
             return false;
         }
-        String text = snippet.lines().get(0).code().trim().toLowerCase();
+        String text = magicSnippet.lines().get(0).code().trim().toLowerCase();
         return text.startsWith(MAGIC_HELP_PREFIX_FIXED);
     }
 
@@ -78,7 +78,7 @@ public class HelpMagicHandler implements MagicHandler {
             sb.append(ANSI.start().bold().fgBlue().text(handler.name()).reset().render()).append("\n");
 
             sb.append(ANSI.start().bold().text("Documentation:\n").render());
-            sb.append(handler.helpMessage().stream().map(s -> "    " + s).collect(Collectors.joining("\n")));
+            sb.append(handler.helpMessage().stream().map(s -> "    " + s).collect(Collectors.joining("\n"))).append("\n");
 
             sb.append(ANSI.start().bold().text("Syntax:\n").render());
             for (var oneLiner : handler.oneLineMagicHandlers()) {

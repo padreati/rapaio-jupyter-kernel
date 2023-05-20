@@ -3,7 +3,7 @@ package org.rapaio.jupyter.kernel.core.display;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.core.display.image.ImageHandler;
+import org.rapaio.jupyter.kernel.core.display.image.ImageRenderer;
 
 public final class Renderer {
 
@@ -13,7 +13,7 @@ public final class Renderer {
             o -> o == null ? null : new DataRendererResponse(true, DisplayData.withText(o.toString()));
 
     static {
-        handlers.add(new ImageHandler());
+        handlers.add(new ImageRenderer());
     }
 
     public DisplayData render(Object result) {

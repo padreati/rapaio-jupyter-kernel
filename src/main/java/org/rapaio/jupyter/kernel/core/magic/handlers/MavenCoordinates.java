@@ -49,11 +49,11 @@ public class MavenCoordinates implements MagicHandler {
     }
 
     @Override
-    public boolean canHandleSnippet(MagicSnippet snippet) {
-        if (!snippet.oneLine()) {
+    public boolean canHandleSnippet(MagicSnippet magicSnippet) {
+        if (!magicSnippet.oneLine()) {
             return false;
         }
-        return snippet.lines().get(0).code().startsWith(HEADER);
+        return magicSnippet.lines().get(0).code().startsWith(HEADER);
     }
 
     public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {

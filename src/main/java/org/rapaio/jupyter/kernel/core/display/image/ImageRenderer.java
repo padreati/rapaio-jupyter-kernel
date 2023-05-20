@@ -15,7 +15,7 @@ import org.rapaio.jupyter.kernel.core.display.DataRendererResponse;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
 
-public class ImageHandler implements DataRenderHandler {
+public class ImageRenderer implements DataRenderHandler {
 
     @Override
     public DataRendererResponse render(Object object) {

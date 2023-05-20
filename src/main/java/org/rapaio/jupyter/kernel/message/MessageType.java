@@ -43,7 +43,7 @@ import org.rapaio.jupyter.kernel.message.messages.StdinInputRequest;
  */
 public record MessageType<T>(String name, Class<T> contentType) {
 
-    private static final Map<String, MessageType<?>> TYPE_REGISTRY = new HashMap<>();
+    private static final Map<String, MessageType<?>> REGISTRY = new HashMap<>();
 
     public static final MessageType<Object> UNKNOWN;
     public static final MessageType<ShellExecuteRequest> SHELL_EXECUTE_REQUEST;
@@ -112,16 +112,16 @@ public record MessageType<T>(String name, Class<T> contentType) {
         CUSTOM_COMM_CLOSE = register(new MessageType<>("comm_close", CustomCommClose.class));
     }
 
-    private static <TT> MessageType<TT> register(MessageType<TT> messageType) {
-        TYPE_REGISTRY.put(messageType.name, messageType);
+    private static <MT> MessageType<MT> register(MessageType<MT> messageType) {
+        REGISTRY.put(messageType.name, messageType);
         return messageType;
     }
 
     public static MessageType<?> getType(String name) {
-        if (!TYPE_REGISTRY.containsKey(name)) {
+        if (!REGISTRY.containsKey(name)) {
             return UNKNOWN;
         }
-        return TYPE_REGISTRY.get(name);
+        return REGISTRY.get(name);
     }
 
     public MessageType<ErrorReply> newError() {

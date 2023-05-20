@@ -30,7 +30,7 @@ public interface MagicHandler {
 
     List<OneLineMagicHandler> oneLineMagicHandlers();
 
-    boolean canHandleSnippet(MagicSnippet snippet);
+    boolean canHandleSnippet(MagicSnippet magicSnippet);
 
     default Object eval(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
             MagicEvalException {

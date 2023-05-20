@@ -48,8 +48,8 @@ public class JarMagicHandler implements MagicHandler {
     }
 
     @Override
-    public boolean canHandleSnippet(MagicSnippet snippet) {
-        return snippet.oneLine() && snippet.lines().size() == 1 && snippet.lines().get(0).code().startsWith(PREFIX);
+    public boolean canHandleSnippet(MagicSnippet magicSnippet) {
+        return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(PREFIX);
     }
 
     public Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException, MagicEvalException {
