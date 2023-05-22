@@ -55,7 +55,7 @@ public class ImageMagicHandler extends MagicHandler {
 
     @Override
     public boolean canHandleSnippet(MagicSnippet magicSnippet) {
-        return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(PREFIX);
+        return canHandleOneLinePrefix(magicSnippet, PREFIX);
     }
 
     Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {

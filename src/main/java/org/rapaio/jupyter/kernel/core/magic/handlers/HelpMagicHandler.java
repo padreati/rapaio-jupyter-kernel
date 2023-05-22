@@ -13,7 +13,7 @@ import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
 
 public class HelpMagicHandler extends MagicHandler {
 
-    private static final String MAGIC_HELP_PREFIX_FIXED = "%help";
+    private static final String ONE_LINE_PREFIX = "%help";
 
     private final List<MagicHandler> magicHandlers;
 
@@ -47,11 +47,7 @@ public class HelpMagicHandler extends MagicHandler {
 
     @Override
     public boolean canHandleSnippet(MagicSnippet magicSnippet) {
-        if (!magicSnippet.oneLine() || magicSnippet.lines().size() != 1) {
-            return false;
-        }
-        String text = magicSnippet.lines().get(0).code().trim().toLowerCase();
-        return text.startsWith(MAGIC_HELP_PREFIX_FIXED);
+        return canHandleOneLinePrefix(magicSnippet, ONE_LINE_PREFIX);
     }
 
     Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
@@ -61,7 +57,7 @@ public class HelpMagicHandler extends MagicHandler {
         String expr = snippet.lines().get(0).code();
         String text = expr.trim().toLowerCase();
 
-        if (text.equals(MAGIC_HELP_PREFIX_FIXED)) {
+        if (text.equals(ONE_LINE_PREFIX)) {
             return help();
         }
         throw new MagicParseException(name(), expr, "Help magic syntax is incorrect.");

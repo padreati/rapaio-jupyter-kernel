@@ -46,8 +46,8 @@ public abstract class MagicHandler {
     public final DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException, MagicParseException {
         // if we can be more specific, than do it
         if (oneLineMagicHandlers().size() > 1) {
-            for(var handler : oneLineMagicHandlers()) {
-                if(handler.canHandlePredicate().test(magicSnippet)) {
+            for (var handler : oneLineMagicHandlers()) {
+                if (handler.canHandlePredicate().test(magicSnippet)) {
                     return handler.inspectFunction().apply(kernel, magicSnippet);
                 }
             }
@@ -80,5 +80,9 @@ public abstract class MagicHandler {
         DisplayData dd = DisplayData.withHtml(inspectHtml);
         dd.putText(sb.toString());
         return dd;
+    }
+
+    protected boolean canHandleOneLinePrefix(MagicSnippet magicSnippet, String prefix) {
+        return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(prefix);
     }
 }

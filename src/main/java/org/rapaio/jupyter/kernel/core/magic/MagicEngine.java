@@ -8,6 +8,7 @@ import java.util.Optional;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.magic.handlers.ClasspathMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.ImageMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
@@ -26,6 +27,7 @@ public class MagicEngine {
         magicHandlers.add(new JarMagicHandler());
         magicHandlers.add(new LoadMagicHandler());
         magicHandlers.add(new ImageMagicHandler());
+        magicHandlers.add(new ClasspathMagicHandler());
         magicHandlers.add(new HelpMagicHandler(magicHandlers));
     }
 

@@ -33,7 +33,6 @@ public class JarMagicHandler extends MagicHandler {
                         ))
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
-                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction(this::completeLine)
                         .build()
         );
@@ -52,16 +51,16 @@ public class JarMagicHandler extends MagicHandler {
         return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(PREFIX);
     }
 
-    private Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException, MagicEvalException {
-        if (!canHandleSnippet(snippet)) {
-            throw new IllegalArgumentException("Snippet cannot be handled by this magic handler.");
+    private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+        if (!canHandleSnippet(magicSnippet)) {
+            throw new MagicParseException("JarMagicHandler", magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
-        String fullCode = snippet.lines().get(0).code();
+        String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(PREFIX.length()).trim();
 
         File file = new File(path);
         if (!file.exists()) {
-            throw new MagicEvalException(snippet, "Provided path does not exist.");
+            throw new MagicEvalException(magicSnippet, "Provided path does not exist.");
         }
         if (file.isDirectory()) {
             File[] jars = file.listFiles(f -> f.getName().endsWith(".jar"));
@@ -76,7 +75,7 @@ public class JarMagicHandler extends MagicHandler {
             }
         } else {
             if (!file.getName().endsWith(".jar")) {
-                throw new MagicEvalException(snippet, "Provided input is not a jar file.");
+                throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.");
             }
             kernel.javaEngine().getShell().addToClasspath(file.getAbsolutePath());
             kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath").render());
@@ -84,8 +83,8 @@ public class JarMagicHandler extends MagicHandler {
         return null;
     }
 
-    private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
-        return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
+    private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {
+        return HandlerUtils.oneLinePathComplete(PREFIX, magicSnippet,
                 f -> (f.isDirectory() || f.getName().endsWith(".jar")));
     }
 }
