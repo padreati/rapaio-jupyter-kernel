@@ -5,14 +5,14 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>0.2.0</version>
+    <version>1.0.0</version>
     <name>rapaio-jupyter-kernel</name>
     <description>Rapaio Jupyter Kernel</description>
     <url>https://github.com/padreati/rapaio-jupyter-kernel</url>
     <licenses>
         <license>
-            <name>Apache License, Version 2.0</name>
-            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <name>MIT</name>
+            <url>https://opensource.org/license/mit/</url>
         </license>
     </licenses>
 
