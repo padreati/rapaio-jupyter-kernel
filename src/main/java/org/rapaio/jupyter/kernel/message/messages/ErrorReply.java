@@ -13,7 +13,7 @@ public record ErrorReply(
         @SerializedName("status") String status,
         @SerializedName("ename") String errName,
         @SerializedName("evalue") String errMsg,
-        @SerializedName("traceback") List<String> stacktrace,
+        @SerializedName("traceback") List<String> traceback,
         @SerializedName("execution_count") Integer executionCount) implements ContentType<Object> {
 
     public MessageType<Object> type() {

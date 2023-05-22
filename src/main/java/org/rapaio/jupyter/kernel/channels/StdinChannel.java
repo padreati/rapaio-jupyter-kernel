@@ -28,9 +28,9 @@ public final class StdinChannel extends AbstractChannel {
         socket.bind(addr);
     }
 
-    public synchronized String getInput(MessageId<?> context, String prompt, boolean isPasswordRequest) {
+    public synchronized String getInput(MessageId<?> messageId, String prompt, boolean isPasswordRequest) {
         StdinInputRequest content = new StdinInputRequest(prompt, isPasswordRequest);
-        Message<StdinInputRequest> request = new Message<>(context, MessageType.STDIN_INPUT_REQUEST, null, content, null);
+        Message<StdinInputRequest> request = new Message<>(messageId, MessageType.STDIN_INPUT_REQUEST, content);
         sendMessage(request);
 
         Message<StdinInputReply> reply = readMessage(MessageType.STDIN_INPUT_REPLY);

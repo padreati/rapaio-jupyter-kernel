@@ -13,15 +13,14 @@ public record Message<T>(
         List<byte[]> blobs) {
 
 
-    public Message(MessageId<?> ctx, MessageType<T> type, Map<String, Object> metadata, T content, List<byte[]> blobs) {
-        this(
-                ctx != null ? ctx.identities() : Collections.emptyList(),
-                new Header<>(ctx, type),
-                ctx != null ? ctx.header() : null,
-                metadata,
-                content,
-                blobs
-        );
+    public Message(MessageId<?> msgId, MessageType<T> type, T content) {
+
+        this(msgId != null ? msgId.identities() : Collections.emptyList(), new Header<>(msgId, type),
+                msgId != null ? msgId.header() : null, null, content, null);
+    }
+
+    public Message(MessageType<T> type, T content) {
+        this(Collections.emptyList(), new Header<>(null, type), null, null, content, null);
     }
 
     public MessageId<T> getId() {

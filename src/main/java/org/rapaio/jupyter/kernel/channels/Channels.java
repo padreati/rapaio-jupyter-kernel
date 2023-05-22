@@ -59,7 +59,7 @@ public final class Channels {
     public void connect(RapaioKernel kernel) {
         if (!isConnected) {
             channels.forEach(s -> s.bind(connProps));
-            iopub.sendMessage(new Message<>(null, MessageType.IOPUB_STATUS, null, IOPubStatus.STARTING, null));
+            iopub.sendMessage(new Message<>(MessageType.IOPUB_STATUS, IOPubStatus.STARTING));
             kernel.registerChannels(this);
 
             handlers = new HashMap<>();
@@ -126,15 +126,15 @@ public final class Channels {
     }
 
     public <T extends ContentType<T>> void publish(T content) {
-        iopub.sendMessage(new Message<>(msgId, content.type(), null, content, null));
+        iopub.sendMessage(new Message<>(msgId, content.type(), content));
     }
 
     public <T extends ContentType<T>> void reply(T content) {
-        shell.sendMessage(new Message<>(msgId, content.type(), null, content, null));
+        shell.sendMessage(new Message<>(msgId, content.type(), content));
     }
 
     public void replyError(MessageType<?> type, ErrorReply error) {
-        shell.sendMessage(new Message(msgId, type, null, error, null));
+        shell.sendMessage(new Message(msgId, type, error));
     }
 
     public void scheduleAfter(Runnable action) {

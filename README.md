@@ -1,6 +1,18 @@
 # rapaio-jupyter-kernel
 
-Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4 and it requires Java >= 17.
+Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java >= 17.
+
+## Introduction
+
+I started implementing this kernel since I believe Java deserves a full feature and properly-maintained jupyter kernel. 
+Personally I need that kernel to use features from a library I contribute to for statistics, ML and data manipulation. 
+However, this kernel has no connection with this library, and it is a general purpose Java kernel.
+
+Currently, this project is in a stable mode, and it contains the features I need. As such, I am the only maintainer. If the 
+kernel prove useful and additional contributors jump into this boat, an organization can be created and a shared ownership 
+can also be added, all of those for the sole purpose of continuity of improvements. The plan is to add new features if requested, 
+so please add issues if you want this tool to be better and fit your needs, if you cannot contribute with code, also. 
+Any feedback is appreciated and supported, if possible.
 
 ## Features
 
@@ -16,68 +28,33 @@ Below are listed some features, besides running Java code, since this is the mai
 * JShell commands (not all command are implemented since some of them are not applicable)
 * Loading notebooks and JShell scripts
 * Loading jar or jars from directory to classpath
+* Adding directories with compiled classes to classpath
+* Display image from local file systems or URL
 * Attach maven dependencies (with transitive dependencies)
 
 ## Installation
 
-The latest version is 0.2.0 cand can be found as a download in the releases section. Rapaio Jupyter Kernel contains an 
-installing tool which allow users to quickly install the kernel. The installer is contained in the jar distribution archive 
+The latest version can be found as a download in the releases section. Rapaio Jupyter Kernel contains an 
+installing tool which allow users to quickly set up the kernel. The installer is contained in the jar distribution archive 
 and can be called with:
 
-    java -jar ./rapaio-jupyter-kernel-0.2.0.jar -i -auto
+    java -jar ./rapaio-jupyter-kernel-1.0.0.jar -i -auto
 
-The `-auto` option uses an automatic mode for installing the kernel. 
+The `-auto` option uses an automatic mode for installing the kernel. The installer has also an interactive mode, and the kernel installation can be realized manually, also. 
+For more details you can follow [INSTALL.md](INSTALL.md).
 
-### Manual installation
+## Maven central
 
-Without using the automatic mode, the installer asks in an interactive way various information to customize the installed kernel. 
-An example of interactive installer mode:
+The project is also stored in maven central repositories and can be added as dependency in maven as:
 
-    shell: java -jar ./rapaio-jupyter-kernel-0.2.0.jar -i
-    Installing in interactive mode.
-    Select installation path:
-    [1] /home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels
-    [2] /usr/local/share/jupyter/kernels
-    [3] /usr/share/jupyter/kernels
-    1
-    Select kernel dir (default 'rapaio-jupyter-kernel'):
-    rapaio-custom-kernel
-    Select display name (default 'Rapaio Kernel'):
-    Rapaio Custom
-    Select timeout in milliseconds:
-    -1
-    Select compiler options (default ''):
-    
-    Select init script (default ''):
-    
-    Installation path: /home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels
-    Kernel dir: rapaio-custom-kernel
-    kernel.json:
-    {
-        "argv": [
-            "java",
-            "--enable-preview",
-            "--add-modules",
-            "jdk.incubator.vector,jdk.incubator.concurrent",
-            "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-custom-kernel/rapaio-jupyter-kernel-0.2.0.jar",
-            "{connection_file}"
-        ],
-        "display_name": "Rapaio Custom",
-        "language": "java",
-        "interrupt_mode": "message",
-        "env": {
-            "RJK_COMPILER_OPTIONS": "",
-            "RJK_INIT_SCRIPT": "",
-            "RJK_TIMEOUT_MILLIS": "-1"
-        }
-    }
-    Installer is ready. Do you want to continue [Y/N] ?
-    Y
+    <dependency>
+        <groupId>io.github.padreati</groupId>
+        <artifactId>rapaio-jupyter-kernel</artifactId>
+        <version>1.0.0</version>
+    </dependency>
 
-
-All the previous steps can be realized manually by creating a kernel in a jupyter kernel specification directory. In that directory the 
-Java archive of versioned rapaio-jupyter-kernel will be copied and a file called `kernel.json` will be created with a content similar 
-with the one dislayed in the previous installing script. For more information regarding how a jupyter kernel should be installer, 
-follow documentation from: [Jupyter Kernel Specs](https://jupyter-client.readthedocs.io/en/stable/kernels.html#kernel-specs).
-
+This is not necessary now, since the kernel is packaged as a self-contained jar archive (it includes all dependencies), 
+and can be downloaded from releases. In the future it would be possible to introduce a plug-in mechanism to allow others to 
+extend library for their own purposes. I see possibilities to allow others to create custom display code for objects of their 
+own type or to implement new magic features. This kind of extension of notebook can work for custom features, for generic features 
+one can consider contributing to this project.  
