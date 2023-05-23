@@ -77,7 +77,7 @@ public class KernelJsonBuilder {
 
         List<String> argv = new ArrayList<>();
         argv.add("java");
-        argv.addAll(List.of("--enable-preview", "--add-modules", "jdk.incubator.vector,jdk.incubator.concurrent"));
+        argv.add("--enable-preview");
         argv.addAll(List.of("-jar", this.jarPath + SEPARATOR + kernelDir + SEPARATOR + jarName));
         argv.add(CONNECTION_FILE_MARKER);
 
