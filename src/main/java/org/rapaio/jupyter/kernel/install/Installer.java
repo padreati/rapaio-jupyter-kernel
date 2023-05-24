@@ -118,6 +118,8 @@ public class Installer {
             System.out.println("Installer is ready. Do you want to continue [Y/N] ?");
             String line = new Scanner(System.in).nextLine().trim();
             if (!line.equals("Y")) {
+                System.out.println("Installation process was canceled. "
+                        + "Please note that you need to answer with capital Y if you want the installer to continue.");
                 System.exit(0);
             }
         }
@@ -126,7 +128,7 @@ public class Installer {
         File installPathFile = new File(installationPath);
         if (!installPathFile.exists()) {
             if (!installPathFile.mkdirs()) {
-                System.out.println("Could not create installation directory.");
+                System.out.println("Could not create installation directory. Check if it is a valid path or there are enough permissions.");
                 System.exit(1);
             }
         }
