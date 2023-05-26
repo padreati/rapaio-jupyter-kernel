@@ -9,7 +9,7 @@ import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
 
 public class HelpMagicHandler extends MagicHandler {
 
@@ -32,9 +32,9 @@ public class HelpMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+    public List<LineMagicHandler> oneLineMagicHandlers() {
         return List.of(
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%help")
                         .syntaxHelp("%help")
                         .syntaxPrefix("%help")

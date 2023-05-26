@@ -1,22 +1,17 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.space;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
-
-import java.util.List;
-import java.util.Objects;
-import java.util.function.Predicate;
-
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
-public record OneLineMagicHandler(
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Predicate;
+
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.*;
+
+public record LineMagicHandler(
         String syntaxMatcher,
         String syntaxHelp,
         String syntaxPrefix,
@@ -82,7 +77,7 @@ public record OneLineMagicHandler(
             return this;
         }
 
-        public OneLineMagicHandler build() {
+        public LineMagicHandler build() {
 
             Objects.requireNonNull(syntaxMatcher);
             Objects.requireNonNull(syntaxHelp);
@@ -91,7 +86,7 @@ public record OneLineMagicHandler(
             Objects.requireNonNull(canHandlePredicate);
             Objects.requireNonNull(evalFunction);
 
-            return new OneLineMagicHandler(
+            return new LineMagicHandler(
                     syntaxMatcher, syntaxHelp, syntaxPrefix,
                     documentation, canHandlePredicate,
                     evalFunction,

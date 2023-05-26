@@ -14,7 +14,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
 import org.rapaio.jupyter.kernel.message.messages.IOPubError;
 
 import com.google.gson.JsonElement;
@@ -30,9 +30,9 @@ public class LoadMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+    public List<LineMagicHandler> oneLineMagicHandlers() {
         return List.of(
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%load .*")
                         .syntaxHelp("%load path_to_script_or_notebook")
                         .syntaxPrefix("%load ")

@@ -11,10 +11,8 @@ public record MagicSnippet(Type type, boolean oneLine, List<CodeLine> lines) {
     }
 
     public enum Type {
-        MAGIC_ONELINE,
-        MAGIC_MULTILINE,
-        COMMENTS,
-        EMPTY,
+        MAGIC_LINE,
+        MAGIC_CELL,
         NON_MAGIC
     }
 }

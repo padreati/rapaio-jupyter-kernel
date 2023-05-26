@@ -22,7 +22,7 @@ import org.rapaio.jupyter.kernel.core.display.MIMEType;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
 
 public class ImageMagicHandler extends MagicHandler {
 
@@ -39,9 +39,9 @@ public class ImageMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+    public List<LineMagicHandler> oneLineMagicHandlers() {
         return List.of(
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%image .*")
                         .syntaxHelp("%image path_to_file_or_url")
                         .syntaxPrefix("%image ")

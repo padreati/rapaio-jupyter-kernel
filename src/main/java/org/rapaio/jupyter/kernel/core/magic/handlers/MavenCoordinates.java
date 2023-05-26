@@ -9,7 +9,7 @@ import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.maven.DepCoordinates;
 import org.rapaio.jupyter.kernel.core.magic.maven.IvyDependencies;
 
@@ -23,9 +23,9 @@ public class MavenCoordinates extends MagicHandler {
     }
 
     @Override
-    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+    public List<LineMagicHandler> oneLineMagicHandlers() {
         return List.of(
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%maven .*")
                         .syntaxHelp("%maven group_id:artifact_id:version")
                         .syntaxPrefix("%maven ")

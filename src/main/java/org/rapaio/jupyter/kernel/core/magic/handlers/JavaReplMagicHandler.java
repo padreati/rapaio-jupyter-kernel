@@ -10,7 +10,7 @@ import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
 
 import jdk.jshell.ImportSnippet;
 import jdk.jshell.MethodSnippet;
@@ -36,9 +36,9 @@ public class JavaReplMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+    public List<LineMagicHandler> oneLineMagicHandlers() {
         return List.of(
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /methods")
                         .syntaxHelp("%jshell /methods")
                         .syntaxPrefix("%jshell /methods")
@@ -47,7 +47,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .evalFunction(this::evalMethods)
                         .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /vars")
                         .syntaxHelp("%jshell /vars")
                         .syntaxPrefix("%jshell /vars")
@@ -56,7 +56,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .evalFunction(this::evalVars)
                         .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /imports")
                         .syntaxHelp("%jshell /imports")
                         .syntaxPrefix("%jshell /imports")
@@ -65,7 +65,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .evalFunction(this::evalImports)
                         .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /types")
                         .syntaxHelp("%jshell /types")
                         .syntaxPrefix("%jshell /types")
@@ -75,7 +75,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
 
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list -all")
                         .syntaxHelp("%jshell /list -all")
                         .syntaxPrefix("%jshell /list -all")
@@ -84,7 +84,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .evalFunction(this::evalAllList)
                         .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list \\w")
                         .syntaxHelp("%jshell /list [id]")
                         .syntaxPrefix("%jshell /list ")
@@ -93,7 +93,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .evalFunction(this::evalIdList)
                         .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jshell /list")
                         .syntaxHelp("%jshell /list")
                         .syntaxPrefix("%jshell /list")

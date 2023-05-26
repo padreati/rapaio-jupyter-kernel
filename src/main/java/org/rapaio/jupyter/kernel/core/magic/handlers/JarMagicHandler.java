@@ -1,16 +1,12 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import java.io.File;
-import java.util.List;
-
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
-import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.OneLineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.*;
+
+import java.io.File;
+import java.util.List;
 
 public class JarMagicHandler extends MagicHandler {
 
@@ -22,9 +18,9 @@ public class JarMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<OneLineMagicHandler> oneLineMagicHandlers() {
+    public List<LineMagicHandler> oneLineMagicHandlers() {
         return List.of(
-                OneLineMagicHandler.builder()
+                LineMagicHandler.builder()
                         .syntaxMatcher("%jar .*")
                         .syntaxHelp("%jar path_to_jar_or_folder_of_jars")
                         .syntaxPrefix("%jar ")

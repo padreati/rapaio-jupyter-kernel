@@ -6,16 +6,18 @@ import java.util.List;
 public class MagicParser {
 
     /**
-     * Parse source into a list of {@link MagicSnippet}. A magic snippet is a line if the snippet starts with character '%'
-     * or a multiline if the magic starts with '%%'. The token next to '%' or '%%' is not checked, since those starting characters
+     * Parse source into a list of {@link MagicSnippet}. A magic snippet is a line if the snippet starts with
+     * character '%' or a multiline if the magic starts with '%%'. The token next to '%' or '%%' is not checked,
+     * since those starting characters
      * are not valid java starting chars and the intent is clear that it should contain a magic code.
      * <p>
      * The parsing produces multiples types of snippets given by {@link MagicSnippet.Type}.
      * <p>
-     * If the list of magic snippets will contain only snippets with types {@link MagicSnippet.Type#NON_MAGIC}, {@link MagicSnippet.Type#COMMENTS}
-     * and {@link MagicSnippet.Type#EMPTY}, than the intent of the code is recognized as not directed to magic engine, and consequently
-     * deferred to Java engine for interpretation. If the resulting snippets contains at least one {@link MagicSnippet.Type#NON_MAGIC} and
-     * at least one of type {@link MagicSnippet.Type#MAGIC_ONELINE} or {@link MagicSnippet.Type#MAGIC_MULTILINE} than an erroneous
+     * If the list of magic snippets will contain only snippets with types {@link MagicSnippet.Type#NON_MAGIC},
+     * than the intent of the code is recognized as not directed to magic engine, and consequently
+     * deferred to Java engine for interpretation.
+     * If the resulting snippets contains at least one {@link MagicSnippet.Type#NON_MAGIC} and at least one of
+     * type {@link MagicSnippet.Type#MAGIC_LINE} or {@link MagicSnippet.Type#MAGIC_CELL} than an erroneous
      * situation is considered.
      * <p>
      * A valid magic code should contain any types other than {@link MagicSnippet.Type#NON_MAGIC}.
@@ -49,12 +51,12 @@ public class MagicParser {
             if (hasLineMarker(line)) {
                 if (cellLines != null) {
                     // collect accumulation
-                    snippets.add(new MagicSnippet(cellMagic ? MagicSnippet.Type.MAGIC_MULTILINE : MagicSnippet.Type.NON_MAGIC,
+                    snippets.add(new MagicSnippet(cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC,
                             false, cellLines));
                     cellLines = null;
                     cellMagic = false;
                 }
-                snippets.add(new MagicSnippet(MagicSnippet.Type.MAGIC_ONELINE,
+                snippets.add(new MagicSnippet(MagicSnippet.Type.MAGIC_LINE,
                         true, List.of(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position))));
                 continue;
             }
@@ -63,10 +65,9 @@ public class MagicParser {
             if (hasCellMarker(line)) {
                 if (cellLines != null) {
                     // collect accumulation
-                    snippets.add(new MagicSnippet(cellMagic ? MagicSnippet.Type.MAGIC_MULTILINE : MagicSnippet.Type.NON_MAGIC,
+                    snippets.add(new MagicSnippet(
+                            cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC,
                             false, cellLines));
-                    cellLines = null;
-                    cellMagic = false;
                 }
                 cellLines = new ArrayList<>();
                 cellMagic = true;
@@ -81,13 +82,14 @@ public class MagicParser {
             }
 
             // non-magic line since there are no previous lines
-            cellMagic = false;
             cellLines = new ArrayList<>();
             cellLines.add(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position));
         }
         // collect what remains
         if (cellLines != null) {
-            snippets.add(new MagicSnippet(cellMagic ? MagicSnippet.Type.MAGIC_MULTILINE : MagicSnippet.Type.NON_MAGIC, false, cellLines));
+            snippets.add(new MagicSnippet(
+                    cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC,
+                    false, cellLines));
         }
         return snippets;
     }
@@ -128,7 +130,7 @@ public class MagicParser {
         boolean hasNonMagic = false;
         for (var magicSnippet : magicSnippets) {
             switch (magicSnippet.type()) {
-                case MAGIC_ONELINE, MAGIC_MULTILINE -> hasMagic = true;
+                case MAGIC_LINE, MAGIC_CELL -> hasMagic = true;
                 case NON_MAGIC -> hasNonMagic = true;
                 default -> {
                 }

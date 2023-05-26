@@ -27,7 +27,7 @@ public abstract class MagicHandler {
      */
     public abstract List<String> helpMessage();
 
-    public abstract List<OneLineMagicHandler> oneLineMagicHandlers();
+    public abstract List<LineMagicHandler> oneLineMagicHandlers();
 
     public abstract boolean canHandleSnippet(MagicSnippet magicSnippet);
 
@@ -35,7 +35,7 @@ public abstract class MagicHandler {
         if (!canHandleSnippet(magicSnippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
-        for (OneLineMagicHandler handler : oneLineMagicHandlers()) {
+        for (LineMagicHandler handler : oneLineMagicHandlers()) {
             if (handler.canHandlePredicate().test(magicSnippet)) {
                 return handler.evalFunction().apply(kernel, magicSnippet);
             }
