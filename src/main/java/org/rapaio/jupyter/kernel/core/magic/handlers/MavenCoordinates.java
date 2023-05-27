@@ -1,17 +1,17 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.List;
-
 import org.apache.ivy.core.report.ResolveReport;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.maven.DepCoordinates;
 import org.rapaio.jupyter.kernel.core.magic.maven.IvyDependencies;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.List;
 
 public class MavenCoordinates extends MagicHandler {
 
@@ -23,11 +23,11 @@ public class MavenCoordinates extends MagicHandler {
     }
 
     @Override
-    public List<LineMagicHandler> oneLineMagicHandlers() {
+    public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
-                LineMagicHandler.builder()
+                SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%maven .*")
-                        .syntaxHelp("%maven group_id:artifact_id:version")
+                        .syntaxHelp(List.of("%maven group_id:artifact_id:version"))
                         .syntaxPrefix("%maven ")
                         .documentation(List.of())
                         .canHandlePredicate(this::canHandleSnippet)
@@ -46,7 +46,7 @@ public class MavenCoordinates extends MagicHandler {
 
     @Override
     public boolean canHandleSnippet(MagicSnippet magicSnippet) {
-        if (!magicSnippet.oneLine()) {
+        if (!magicSnippet.isLineMagic()) {
             return false;
         }
         return magicSnippet.lines().get(0).code().startsWith(HEADER);

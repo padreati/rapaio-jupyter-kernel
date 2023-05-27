@@ -1,15 +1,14 @@
 package org.rapaio.jupyter.kernel.core.format;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-
-import java.util.List;
-
+import jdk.jshell.EvalException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
-import jdk.jshell.EvalException;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class OutputFormatterTest {
 
@@ -29,7 +28,7 @@ public class OutputFormatterTest {
                 };
                 g(0);"""));
         assertNotNull(e);
-        List<String> output = OutputFormatter.exceptionFormat(kernel.javaEngine(), e);
+        List<String> output = ErrorFormatters.exceptionFormat(kernel, e);
         assertNotNull(output);
 
         for (String line : output) {

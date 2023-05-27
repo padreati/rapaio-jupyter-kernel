@@ -6,11 +6,15 @@ import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.*;
 
 import java.io.File;
+import java.io.FileFilter;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class JarMagicHandler extends MagicHandler {
 
-    private static final String PREFIX = "%jar ";
+    private static final String LINE_PREFIX = "%jar ";
+    private static final String CELL_PREFIX = "%%jars";
 
     @Override
     public String name() {
@@ -18,18 +22,34 @@ public class JarMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<LineMagicHandler> oneLineMagicHandlers() {
+    public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
-                LineMagicHandler.builder()
+                SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%jar .*")
-                        .syntaxHelp("%jar path_to_jar_or_folder_of_jars")
-                        .syntaxPrefix("%jar ")
+                        .syntaxHelp(List.of("%jar path_to_jar_or_folder_of_jars"))
+                        .syntaxPrefix(LINE_PREFIX)
                         .documentation(List.of(
                                 "Adds to the classpath a jar or all jar archives from a directory"
                         ))
-                        .canHandlePredicate(this::canHandleSnippet)
+                        .canHandlePredicate(this::canHandleLine)
                         .evalFunction(this::evalLine)
                         .completeFunction(this::completeLine)
+                        .build(),
+                SnippetMagicHandler.cellMagic()
+                        .syntaxMatcher("%%jars\\s(.+\\s*)+")
+                        .syntaxHelp(List.of(
+                                "%%jars",
+                                "jar_file_or_folder_1",
+                                "[jar_file_or_folder_2]",
+                                "...",
+                                "[jar_file_or_folder_n]"))
+                        .syntaxPrefix(CELL_PREFIX)
+                        .documentation(List.of(
+                                "Adds to classpath all referenced jars or all jar files from referenced directories."
+                        ))
+                        .canHandlePredicate(this::canHandleCell)
+                        .evalFunction(this::evalCell)
+                        .completeFunction(this::completeCell)
                         .build()
         );
     }
@@ -44,7 +64,15 @@ public class JarMagicHandler extends MagicHandler {
 
     @Override
     public boolean canHandleSnippet(MagicSnippet magicSnippet) {
-        return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.lines().get(0).code().startsWith(PREFIX);
+        return canHandleLine(magicSnippet) || canHandleCell(magicSnippet);
+    }
+
+    private boolean canHandleLine(MagicSnippet magicSnippet) {
+        return magicSnippet.isLineMagic() && magicSnippet.line(0).code().startsWith(LINE_PREFIX);
+    }
+
+    private boolean canHandleCell(MagicSnippet magicSnippet) {
+        return magicSnippet.isCellMagic() && magicSnippet.line(0).code().startsWith(CELL_PREFIX);
     }
 
     private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
@@ -52,17 +80,54 @@ public class JarMagicHandler extends MagicHandler {
             throw new MagicParseException("JarMagicHandler", magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
         String fullCode = magicSnippet.lines().get(0).code();
-        String path = fullCode.substring(PREFIX.length()).trim();
+        String path = fullCode.substring(LINE_PREFIX.length()).trim();
 
         File file = new File(path);
         if (!file.exists()) {
             throw new MagicEvalException(magicSnippet, "Provided path does not exist.");
         }
+        if (!file.getName().endsWith(".jar")) {
+            throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.");
+        }
+        addFileToPath(kernel, file);
+        return null;
+    }
+
+    private Object evalCell(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+        if (!canHandleCell(magicSnippet)) {
+            throw new MagicParseException("JarMagicHandler", magicSnippet, "Snippet cannot be handled by this magic handler.");
+        }
+
+        // test first line is only the command
+        if (!magicSnippet.line(0).code().trim().equals("%%jars")) {
+            throw new MagicEvalException(magicSnippet, "Invalid command line, it should be `%%jars`",
+                    0, 0, magicSnippet.line(0).code().length());
+        }
+
+        // all other lines should be added
+
+        List<File> files = new ArrayList<>();
+        for (int i = 1; i < magicSnippet.lines().size(); i++) {
+            String path = magicSnippet.lines().get(i).code();
+            File file = new File(path.trim());
+            if (!file.exists()) {
+                throw new MagicEvalException(magicSnippet, "Provided path does not exist.", i, 0, path.length());
+            }
+            if (!file.isDirectory() && !file.getName().endsWith(".jar")) {
+                throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.", i, 0, path.length());
+            }
+            files.add(file);
+        }
+        files.forEach(file -> addFileToPath(kernel, file));
+        return null;
+    }
+
+    private void addFileToPath(RapaioKernel kernel, File file) {
         if (file.isDirectory()) {
             File[] jars = file.listFiles(f -> f.getName().endsWith(".jar"));
             if (jars == null) {
                 kernel.channels().writeToStdOut(ANSI.start().bold().fgGreen().text("No jar files were found.\n").render());
-                return null;
+                return;
             }
             kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Found " + jars.length + " jar files.\n").render());
             for (File jar : jars) {
@@ -70,17 +135,45 @@ public class JarMagicHandler extends MagicHandler {
                 kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + jar.getAbsolutePath() + " to classpath\n").render());
             }
         } else {
-            if (!file.getName().endsWith(".jar")) {
-                throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.");
-            }
             kernel.javaEngine().getShell().addToClasspath(file.getAbsolutePath());
             kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath").render());
         }
-        return null;
     }
 
     private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {
-        return HandlerUtils.oneLinePathComplete(PREFIX, magicSnippet,
+        return MagicHandlerTools.oneLinePathComplete(LINE_PREFIX, magicSnippet,
                 f -> (f.isDirectory() || f.getName().endsWith(".jar")));
+    }
+
+    private CompleteMatches completeCell(RapaioKernel kernel, MagicSnippet snippet) {
+        FileFilter fileFilter = f -> (f.isDirectory() || f.getName().endsWith(".jar"));
+        for (int i = 0; i < snippet.lines().size(); i++) {
+            var line = snippet.line(i);
+            if (!line.hasPosition()) {
+                continue;
+            }
+            if (i == 0) {
+                return completeLine(kernel, snippet);
+            }
+            String code = line.code();
+            String path = code.substring(0, line.relativePosition());
+
+            int indexPos = path.lastIndexOf('/') + 1;
+            String pathPrefix = path.substring(indexPos);
+            path = path.substring(0, indexPos);
+            File file = new File(path);
+            if (file.exists() && file.isDirectory()) {
+                File[] children = file.listFiles(f -> f.getName().startsWith(pathPrefix) && (fileFilter.accept(f)));
+                if (children != null) {
+                    List<String> options =
+                            new ArrayList<>(Arrays.stream(children).map(f -> f.isDirectory() ? f.getName() + '/' : f.getName()).toList());
+                    options.sort(String::compareTo);
+                    return new CompleteMatches(options,
+                            line.globalPosition() - line.relativePosition() + path.length(),
+                            line.globalPosition() - line.relativePosition() + line.code().length());
+                }
+            }
+        }
+        return null;
     }
 }

@@ -1,13 +1,12 @@
 package org.rapaio.jupyter.kernel.message.messages;
 
-import java.util.List;
-
-import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import com.google.gson.annotations.SerializedName;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 
-import com.google.gson.annotations.SerializedName;
+import java.util.List;
 
 public record ErrorReply(
         @SerializedName("status") String status,
@@ -20,12 +19,12 @@ public record ErrorReply(
         return MessageType.UNKNOWN;
     }
 
-    public static ErrorReply of(JavaEngine javaEngine, Exception exception, int executionCount) {
+    public static ErrorReply of(RapaioKernel kernel, Exception exception, int executionCount) {
 
         String name = exception.getClass().getSimpleName();
         String msg = exception.getLocalizedMessage();
 
-        return new ErrorReply(name, msg == null ? "" : msg, OutputFormatter.exceptionFormat(javaEngine, exception), executionCount);
+        return new ErrorReply(name, msg == null ? "" : msg, ErrorFormatters.exceptionFormat(kernel, exception), executionCount);
     }
 
     public ErrorReply(String errName, String errMsg, List<String> stacktrace, int executionCount) {

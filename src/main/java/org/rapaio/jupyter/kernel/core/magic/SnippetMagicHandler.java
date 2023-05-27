@@ -11,9 +11,10 @@ import java.util.function.Predicate;
 
 import static org.rapaio.jupyter.kernel.core.display.html.Tags.*;
 
-public record LineMagicHandler(
+public record SnippetMagicHandler(
+        MagicSnippet.Type type,
         String syntaxMatcher,
-        String syntaxHelp,
+        List<String> syntaxHelp,
         String syntaxPrefix,
         List<String> documentation,
         Predicate<MagicSnippet> canHandlePredicate,
@@ -22,14 +23,19 @@ public record LineMagicHandler(
         MagicFunction<CompleteMatches> completeFunction
 ) {
 
-    public static Builder builder() {
-        return new Builder();
+    public static Builder lineMagic() {
+        return new Builder(MagicSnippet.Type.MAGIC_LINE);
+    }
+
+    public static Builder cellMagic() {
+        return new Builder(MagicSnippet.Type.MAGIC_CELL);
     }
 
 
     public static final class Builder {
+        private final MagicSnippet.Type type;
         private String syntaxMatcher;
-        private String syntaxHelp;
+        private List<String> syntaxHelp;
         private String syntaxPrefix;
         private List<String> documentation;
         private Predicate<MagicSnippet> canHandlePredicate;
@@ -37,12 +43,16 @@ public record LineMagicHandler(
         private MagicFunction<DisplayData> inspectFunction = null;
         private MagicFunction<CompleteMatches> completeFunction;
 
+        private Builder(MagicSnippet.Type type) {
+            this.type = type;
+        }
+
         public Builder syntaxMatcher(String syntaxMatcher) {
             this.syntaxMatcher = syntaxMatcher;
             return this;
         }
 
-        public Builder syntaxHelp(String syntaxHelp) {
+        public Builder syntaxHelp(List<String> syntaxHelp) {
             this.syntaxHelp = syntaxHelp;
             return this;
         }
@@ -77,16 +87,17 @@ public record LineMagicHandler(
             return this;
         }
 
-        public LineMagicHandler build() {
+        public SnippetMagicHandler build() {
 
-            Objects.requireNonNull(syntaxMatcher);
-            Objects.requireNonNull(syntaxHelp);
-            Objects.requireNonNull(syntaxPrefix);
-            Objects.requireNonNull(documentation);
-            Objects.requireNonNull(canHandlePredicate);
-            Objects.requireNonNull(evalFunction);
+            Objects.requireNonNull(syntaxMatcher, "Syntax matcher is null");
+            Objects.requireNonNull(syntaxHelp, "Syntax help is null");
+            Objects.requireNonNull(syntaxPrefix, "Syntax prefix is null");
+            Objects.requireNonNull(documentation, "Documentation is null");
+            Objects.requireNonNull(canHandlePredicate, "Handler predicate is null");
+            Objects.requireNonNull(evalFunction, "Eval function is null");
 
-            return new LineMagicHandler(
+            return new SnippetMagicHandler(
+                    type,
                     syntaxMatcher, syntaxHelp, syntaxPrefix,
                     documentation, canHandlePredicate,
                     evalFunction,
@@ -98,15 +109,14 @@ public record LineMagicHandler(
             String html = join(
                     texts("Syntax: "), br(),
                     join(
-                            b(texts(syntaxHelp)),
-                            br(),
+                            each(syntaxHelp, line -> join(b(texts(line)), br())),
                             each(documentation, line -> join(space(4), texts(line), br()))
                     )
             ).render();
 
             StringBuilder sb = new StringBuilder();
             sb.append("Syntax:\n");
-            sb.append(ANSI.start().bold().text(syntaxHelp).render()).append("\n");
+            sb.append(ANSI.start().bold().text(String.join("\n", syntaxHelp)).render()).append("\n");
             for (var line : documentation) {
                 sb.append("    ").append(line).append("\n");
             }

@@ -1,18 +1,9 @@
 package org.rapaio.jupyter.kernel.core;
 
-import java.io.InputStream;
-import java.io.PrintStream;
-import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Logger;
-
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
-import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
+import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
@@ -22,32 +13,16 @@ import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
-import org.rapaio.jupyter.kernel.message.messages.ControlInterruptReply;
-import org.rapaio.jupyter.kernel.message.messages.ControlInterruptRequest;
-import org.rapaio.jupyter.kernel.message.messages.ControlShutdownReply;
-import org.rapaio.jupyter.kernel.message.messages.ControlShutdownRequest;
-import org.rapaio.jupyter.kernel.message.messages.CustomCommClose;
-import org.rapaio.jupyter.kernel.message.messages.CustomCommMsg;
-import org.rapaio.jupyter.kernel.message.messages.CustomCommOpen;
-import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
-import org.rapaio.jupyter.kernel.message.messages.IOPubDisplayData;
-import org.rapaio.jupyter.kernel.message.messages.IOPubError;
-import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteInput;
-import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteResult;
-import org.rapaio.jupyter.kernel.message.messages.IOPubUpdateDisplayData;
-import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoRequest;
-import org.rapaio.jupyter.kernel.message.messages.ShellCompleteReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellCompleteRequest;
-import org.rapaio.jupyter.kernel.message.messages.ShellExecuteReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
-import org.rapaio.jupyter.kernel.message.messages.ShellHistoryRequest;
-import org.rapaio.jupyter.kernel.message.messages.ShellInspectReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellInspectRequest;
-import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
-import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
-import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
+import org.rapaio.jupyter.kernel.message.messages.*;
+
+import java.io.InputStream;
+import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Logger;
 
 public class RapaioKernel {
 
@@ -190,8 +165,8 @@ public class RapaioKernel {
                 return;
             }
         } catch (Exception e) {
-            channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            channels.scheduleAfter(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
+            channels.publish(IOPubError.of(e, ex -> ErrorFormatters.exceptionFormat(this, ex)));
+            channels.scheduleAfter(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(this, e, count)));
             return;
         }
 
@@ -228,8 +203,8 @@ public class RapaioKernel {
             }
             channels.scheduleAfter(() -> channels.reply(ShellExecuteReply.withOk(count, Collections.emptyMap())));
         } catch (Exception e) {
-            channels.publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(javaEngine, ex)));
-            channels.scheduleAfter(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(javaEngine, e, count)));
+            channels.publish(IOPubError.of(e, ex -> ErrorFormatters.exceptionFormat(this, ex)));
+            channels.scheduleAfter(() -> channels.replyError(MessageType.SHELL_EXECUTE_REPLY.newError(), ErrorReply.of(this, e, count)));
         }
     }
 
@@ -240,6 +215,9 @@ public class RapaioKernel {
     public void handleIsCompleteRequest(Message<ShellIsCompleteRequest> message) {
         ShellIsCompleteRequest request = message.content();
         channels.busyThenIdle();
+
+        // TODO: add here is complete for magic, right now it is passed to Java which will not recognize
+        //  and will give an unuseful indent
 
         String result = javaEngine.isComplete(request.code());
 
@@ -268,7 +246,7 @@ public class RapaioKernel {
             DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
             channels.reply(new ShellInspectReply(inspection != null, inspection));
         } catch (Exception e) {
-            channels.replyError(MessageType.SHELL_INSPECT_REPLY.newError(), ErrorReply.of(javaEngine, e, 0));
+            channels.replyError(MessageType.SHELL_INSPECT_REPLY.newError(), ErrorReply.of(this, e, 0));
         }
     }
 
@@ -288,7 +266,7 @@ public class RapaioKernel {
                 channels.reply(ShellCompleteReply.from(options));
             }
         } catch (Exception e) {
-            channels.replyError(MessageType.SHELL_COMPLETE_REPLY.newError(), ErrorReply.of(javaEngine, e, 0));
+            channels.replyError(MessageType.SHELL_COMPLETE_REPLY.newError(), ErrorReply.of(this, e, 0));
         }
     }
 

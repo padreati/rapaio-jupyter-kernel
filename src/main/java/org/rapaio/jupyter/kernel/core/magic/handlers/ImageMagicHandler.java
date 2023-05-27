@@ -1,28 +1,20 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.imageio.ImageIO;
-
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.Transform;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.*;
+
+import javax.imageio.ImageIO;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.stream.Collectors;
 
 public class ImageMagicHandler extends MagicHandler {
 
@@ -39,11 +31,11 @@ public class ImageMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<LineMagicHandler> oneLineMagicHandlers() {
+    public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
-                LineMagicHandler.builder()
+                SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%image .*")
-                        .syntaxHelp("%image path_to_file_or_url")
+                        .syntaxHelp(List.of("%image path_to_file_or_url"))
                         .syntaxPrefix("%image ")
                         .documentation(List.of("Display an image from a local file or from an URL"))
                         .canHandlePredicate(this::canHandleSnippet)
@@ -86,7 +78,7 @@ public class ImageMagicHandler extends MagicHandler {
 
     CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
         Set<String> fileSuffixes = Arrays.stream(ImageIO.getReaderFileSuffixes()).map(String::toLowerCase).collect(Collectors.toSet());
-        return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
+        return MagicHandlerTools.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || fileSuffixes.contains(f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase()));
     }
 }

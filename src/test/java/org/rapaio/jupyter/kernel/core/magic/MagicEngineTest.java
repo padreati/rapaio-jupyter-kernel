@@ -1,19 +1,24 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
+import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MagicEngineTest {
 
     private RapaioKernel kernel;
+    private Channels channels;
 
     @BeforeEach
     void beforeEach() {
+        channels = Mockito.mock(Channels.class);
         kernel = new RapaioKernel();
+        kernel.registerChannels(channels);
     }
 
     @Test
@@ -36,7 +41,18 @@ public class MagicEngineTest {
 
     @Test
     void magicCompleteTest() throws MagicEvalException, MagicParseException {
-        var result = kernel.magicEngine().complete(kernel, "%he", 2);
+        var result = kernel.magicEngine().complete(kernel, """
+                %%jars
+                /""", 0);
         System.out.println(result);
+    }
+
+    @Test
+    void magicJarsEvalTest() throws MagicEvalException, MagicParseException {
+        kernel.magicEngine().eval("""
+                %%jars
+                /home/ati/work/rapaio-kaggle/
+                /home/ati/work/rapaio/rapaio-core/target/
+                """);
     }
 }

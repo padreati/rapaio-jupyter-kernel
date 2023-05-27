@@ -1,12 +1,12 @@
 package org.rapaio.jupyter.kernel;
 
-import java.io.InputStream;
-import java.io.OutputStream;
-
 import org.mockito.Mockito;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+
+import java.io.InputStream;
+import java.io.OutputStream;
 
 public class TestUtils {
 
@@ -21,6 +21,8 @@ public class TestUtils {
     public static Channels mockChannels() {
         return Mockito.mock(Channels.class);
     }
+
+
 }
 
 class TestShellConsole extends JShellConsole {

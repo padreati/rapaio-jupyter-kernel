@@ -5,6 +5,8 @@ import java.util.List;
 
 public class MagicParser {
 
+    private static final char MAGIC_CHAR = '%';
+
     /**
      * Parse source into a list of {@link MagicSnippet}. A magic snippet is a line if the snippet starts with
      * character '%' or a multiline if the magic starts with '%%'. The token next to '%' or '%%' is not checked,
@@ -51,13 +53,12 @@ public class MagicParser {
             if (hasLineMarker(line)) {
                 if (cellLines != null) {
                     // collect accumulation
-                    snippets.add(new MagicSnippet(cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC,
-                            false, cellLines));
+                    snippets.add(new MagicSnippet(cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC, cellLines));
                     cellLines = null;
                     cellMagic = false;
                 }
                 snippets.add(new MagicSnippet(MagicSnippet.Type.MAGIC_LINE,
-                        true, List.of(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position))));
+                        List.of(new MagicSnippet.CodeLine(line, hasPosition, relativePosition, position))));
                 continue;
             }
 
@@ -66,8 +67,7 @@ public class MagicParser {
                 if (cellLines != null) {
                     // collect accumulation
                     snippets.add(new MagicSnippet(
-                            cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC,
-                            false, cellLines));
+                            cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC, cellLines));
                 }
                 cellLines = new ArrayList<>();
                 cellMagic = true;
@@ -88,24 +88,26 @@ public class MagicParser {
         // collect what remains
         if (cellLines != null) {
             snippets.add(new MagicSnippet(
-                    cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC,
-                    false, cellLines));
+                    cellMagic ? MagicSnippet.Type.MAGIC_CELL : MagicSnippet.Type.NON_MAGIC, cellLines));
         }
         return snippets;
     }
 
     private boolean hasLineMarker(String line) {
-        if (line.length() < 2) {
+        if (line.isEmpty()) {
             return false;
         }
-        return line.charAt(0) == '%' && line.charAt(1) != '%' && !line.substring(1).trim().isEmpty();
+        if (line.charAt(0) == MAGIC_CHAR && line.length() == 1) {
+            return true;
+        }
+        return line.charAt(0) == '%' && line.charAt(1) != '%';
     }
 
     private boolean hasCellMarker(String line) {
         if (line.length() < 2) {
             return false;
         }
-        return line.charAt(0) == '%' && line.charAt(1) == '%' && !line.substring(2).trim().isEmpty();
+        return line.charAt(0) == '%' && line.charAt(1) == '%';
     }
 
     private boolean hasComment(String line) {

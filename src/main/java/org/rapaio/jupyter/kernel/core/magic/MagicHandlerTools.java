@@ -1,4 +1,6 @@
-package org.rapaio.jupyter.kernel.core.magic.handlers;
+package org.rapaio.jupyter.kernel.core.magic;
+
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -6,12 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+public final class MagicHandlerTools {
 
-public final class HandlerUtils {
-
-    private HandlerUtils() {
+    private MagicHandlerTools() {
     }
 
     public static CompleteMatches oneLinePathComplete(String prefix, MagicSnippet snippet, FileFilter fileFilter) {

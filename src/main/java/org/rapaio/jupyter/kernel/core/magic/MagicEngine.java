@@ -1,20 +1,14 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.magic.handlers.*;
+
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.magic.handlers.ClasspathMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.handlers.ImageMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.handlers.LoadMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.handlers.MavenCoordinates;
 
 public class MagicEngine {
 
@@ -167,9 +161,9 @@ public class MagicEngine {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
                 boolean handled = false;
-                for (var oneLineHandler : handler.oneLineMagicHandlers()) {
-                    if (oneLineHandler.canHandlePredicate().test(snippet)) {
-                        CompleteMatches matches = oneLineHandler.completeFunction().apply(kernel, snippet);
+                for (var snippetMagicHandler : handler.snippetMagicHandlers()) {
+                    if (snippetMagicHandler.canHandlePredicate().test(snippet)) {
+                        CompleteMatches matches = snippetMagicHandler.completeFunction().apply(kernel, snippet);
                         if (matches == null) {
                             handled = true;
                             break;
@@ -188,7 +182,7 @@ public class MagicEngine {
         String line = codeLine.code();
         String linePrefix = line.substring(0, codeLine.relativePosition());
         for (var handler : magicHandlers) {
-            for (var oneLineHandler : handler.oneLineMagicHandlers()) {
+            for (var oneLineHandler : handler.snippetMagicHandlers()) {
                 String prefix = oneLineHandler.syntaxPrefix();
                 if (prefix.startsWith(linePrefix) && !prefix.equals(linePrefix)) {
                     prefixes.add(prefix);

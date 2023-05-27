@@ -23,12 +23,12 @@ public class ClasspathMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<LineMagicHandler> oneLineMagicHandlers() {
+    public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
-                LineMagicHandler.builder()
+                SnippetMagicHandler.lineMagic()
                         .syntaxPrefix("%classpath ")
                         .syntaxMatcher("%classpath .*")
-                        .syntaxHelp("%classpath path_to_folder_with_classes")
+                        .syntaxHelp(List.of("%classpath path_to_folder_with_classes"))
                         .documentation(List.of("Adds to classpath folder which contains class files"))
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
@@ -62,6 +62,6 @@ public class ClasspathMagicHandler extends MagicHandler {
     }
 
     private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {
-        return HandlerUtils.oneLinePathComplete(ONE_LINE_PREFIX, magicSnippet, File::isDirectory);
+        return MagicHandlerTools.oneLinePathComplete(ONE_LINE_PREFIX, magicSnippet, File::isDirectory);
     }
 }

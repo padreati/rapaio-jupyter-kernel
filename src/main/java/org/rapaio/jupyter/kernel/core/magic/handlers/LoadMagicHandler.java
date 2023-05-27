@@ -1,24 +1,18 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
+import org.rapaio.jupyter.kernel.core.magic.*;
+import org.rapaio.jupyter.kernel.message.messages.IOPubError;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
-
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.format.OutputFormatter;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
-import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
-import org.rapaio.jupyter.kernel.message.messages.IOPubError;
-
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
 
 public class LoadMagicHandler extends MagicHandler {
 
@@ -30,11 +24,11 @@ public class LoadMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<LineMagicHandler> oneLineMagicHandlers() {
+    public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
-                LineMagicHandler.builder()
+                SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%load .*")
-                        .syntaxHelp("%load path_to_script_or_notebook")
+                        .syntaxHelp(List.of("%load path_to_script_or_notebook"))
                         .syntaxPrefix("%load ")
                         .documentation(List.of())
                         .canHandlePredicate(this::canHandleSnippet)
@@ -54,7 +48,7 @@ public class LoadMagicHandler extends MagicHandler {
 
     @Override
     public boolean canHandleSnippet(MagicSnippet magicSnippet) {
-        return magicSnippet.oneLine() && magicSnippet.lines().size() == 1 && magicSnippet.line(0).code().startsWith(PREFIX);
+        return magicSnippet.isLineMagic() && magicSnippet.lines().size() == 1 && magicSnippet.line(0).code().startsWith(PREFIX);
     }
 
     Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
@@ -85,7 +79,7 @@ public class LoadMagicHandler extends MagicHandler {
     }
 
     CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
-        return HandlerUtils.oneLinePathComplete(PREFIX, snippet,
+        return MagicHandlerTools.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || f.getName().endsWith(".ipynb") || f.getName().endsWith(".jshell"));
     }
 
@@ -145,7 +139,7 @@ public class LoadMagicHandler extends MagicHandler {
                     kernel.javaEngine().eval(cellCode);
                 }
             } catch (Exception e) {
-                kernel.channels().publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(kernel.javaEngine(), ex)));
+                kernel.channels().publish(IOPubError.of(e, ex -> ErrorFormatters.exceptionFormat(kernel, ex)));
                 return null;
             }
         }
@@ -156,7 +150,7 @@ public class LoadMagicHandler extends MagicHandler {
         try {
             return kernel.javaEngine().eval(content);
         } catch (Exception e) {
-            kernel.channels().publish(IOPubError.of(e, ex -> OutputFormatter.exceptionFormat(kernel.javaEngine(), ex)));
+            kernel.channels().publish(IOPubError.of(e, ex -> ErrorFormatters.exceptionFormat(kernel, ex)));
             return null;
         }
     }

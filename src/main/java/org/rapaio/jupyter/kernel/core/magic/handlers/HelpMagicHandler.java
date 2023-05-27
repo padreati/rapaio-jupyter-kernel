@@ -1,15 +1,15 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import java.util.List;
-import java.util.stream.Collectors;
-
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.LineMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class HelpMagicHandler extends MagicHandler {
 
@@ -32,11 +32,11 @@ public class HelpMagicHandler extends MagicHandler {
     }
 
     @Override
-    public List<LineMagicHandler> oneLineMagicHandlers() {
+    public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
-                LineMagicHandler.builder()
+                SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%help")
-                        .syntaxHelp("%help")
+                        .syntaxHelp(List.of("%help"))
                         .syntaxPrefix("%help")
                         .documentation(List.of("Display help for all magic handlers."))
                         .canHandlePredicate(this::canHandleSnippet)
@@ -75,9 +75,11 @@ public class HelpMagicHandler extends MagicHandler {
             sb.append(handler.helpMessage().stream().map(s -> "    " + s).collect(Collectors.joining("\n"))).append("\n");
 
             sb.append(ANSI.start().bold().text("Syntax:\n").render());
-            for (var oneLiner : handler.oneLineMagicHandlers()) {
-                sb.append("    ").append(ANSI.start().bold().fgGreen().text(oneLiner.syntaxHelp()).render()).append("\n");
-                sb.append("    ").append(String.join("\n", oneLiner.documentation())).append("\n");
+            for (var snippetMagicHandler : handler.snippetMagicHandlers()) {
+                for(var line : snippetMagicHandler.syntaxHelp()) {
+                    sb.append("    ").append(ANSI.start().bold().fgGreen().text(line).render()).append("\n");
+                }
+                sb.append("    ").append(String.join("\n", snippetMagicHandler.documentation())).append("\n");
             }
         }
         return DisplayData.withText(sb.toString());
