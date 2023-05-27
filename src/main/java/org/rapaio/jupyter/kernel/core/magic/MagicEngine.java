@@ -44,7 +44,7 @@ public class MagicEngine {
         }
 
         if (parser.containsMixedSnippets(snippets)) {
-            throw new MagicParseException("Magic parser", expr, "Mixed code with Magic and Java snippets.");
+            throw new MagicParseException("Mixed magic and Java code snippets are not allowed.");
         }
 
         if (!parser.canHandleByMagic(snippets)) {

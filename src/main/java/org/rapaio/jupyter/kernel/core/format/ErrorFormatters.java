@@ -6,6 +6,7 @@ import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 
 import java.util.*;
 
@@ -23,7 +24,7 @@ public final class ErrorFormatters {
     static {
 
         register(CompilerException.class, (kernel, e) -> {
-            List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("Compile error"));
+            List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("Compile error:"));
             SnippetEvent event = e.badSnippet();
             Snippet snippet = event.snippet();
             var diagnostics = kernel.javaEngine().getShell().diagnostics(snippet).toList();
@@ -47,13 +48,13 @@ public final class ErrorFormatters {
         });
 
         register(EvaluationInterruptedException.class, (kernel, e) -> {
-            List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("InterruptedException"));
+            List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("InterruptedException:"));
             msgs.addAll(ANSI.sourceCode(e.getSource()));
             return msgs;
         });
 
         register(EvaluationTimeoutException.class, (kernel, e) -> {
-            List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("TimeoutException"));
+            List<String> msgs = new ArrayList<>(ANSI.errorTypeHeader("TimeoutException:"));
             msgs.addAll(ANSI.sourceCode(e.getSource()));
             msgs.addAll(ANSI.errorMessages(e.getMessage()));
             return msgs;
@@ -80,10 +81,16 @@ public final class ErrorFormatters {
             }
             return output;
         });
-        // TODO
-//            register(MagicEvalException.class, (kernel, e) -> {
-//                return null;
-//            });
+        register(MagicEvalException.class, (kernel, e) -> {
+            List<String> output = new ArrayList<>(ANSI.errorTypeHeader("MagicEvalException:"));
+            if (e.hasErrorLine()) {
+                var magicSnippet = e.magicSnippet();
+                var code = magicSnippet.line(e.errorLine()).code();
+                output.addAll(ANSI.sourceCode(code, e.errorStart(), e.errorStart(), e.errorEnd()));
+            }
+            output.addAll(ANSI.errorMessages(e.getMessage()));
+            return output;
+        });
     }
 
     private static List<String> genericFormatException(RapaioKernel kernel, Throwable throwable) {

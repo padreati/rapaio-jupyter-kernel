@@ -51,8 +51,7 @@ public class LoadMagicHandler extends MagicHandler {
         return magicSnippet.isLineMagic() && magicSnippet.lines().size() == 1 && magicSnippet.line(0).code().startsWith(PREFIX);
     }
 
-    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException,
-            MagicEvalException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
         }
@@ -70,9 +69,8 @@ public class LoadMagicHandler extends MagicHandler {
                     return evalShellScript(kernel, content);
                 }
             } catch (IOException ex) {
-                throw new MagicParseException("LoadMagicHandler",
-                        snippet.line(0).code(),
-                        "Cannot read file: '%s'".formatted(file.getAbsolutePath()));
+                throw new MagicEvalException(snippet, "Cannot read file: '%s'".formatted(file.getAbsolutePath()),
+                        0, allCode.indexOf(PREFIX) + PREFIX.length(), allCode.length());
             }
         }
         return null;

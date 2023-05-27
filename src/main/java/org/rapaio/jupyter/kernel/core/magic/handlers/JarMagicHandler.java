@@ -75,9 +75,9 @@ public class JarMagicHandler extends MagicHandler {
         return magicSnippet.isCellMagic() && magicSnippet.line(0).code().startsWith(CELL_PREFIX);
     }
 
-    private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+    private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
-            throw new MagicParseException("JarMagicHandler", magicSnippet, "Snippet cannot be handled by this magic handler.");
+            throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
         String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(LINE_PREFIX.length()).trim();
@@ -93,15 +93,16 @@ public class JarMagicHandler extends MagicHandler {
         return null;
     }
 
-    private Object evalCell(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+    private Object evalCell(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleCell(magicSnippet)) {
-            throw new MagicParseException("JarMagicHandler", magicSnippet, "Snippet cannot be handled by this magic handler.");
+            throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
 
         // test first line is only the command
-        if (!magicSnippet.line(0).code().trim().equals("%%jars")) {
+        var code = magicSnippet.line(0).code();
+        if (!code.trim().equals("%%jars")) {
             throw new MagicEvalException(magicSnippet, "Invalid command line, it should be `%%jars`",
-                    0, 0, magicSnippet.line(0).code().length());
+                    0, code.indexOf(CELL_PREFIX) + CELL_PREFIX.length(), code.length());
         }
 
         // all other lines should be added

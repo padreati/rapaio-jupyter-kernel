@@ -3,10 +3,7 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
-import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -50,9 +47,9 @@ public class HelpMagicHandler extends MagicHandler {
         return canHandleOneLinePrefix(magicSnippet, ONE_LINE_PREFIX);
     }
 
-    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicParseException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
-            throw new RuntimeException("Try to execute a magic snippet to improper handler.");
+            throw new MagicEvalException(snippet, "Try to execute a magic snippet to improper handler.");
         }
         String expr = snippet.lines().get(0).code();
         String text = expr.trim().toLowerCase();
@@ -60,7 +57,7 @@ public class HelpMagicHandler extends MagicHandler {
         if (text.equals(ONE_LINE_PREFIX)) {
             return help();
         }
-        throw new MagicParseException(name(), expr, "Help magic syntax is incorrect.");
+        throw new MagicEvalException(snippet, "Help magic syntax is incorrect.");
     }
 
     private DisplayData help() {

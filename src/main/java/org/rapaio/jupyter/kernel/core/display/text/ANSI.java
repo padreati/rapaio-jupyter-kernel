@@ -146,7 +146,7 @@ public final class ANSI {
     private static final String CODE_LINE_POINTER = "|--> ";
 
     public static List<String> errorTypeHeader(String errorType) {
-        return List.of(ANSI.start().codes(BOLD, FG_RED).text(errorType).text(":").render());
+        return List.of(ANSI.start().bold().fgRed().text(errorType).render());
     }
 
     public static List<String> sourceCode(String code, int lineNumber) {

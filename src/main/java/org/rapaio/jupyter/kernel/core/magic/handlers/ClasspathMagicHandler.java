@@ -44,7 +44,7 @@ public class ClasspathMagicHandler extends MagicHandler {
 
     private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
-            throw new MagicParseException(name(), magicSnippet, "Snippet cannot be handled by this magic handler.");
+            throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
         String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(ONE_LINE_PREFIX.length()).trim();

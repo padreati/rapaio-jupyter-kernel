@@ -35,8 +35,7 @@ public class JarMagicHandlerTest {
 
         assertTrue(ex.hasErrorLine());
         assertEquals(0, ex.errorLine());
-        assertEquals(0, ex.errorStart());
+        assertEquals(6, ex.errorStart());
         assertEquals(code.length(), ex.errorEnd());
     }
-
 }
