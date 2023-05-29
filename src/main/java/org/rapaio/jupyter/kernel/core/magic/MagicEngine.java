@@ -22,6 +22,7 @@ public class MagicEngine {
         magicHandlers.add(new LoadMagicHandler());
         magicHandlers.add(new ImageMagicHandler());
         magicHandlers.add(new ClasspathMagicHandler());
+        magicHandlers.add(new BashMagicHandler());
         magicHandlers.add(new HelpMagicHandler(magicHandlers));
     }
 

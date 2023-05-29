@@ -100,7 +100,7 @@ public class JarMagicHandler extends MagicHandler {
 
         // test first line is only the command
         var code = magicSnippet.line(0).code();
-        if (!code.trim().equals("%%jars")) {
+        if (!code.trim().equals(CELL_PREFIX)) {
             throw new MagicEvalException(magicSnippet, "Invalid command line, it should be `%%jars`",
                     0, code.indexOf(CELL_PREFIX) + CELL_PREFIX.length(), code.length());
         }

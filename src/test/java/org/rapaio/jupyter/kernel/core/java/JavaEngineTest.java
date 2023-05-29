@@ -1,15 +1,9 @@
 package org.rapaio.jupyter.kernel.core.java;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 import org.rapaio.jupyter.kernel.TestUtils;
-import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+
+import static org.junit.jupiter.api.Assertions.*;
 
 public class JavaEngineTest {
 
