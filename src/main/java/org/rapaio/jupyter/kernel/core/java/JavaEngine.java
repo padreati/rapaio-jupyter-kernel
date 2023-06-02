@@ -1,42 +1,18 @@
 package org.rapaio.jupyter.kernel.core.java;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.iif;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Comparator;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
+import jdk.jshell.*;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
 
-import jdk.jshell.EvalException;
-import jdk.jshell.JShell;
-import jdk.jshell.JShellException;
-import jdk.jshell.Snippet;
-import jdk.jshell.SnippetEvent;
-import jdk.jshell.SourceCodeAnalysis;
+import java.io.*;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.*;
 
 public class JavaEngine {
 
@@ -154,19 +130,23 @@ public class JavaEngine {
         return result;
     }
 
-    public String isComplete(String code) {
+    public IsCompleteResult isComplete(String code) {
         SourceCodeAnalysis.CompletionInfo info = sourceAnalysis.analyzeCompletion(code);
         while (info.completeness().isComplete()) {
             info = sourceAnalysis.analyzeCompletion(info.remaining());
         }
 
         return switch (info.completeness()) {
-            case COMPLETE, COMPLETE_WITH_SEMI, EMPTY -> RapaioKernel.IS_COMPLETE_STATUS_YES;
-            case UNKNOWN -> RapaioKernel.IS_COMPLETE_STATUS_BAD;
+            case COMPLETE, COMPLETE_WITH_SEMI, EMPTY -> new IsCompleteResult(ShellIsCompleteReply.Status.COMPLETE);
+            case UNKNOWN -> new IsCompleteResult(ShellIsCompleteReply.Status.INVALID);
             case CONSIDERED_INCOMPLETE, DEFINITELY_INCOMPLETE ->
-                // TODO: improvement on how to compute indentation on info.remaining()
-                    "0";
+                new IsCompleteResult(ShellIsCompleteReply.Status.INCOMPLETE, computeIndent(info));
         };
+    }
+
+    private String computeIndent(SourceCodeAnalysis.CompletionInfo info) {
+        // TODO: use info to compute indent
+        return "";
     }
 
     public CompleteMatches complete(String code, int at) {

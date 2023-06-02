@@ -4,12 +4,10 @@ import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
 import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
+import org.rapaio.jupyter.kernel.core.java.IsCompleteResult;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
-import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
-import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
-import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
+import org.rapaio.jupyter.kernel.core.magic.*;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
@@ -208,26 +206,18 @@ public class RapaioKernel {
         }
     }
 
-    public static final String IS_COMPLETE_STATUS_YES = "complete";
-    public static final String IS_COMPLETE_STATUS_BAD = "invalid";
-    public static final String IS_COMPLETE_STATUS_MAYBE = "unknown";
-
     public void handleIsCompleteRequest(Message<ShellIsCompleteRequest> message) {
         ShellIsCompleteRequest request = message.content();
         channels.busyThenIdle();
 
-        // TODO: add here is complete for magic, right now it is passed to Java which will not recognize
-        //  and will give an unuseful indent
+        MagicIsCompleteResult magicResult = magicEngine.isComplete(this, request.code());
+        if (magicResult.handled()) {
+            channels.reply(magicResult.buildReply());
+            return;
+        }
 
-        String result = javaEngine.isComplete(request.code());
-
-        ShellIsCompleteReply reply = switch (result) {
-            case IS_COMPLETE_STATUS_YES -> ShellIsCompleteReply.VALID_CODE;
-            case IS_COMPLETE_STATUS_BAD -> ShellIsCompleteReply.INVALID_CODE;
-            case IS_COMPLETE_STATUS_MAYBE -> ShellIsCompleteReply.UNKNOWN;
-            default -> ShellIsCompleteReply.getIncompleteReplyWithIndent(result);
-        };
-        channels.reply(reply);
+        IsCompleteResult result = javaEngine.isComplete(request.code());
+        channels.reply(result.buildReply());
     }
 
     public void handleInspectRequest(Message<ShellInspectRequest> message) {

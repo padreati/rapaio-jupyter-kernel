@@ -195,4 +195,9 @@ public class MagicEngine {
                 codeLine.globalPosition() + codeLine.code().length() - codeLine.relativePosition());
         return new MagicCompleteResult(true, matches);
     }
+
+    public MagicIsCompleteResult isComplete(RapaioKernel kernel, String code) {
+        // TODO: implement iscomplete logic here
+        return MagicIsCompleteResult.notHandled();
+    }
 }
