@@ -6,3 +6,4 @@ build
 /target/
 /out/
 /ivy/
+/.ipynb_checkpoints/example-checkpoint.ipynb
