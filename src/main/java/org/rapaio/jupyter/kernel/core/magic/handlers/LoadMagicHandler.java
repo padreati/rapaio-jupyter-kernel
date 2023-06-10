@@ -16,7 +16,7 @@ import java.util.List;
 
 public class LoadMagicHandler extends MagicHandler {
 
-    private static final String PREFIX = "%load ";
+    private static final String PREFIX = "%load";
 
     @Override
     public String name() {

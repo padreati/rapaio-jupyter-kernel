@@ -19,8 +19,8 @@ public final class MagicHandlerTools {
             return null;
         }
         String code = line.code();
-        if (line.relativePosition() >= prefix.length()) {
-            String path = code.substring(prefix.length(), line.relativePosition());
+        if (line.relativePosition() >= prefix.length() + 1) {
+            String path = code.substring(prefix.length() + 1, line.relativePosition());
 
             int indexPos = path.lastIndexOf('/') + 1;
             String pathPrefix = path.substring(indexPos);
@@ -33,7 +33,7 @@ public final class MagicHandlerTools {
                             new ArrayList<>(Arrays.stream(children).map(f -> f.isDirectory() ? f.getName() + '/' : f.getName()).toList());
                     options.sort(String::compareTo);
                     return new CompleteMatches(options,
-                            line.globalPosition() - line.relativePosition() + prefix.length() + path.length(),
+                            line.globalPosition() - line.relativePosition() + prefix.length() + 1 + path.length(),
                             line.globalPosition() - line.relativePosition() + line.code().length());
                 }
             }

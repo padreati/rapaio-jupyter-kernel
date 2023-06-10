@@ -15,7 +15,7 @@ import java.util.List;
 
 public class MavenCoordinates extends MagicHandler {
 
-    private static final String HEADER = "%maven ";
+    private static final String HEADER = "%maven";
 
     @Override
     public String name() {

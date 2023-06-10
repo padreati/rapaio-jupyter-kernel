@@ -10,7 +10,7 @@ import java.util.List;
 
 public class ClasspathMagicHandler extends MagicHandler {
 
-    private static final String ONE_LINE_PREFIX = "%classpath ";
+    private static final String ONE_LINE_PREFIX = "%classpath";
 
     @Override
     public String name() {

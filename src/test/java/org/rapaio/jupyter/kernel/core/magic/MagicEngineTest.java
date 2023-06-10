@@ -37,6 +37,7 @@ public class MagicEngineTest {
     void magicInspectMagicCode() throws MagicEvalException, MagicParseException {
         var result = kernel.magicEngine().inspect("%load", 3);
         assertTrue(result.handled());
+        System.out.println(result.displayData());
     }
 
     @Test

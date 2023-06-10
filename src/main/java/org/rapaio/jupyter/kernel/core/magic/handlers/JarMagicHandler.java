@@ -13,7 +13,7 @@ import java.util.List;
 
 public class JarMagicHandler extends MagicHandler {
 
-    private static final String LINE_PREFIX = "%jar ";
+    private static final String LINE_PREFIX = "%jar";
     private static final String CELL_PREFIX = "%%jars";
 
     @Override
@@ -80,7 +80,7 @@ public class JarMagicHandler extends MagicHandler {
             throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
         String fullCode = magicSnippet.lines().get(0).code();
-        String path = fullCode.substring(LINE_PREFIX.length()).trim();
+        String path = fullCode.substring(LINE_PREFIX.length() + 1).trim();
 
         File file = new File(path);
         if (!file.exists()) {

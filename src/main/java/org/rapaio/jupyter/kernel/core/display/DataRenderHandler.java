@@ -6,5 +6,13 @@ package org.rapaio.jupyter.kernel.core.display;
  */
 public interface DataRenderHandler {
 
-    DataRendererResponse render(Object object);
+    boolean canRender(Object o);
+
+    MIMEType defaultMIMEType();
+
+    default DisplayData render(Object o) {
+        return render(defaultMIMEType(), o);
+    }
+
+    DisplayData render(MIMEType mimeType, Object o);
 }

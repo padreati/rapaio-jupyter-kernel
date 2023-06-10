@@ -14,6 +14,10 @@ public final class MIMEType {
     public static final MIMEType PNG = new MIMEType("image/png");
     public static final MIMEType SVG = new MIMEType("image/svg+xml");
 
+    public static MIMEType fromString(String type) {
+        return new MIMEType(type);
+    }
+
     private final String stringType;
 
     private MIMEType(String stringType) {

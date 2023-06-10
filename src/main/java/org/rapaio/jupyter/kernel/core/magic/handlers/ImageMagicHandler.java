@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 
 public class ImageMagicHandler extends MagicHandler {
 
-    private static final String PREFIX = "%image ";
+    private static final String PREFIX = "%image";
 
     @Override
     public String name() {
@@ -55,7 +55,7 @@ public class ImageMagicHandler extends MagicHandler {
             throw new MagicEvalException(magicSnippet, "Cannot handle an unmatched snippet.");
         }
         MagicSnippet.CodeLine line = magicSnippet.line(0);
-        String src = line.code().trim().substring(PREFIX.length());
+        String src = line.code().trim().substring(PREFIX.length() + 1);
 
         File file = new File(src);
 
