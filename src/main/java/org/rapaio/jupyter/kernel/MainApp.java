@@ -1,5 +1,11 @@
 package org.rapaio.jupyter.kernel;
 
+import org.rapaio.jupyter.kernel.channels.Channels;
+import org.rapaio.jupyter.kernel.core.ConnectionProperties;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.Transform;
+import org.rapaio.jupyter.kernel.install.Installer;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,15 +16,11 @@ import java.util.Arrays;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.ConnectionProperties;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.Transform;
-import org.rapaio.jupyter.kernel.install.Installer;
-
 public class MainApp {
 
+    private static final String IPC_TRANSPORT = "ipc";
     private static final Logger LOGGER = Logger.getLogger(MainApp.class.getSimpleName());
+
     public static final RapaioKernel kernel = new RapaioKernel();
 
     public static void main(String[] args) throws Exception {
@@ -49,6 +51,11 @@ public class MainApp {
 
         ConnectionProperties connProps = Transform.fromJson(contents, ConnectionProperties.class);
         LOGGER.info("Kernel connection file content: " + contents);
+
+        if(IPC_TRANSPORT.equals(connProps.transport())) {
+            // we should create a proxy for ipc
+            LOGGER.severe("ipc protocol is not supported.");
+        }
 
         Channels channels = new Channels(connProps);
         channels.connect(kernel);
