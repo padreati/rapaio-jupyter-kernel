@@ -2,7 +2,6 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.Transform;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
 import org.rapaio.jupyter.kernel.core.magic.*;
@@ -13,7 +12,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Base64;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 public class ImageMagicHandler extends MagicHandler {
@@ -68,8 +70,9 @@ public class ImageMagicHandler extends MagicHandler {
             String response = out.toString(StandardCharsets.UTF_8);
 
             DisplayData dd = DisplayData.withType(MIMEType.PNG, response);
-            Map<String, Integer> sizeMap = Map.of("width", bi.getWidth(), "height", bi.getHeight());
-            dd.putMetaData(MIMEType.PNG.toString(), Transform.toJson(sizeMap));
+            // disable metadata due to a problem in nbviewr export
+//            Map<String, Integer> sizeMap = Map.of("width", bi.getWidth(), "height", bi.getHeight());
+//            dd.putMetaData(MIMEType.PNG.toString(), Transform.toJson(sizeMap));
             return dd;
         } catch (IOException e) {
             throw new MagicEvalException(magicSnippet, "Could not read image. " + e.getMessage());
