@@ -1,6 +1,5 @@
 package org.rapaio.jupyter.kernel.core.display.image;
 
-import org.rapaio.jupyter.kernel.core.Transform;
 import org.rapaio.jupyter.kernel.core.display.DataRenderHandler;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
@@ -52,8 +51,9 @@ public class ImageRenderer implements DataRenderHandler {
             String response = out.toString(StandardCharsets.UTF_8);
 
             DisplayData displayData = DisplayData.withType(mimeType, response);
-            Map<String, Integer> sizeMap = Map.of("width", image.getWidth(), "height", image.getHeight());
-            displayData.putMetaData(mimeType.toString(), Transform.toJson(sizeMap));
+            // Fix a bug in nbconvert which is unable to work with this attribute
+//            Map<String, Integer> sizeMap = Map.of("width", image.getWidth(), "height", image.getHeight());
+//            displayData.putMetaData(mimeType.toString(), Transform.toJson(sizeMap));
             return displayData;
         } catch (IOException e) {
             throw new RuntimeException(e);
