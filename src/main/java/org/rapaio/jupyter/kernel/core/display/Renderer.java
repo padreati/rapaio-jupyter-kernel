@@ -5,6 +5,7 @@ import org.rapaio.jupyter.kernel.extension.JupyterDisplayable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public final class Renderer {
 
@@ -42,15 +43,22 @@ public final class Renderer {
     public DisplayData render(MIMEType mimeType, Object o) {
         if(o instanceof JupyterDisplayable displayable) {
             MIMEType callMimeType = mimeType == null ? displayable.defaultMIMEType() : mimeType;
-            return displayable.render(callMimeType);
+            return withId(displayable.render(callMimeType));
         }
         for (var handler : handlers) {
             if (handler.canRender(o)) {
                 MIMEType callMimeType = mimeType == null ? handler.defaultMIMEType() : mimeType;
-                return handler.render(callMimeType, o);
+                return withId(handler.render(callMimeType, o));
             }
         }
         MIMEType callMimeType = mimeType == null ? backoffHandler.defaultMIMEType() : mimeType;
-        return backoffHandler.render(callMimeType, o);
+        return withId(backoffHandler.render(callMimeType, o));
+    }
+
+    private DisplayData withId(DisplayData displayData) {
+        if(!displayData.hasDisplayId()) {
+            displayData.setDisplayId(UUID.randomUUID().toString());
+        }
+        return displayData;
     }
 }
