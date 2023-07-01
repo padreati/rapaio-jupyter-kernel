@@ -56,7 +56,7 @@ public class LoadMagicHandler extends MagicHandler {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
         }
         String allCode = snippet.line(0).code();
-        String path = allCode.substring(PREFIX.length());
+        String path = allCode.substring(PREFIX.length() + 1).trim();
 
         File file = new File(path);
 
@@ -126,9 +126,12 @@ public class LoadMagicHandler extends MagicHandler {
             var codeLines = cell.getAsJsonObject().get("source").getAsJsonArray();
             StringBuilder sb = new StringBuilder();
             for (var codeLine : codeLines) {
-                sb.append(codeLine.getAsString());
+                String codeString = codeLine.getAsString();
+                sb.append(codeString);
                 // we should append a new line, it seems it is already contained
-                // sb.append("\n")
+                if (!codeString.endsWith("\n")) {
+                    sb.append("\n");
+                }
             }
             String cellCode = sb.toString();
             try {
