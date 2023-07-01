@@ -1,17 +1,21 @@
 package org.rapaio.jupyter.kernel.core.display.html;
 
+import org.rapaio.jupyter.kernel.core.display.html.tags.*;
+
 import java.util.Collection;
 import java.util.function.Function;
-
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagB;
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagBr;
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagEach;
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagIf;
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagJoin;
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagP;
-import org.rapaio.jupyter.kernel.core.display.html.tags.TagTexts;
+import java.util.function.Supplier;
 
 public class Tags {
+
+    public static Tag empty() {
+        return new Tag() {
+            @Override
+            public String render(HtmlStyle style) {
+                return "";
+            }
+        };
+    }
 
     public static TagJoin join(Tag... nodes) {
         return new TagJoin(nodes);
@@ -41,7 +45,7 @@ public class Tags {
         return new TagTexts("&nbsp;".repeat(repeat));
     }
 
-    public static TagIf iif(boolean cond, Tag... tags) {
-        return new TagIf(cond, tags);
+    public static TagIf iif(boolean cond, Supplier<Tag[]> supplier) {
+        return new TagIf(cond, supplier);
     }
 }

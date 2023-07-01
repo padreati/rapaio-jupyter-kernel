@@ -7,22 +7,22 @@ import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 public class TestUtils {
 
     public static ConnectionProperties testConnectionProperties() {
-        return new ConnectionProperties(1, 2, "tdp", null, 3, 4, "127.0.0.1", 5, null);
+        return new ConnectionProperties(60001, 60002, "tcp", null, 60003, 60004, "127.0.0.1", 60005, null);
     }
 
     public static JShellConsole getTestJShellConsole() {
         return new TestShellConsole();
     }
 
-    public static Channels mockChannels() {
-        return Mockito.mock(Channels.class);
+    public static Channels spyChannels() throws NoSuchAlgorithmException, InvalidKeyException {
+        return Mockito.spy(new Channels(testConnectionProperties()));
     }
-
-
 }
 
 class TestShellConsole extends JShellConsole {

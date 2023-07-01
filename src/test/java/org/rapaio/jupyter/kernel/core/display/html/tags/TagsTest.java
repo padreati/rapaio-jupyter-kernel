@@ -1,21 +1,15 @@
 package org.rapaio.jupyter.kernel.core.display.html.tags;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.iif;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
-
-import java.util.List;
-
+import jdk.jshell.SourceCodeAnalysis;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
+import org.rapaio.jupyter.kernel.core.display.html.Tag;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
 
-import jdk.jshell.SourceCodeAnalysis;
+import java.util.List;
+
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.*;
 
 public class TagsTest {
 
@@ -46,8 +40,7 @@ public class TagsTest {
                 each(documentations, doc -> p(join(
                         b(texts(doc.signature())),
                         iif(doc.javadoc() != null,
-                                br(),
-                                texts(JavadocTools.javadocPreprocess(doc.javadoc()))
+                                () -> new Tag[]{br(), texts(JavadocTools.javadocPreprocess(doc.javadoc()))}
                         )
                 )))
         ).render();

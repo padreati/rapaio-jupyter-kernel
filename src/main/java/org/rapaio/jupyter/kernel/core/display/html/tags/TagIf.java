@@ -2,11 +2,14 @@ package org.rapaio.jupyter.kernel.core.display.html.tags;
 
 import org.rapaio.jupyter.kernel.core.display.html.HtmlStyle;
 import org.rapaio.jupyter.kernel.core.display.html.Tag;
+import org.rapaio.jupyter.kernel.core.display.html.Tags;
+
+import java.util.function.Supplier;
 
 public class TagIf extends Tag {
 
-    public TagIf(boolean condition, Tag... children) {
-        super(condition ? children : new Tag[0]);
+    public TagIf(boolean condition, Supplier<Tag[]> supplier) {
+        super(condition ? supplier.get() : new Tag[]{Tags.empty()});
     }
 
     @Override

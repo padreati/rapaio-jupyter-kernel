@@ -38,6 +38,7 @@ public class LoadMagicHandlerTest {
                "metadata": {},
                "outputs": [],
                "source": [
+                "error\\n",
                 "//%jars /home/ati/work/out/artifacts/rapaio_jar/rapaio.jar"
                ]
               },
@@ -199,7 +200,7 @@ public class LoadMagicHandlerTest {
     void loadNotebook() throws MagicEvalException, NoSuchAlgorithmException, InvalidKeyException {
         LoadMagicHandler handler = new LoadMagicHandler();
         RapaioKernel kernel = new RapaioKernel();
-        Channels channels = new Channels(TestUtils.testConnectionProperties());
+        Channels channels = TestUtils.spyChannels();
         kernel.registerChannels(channels);
         MagicSnippet snippet = mock(MagicSnippet.class);
 

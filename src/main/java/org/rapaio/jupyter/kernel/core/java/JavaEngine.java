@@ -4,6 +4,7 @@ import jdk.jshell.*;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
+import org.rapaio.jupyter.kernel.core.display.html.Tag;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
@@ -140,7 +141,7 @@ public class JavaEngine {
             case COMPLETE, COMPLETE_WITH_SEMI, EMPTY -> new IsCompleteResult(ShellIsCompleteReply.Status.COMPLETE);
             case UNKNOWN -> new IsCompleteResult(ShellIsCompleteReply.Status.INVALID);
             case CONSIDERED_INCOMPLETE, DEFINITELY_INCOMPLETE ->
-                new IsCompleteResult(ShellIsCompleteReply.Status.INCOMPLETE, computeIndent(info));
+                    new IsCompleteResult(ShellIsCompleteReply.Status.INCOMPLETE, computeIndent(info));
         };
     }
 
@@ -188,12 +189,10 @@ public class JavaEngine {
 
         String html = join(
                 each(documentations, doc -> p(join(
-                        b(texts(doc.signature())),
-                        iif(doc.javadoc() != null,
-                                br(),
-                                texts(JavadocTools.javadocPreprocess(doc.javadoc()))
+                                b(texts(doc.signature())),
+                                iif(doc.javadoc() != null, () -> new Tag[]{br(), texts(JavadocTools.javadocPreprocess(doc.javadoc()))})
                         )
-                )))
+                ))
         ).render();
         StringBuilder sb = new StringBuilder();
         for (var doc : documentations) {
