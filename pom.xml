@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>1.1.0</version>
+    <version>1.2.0</version>
     <name>rapaio-jupyter-kernel</name>
     <description>Rapaio Jupyter Kernel</description>
     <url>https://github.com/padreati/rapaio-jupyter-kernel</url>
