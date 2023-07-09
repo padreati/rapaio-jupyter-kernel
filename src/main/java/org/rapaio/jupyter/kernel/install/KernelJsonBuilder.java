@@ -1,12 +1,8 @@
 package org.rapaio.jupyter.kernel.install;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
+
+import java.util.*;
 
 public class KernelJsonBuilder {
 
@@ -69,8 +65,8 @@ public class KernelJsonBuilder {
     public KernelJson build() {
         validate();
 
-        String jarPath = KernelJsonBuilder.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String jarName = jarPath.substring(jarPath.lastIndexOf('/') + 1);
+        String fullPath = KernelJsonBuilder.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String jarName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
         if (jarName.isEmpty()) {
             jarName = DEFAULT_JAR_NAME;
         }
@@ -78,7 +74,10 @@ public class KernelJsonBuilder {
         List<String> argv = new ArrayList<>();
         argv.add("java");
         argv.add("--enable-preview");
-        argv.addAll(List.of("-jar", this.jarPath + SEPARATOR + kernelDir + SEPARATOR + jarName));
+        argv.add("--add-modules");
+        argv.add("jdk.incubator.vector,jdk.incubator.concurrent");
+        argv.add("-jar");
+        argv.add(jarPath + SEPARATOR + kernelDir + SEPARATOR + jarName);
         argv.add(CONNECTION_FILE_MARKER);
 
         return new KernelJson(argv.toArray(String[]::new), displayName, LANGUAGE, INTERRUPT_MODE, env);

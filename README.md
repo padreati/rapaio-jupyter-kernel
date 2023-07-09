@@ -1,6 +1,6 @@
 # rapaio-jupyter-kernel
 
-Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java >= 17.
+Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java >= 20.
 
 ## Introduction
 
@@ -38,7 +38,7 @@ The latest version can be found as a download in the releases section. Rapaio Ju
 installing tool which allow users to quickly set up the kernel. The installer is contained in the jar distribution archive 
 and can be called with:
 
-    java -jar ./rapaio-jupyter-kernel-1.2.0.jar -i -auto
+    java -jar ./rapaio-jupyter-kernel-1.2.1.jar -i -auto
 
 The `-auto` option uses an automatic mode for installing the kernel. The installer has also an interactive mode, and the kernel installation can be realized manually, also. 
 For more details you can follow [INSTALL.md](INSTALL.md).
@@ -50,11 +50,11 @@ The project is also stored in maven central repositories and can be added as dep
     <dependency>
         <groupId>io.github.padreati</groupId>
         <artifactId>rapaio-jupyter-kernel</artifactId>
-        <version>1.2.0</version>
+        <version>1.2.1</version>
     </dependency>
 
 This is not necessary now, since the kernel is packaged as a self-contained jar archive (it includes all dependencies), 
 and can be downloaded from releases. In the future it would be possible to introduce a plug-in mechanism to allow others to 
 extend library for their own purposes. I see possibilities to allow others to create custom display code for objects of their 
 own type or to implement new magic features. This kind of extension of notebook can work for custom features, for generic features 
-one can consider contributing to this project.  
+one can consider contributing to this project.

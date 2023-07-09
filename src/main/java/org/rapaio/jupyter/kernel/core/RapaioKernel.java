@@ -1,5 +1,6 @@
 package org.rapaio.jupyter.kernel.core;
 
+import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.Renderer;
@@ -99,8 +100,8 @@ public class RapaioKernel {
 
     private ShellKernelInfoReply kernelInfo() {
 
-        String kernelName = "rapaio-jupyter-kernel";
-        String kernelVersion = "0.2.0";
+        String kernelName = GeneralProperties.getInstance().getKernelName();
+        String kernelVersion = GeneralProperties.getInstance().getKernelVersion();
         LanguageInfo languageInfo = LanguageInfo.kernelLanguageInfo();
         String banner = languageInfo.name() + " " + languageInfo.version();
 

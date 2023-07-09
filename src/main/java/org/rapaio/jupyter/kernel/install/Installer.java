@@ -1,20 +1,23 @@
 package org.rapaio.jupyter.kernel.install;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
 
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
 public class Installer {
+
+    private static final String INSTALL_FLAG_AUTO = "-auto";
+    private static final String INSTALL_FLAG_SYSTEM = "-system";
 
     private enum OSName {
         LINUX,
@@ -75,21 +78,30 @@ public class Installer {
         };
     }
 
+    private boolean hasFlag(String[] args, String flagArg) {
+        if (args == null || args.length == 0) {
+            return false;
+        }
+        return Arrays.asList(args).contains(flagArg);
+    }
+
     public void install(String[] args) throws IOException {
 
-        boolean autoInstall = args != null && args.length > 0 && args[0].equals("-auto");
+        boolean autoInstall = hasFlag(args, INSTALL_FLAG_AUTO);
         if (autoInstall) {
             System.out.println("Installing in automatic mode.");
         } else {
             System.out.println("Installing in interactive mode.");
         }
 
+        boolean system = hasFlag(args, INSTALL_FLAG_SYSTEM);
+
         OSName os = findOSName();
         if (os == null) {
             throw new RuntimeException("Operating system is not recognized. Installation failed.");
         }
 
-        String installationPath = collectInstallationPath(os, autoInstall);
+        String installationPath = collectInstallationPath(os, autoInstall, system);
         String kernelDir = collectKernelDir(autoInstall);
         String displayName = collectDisplayName(autoInstall);
         String timeoutMillis = collectTimeoutMillis(autoInstall);
@@ -178,10 +190,14 @@ public class Installer {
         }
     }
 
-    private String collectInstallationPath(OSName os, boolean autoInstall) {
+    private String collectInstallationPath(OSName os, boolean autoInstall, boolean system) {
         List<String> paths = getInstallationPaths(os);
         if (autoInstall) {
-            return paths.get(0);
+            if (!system) {
+                return paths.get(0);
+            } else {
+                return paths.get(paths.size() - 1);
+            }
         }
         return selectInteractivePath(paths);
     }
