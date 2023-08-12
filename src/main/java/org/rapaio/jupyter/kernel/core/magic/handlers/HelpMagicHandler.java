@@ -1,5 +1,6 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -47,7 +48,7 @@ public class HelpMagicHandler extends MagicHandler {
         return canHandleOneLinePrefix(magicSnippet, ONE_LINE_PREFIX);
     }
 
-    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException {
+    Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new MagicEvalException(snippet, "Try to execute a magic snippet to improper handler.");
         }

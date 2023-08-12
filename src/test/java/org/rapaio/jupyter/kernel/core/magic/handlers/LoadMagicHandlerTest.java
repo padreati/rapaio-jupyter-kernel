@@ -7,10 +7,14 @@ import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicParseException;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.message.Message;
+import org.rapaio.jupyter.kernel.message.MessageType;
+import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
 
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
@@ -192,7 +196,7 @@ public class LoadMagicHandlerTest {
     void testHandler() throws MagicEvalException, MagicParseException {
         LoadMagicHandler handler = new LoadMagicHandler();
         MagicSnippet snippet = new MagicSnippet(MagicSnippet.Type.MAGIC_LINE, List.of(new MagicSnippet.CodeLine("%load /", true, 7, 7)));
-        var options = handler.snippetMagicHandlers().get(0).completeFunction().apply(null, snippet);
+        var options = handler.snippetMagicHandlers().get(0).completeFunction().apply(null, TestUtils.context(), snippet);
         assertNotNull(options);
     }
 
@@ -204,6 +208,15 @@ public class LoadMagicHandlerTest {
         kernel.registerChannels(channels);
         MagicSnippet snippet = mock(MagicSnippet.class);
 
-        handler.evalNotebook(kernel, snippet, content1);
+        handler.evalNotebook(kernel, TestUtils.context(), snippet, content1);
+    }
+
+    @Test
+    void testAbsolutePath() throws NoSuchAlgorithmException, InvalidKeyException {
+        RapaioKernel kernel = new RapaioKernel();
+        Channels channels = TestUtils.spyChannels();
+        kernel.registerChannels(channels);
+
+        kernel.handleExecuteRequest(new Message<>(MessageType.SHELL_EXECUTE_REQUEST, new ShellExecuteRequest("%load /home/ati/work/rapaio-notebooks/rapaio-bootstrap.ipynb", true, false, Map.of(), false, false)));
     }
 }

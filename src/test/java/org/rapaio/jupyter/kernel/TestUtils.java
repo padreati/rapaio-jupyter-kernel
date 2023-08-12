@@ -3,6 +3,7 @@ package org.rapaio.jupyter.kernel;
 import org.mockito.Mockito;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.ConnectionProperties;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 
 import java.io.InputStream;
@@ -22,6 +23,10 @@ public class TestUtils {
 
     public static Channels spyChannels() throws NoSuchAlgorithmException, InvalidKeyException {
         return Mockito.spy(new Channels(testConnectionProperties()));
+    }
+
+    public static ExecutionContext context() {
+        return new ExecutionContext(null);
     }
 }
 

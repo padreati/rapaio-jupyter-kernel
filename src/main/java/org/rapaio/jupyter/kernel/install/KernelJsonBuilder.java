@@ -11,7 +11,7 @@ public class KernelJsonBuilder {
     private static final String LANGUAGE = "java";
     private static final String INTERRUPT_MODE = "message";
 
-    public static final String DEFAULT_DISPLAY_NAME = "Rapaio Kernel";
+    public static final String DEFAULT_DISPLAY_NAME = "Java RJK";
     public static final String DEFAULT_KERNEL_DIR = "rapaio-jupyter-kernel";
     private static final String DEFAULT_JAR_NAME = "rapaio-jupyter-kernel.jar";
 

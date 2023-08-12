@@ -13,12 +13,12 @@ public class JavaEngineTest {
                 .withTimeoutMillis(-1L)
                 .build();
 
-        var result = engine.eval("int x = 3;int y = 4;y");
+        var result = engine.eval(TestUtils.context(), "int x = 3;int y = 4;y");
         assertNotNull(result);
         assertTrue(result instanceof Integer);
         assertEquals(4, result);
 
-        result = engine.eval("x");
+        result = engine.eval(TestUtils.context(), "x");
         assertNotNull(result);
         assertTrue(result instanceof Integer);
         assertEquals(3, result);
@@ -38,7 +38,7 @@ public class JavaEngineTest {
         JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
-        var out = engine.eval("System.out.println(\"test\")");
+        var out = engine.eval(TestUtils.context(), "System.out.println(\"test\")");
         assertNull(out);
     }
 }

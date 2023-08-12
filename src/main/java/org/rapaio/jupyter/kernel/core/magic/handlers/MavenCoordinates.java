@@ -1,6 +1,7 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import org.apache.ivy.core.report.ResolveReport;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -52,7 +53,7 @@ public class MavenCoordinates extends MagicHandler {
         return magicSnippet.lines().get(0).code().startsWith(HEADER);
     }
 
-    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) {
+    Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
         if (!canHandleSnippet(snippet)) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }

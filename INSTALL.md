@@ -4,7 +4,7 @@ The latest version can be found as a download in the releases section. Rapaio Ju
 installing tool which allow users to quickly install the kernel. The installer is contained in the jar distribution archive
 and can be called with:
 
-    java -jar ./rapaio-jupyter-kernel-1.2.1.jar -i -auto
+    java -jar ./rapaio-jupyter-kernel-1.2.2.jar -i -auto
 
 The `-auto` option uses an automatic mode for installing the kernel.
 
@@ -13,7 +13,7 @@ The `-auto` option uses an automatic mode for installing the kernel.
 Without using the automatic mode, the installer asks in an interactive way various information to customize the installed kernel.
 An example of interactive installer mode:
 
-    shell: java -jar ./rapaio-jupyter-kernel-1.2.1.jar -i
+    shell: java -jar ./rapaio-jupyter-kernel-1.2.2.jar -i
     Installing in interactive mode.
     Select installation path:
     [1] /home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels
@@ -40,7 +40,7 @@ An example of interactive installer mode:
             "--add-modules",
             "jdk.incubator.vector,jdk.incubator.concurrent",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-custom-kernel/rapaio-jupyter-kernel-1.2.1.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-custom-kernel/rapaio-jupyter-kernel-1.2.2.jar",
             "{connection_file}"
         ],
         "display_name": "Rapaio Custom",

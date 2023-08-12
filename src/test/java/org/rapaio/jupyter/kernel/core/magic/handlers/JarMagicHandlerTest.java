@@ -3,6 +3,7 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
@@ -29,7 +30,7 @@ public class JarMagicHandlerTest {
     @Test
     void testInvalidCode() {
         String code = "%%jars test";
-        MagicEvalException ex = assertThrows(MagicEvalException.class, () -> handler.eval(kernel,
+        MagicEvalException ex = assertThrows(MagicEvalException.class, () -> handler.eval(kernel, TestUtils.context(),
                 new MagicSnippet(MagicSnippet.Type.MAGIC_CELL, List.of(new MagicSnippet.CodeLine(code, false, 0, 0)))));
         assertNotNull(ex);
 

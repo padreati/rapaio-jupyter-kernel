@@ -1,11 +1,13 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.*;
 
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 
 public class ClasspathMagicHandler extends MagicHandler {
@@ -42,12 +44,13 @@ public class ClasspathMagicHandler extends MagicHandler {
         return canHandleOneLinePrefix(magicSnippet, ONE_LINE_PREFIX);
     }
 
-    private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+    private Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
         String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(ONE_LINE_PREFIX.length()).trim();
+        path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
 
         File file = new File(path);
         if (!file.exists()) {
@@ -61,7 +64,7 @@ public class ClasspathMagicHandler extends MagicHandler {
         return null;
     }
 
-    private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {
+    private CompleteMatches completeLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) {
         return MagicHandlerTools.oneLinePathComplete(ONE_LINE_PREFIX, magicSnippet, File::isDirectory);
     }
 }

@@ -2,6 +2,7 @@ package org.rapaio.jupyter.kernel.core.java;
 
 import jdk.jshell.*;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.display.html.Tag;
@@ -66,7 +67,7 @@ public class JavaEngine {
         shell.close();
     }
 
-    public Object eval(String code) throws Exception {
+    public Object eval(ExecutionContext context, String code) throws Exception {
 
         // the last result will be displayed if we have the result of an expression,
         // or it's the value of a variable (emulate the behavior from ipython)

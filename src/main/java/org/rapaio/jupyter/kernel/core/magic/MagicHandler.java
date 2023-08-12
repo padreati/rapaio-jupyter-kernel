@@ -1,5 +1,6 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -26,24 +27,24 @@ public abstract class MagicHandler {
 
     public abstract boolean canHandleSnippet(MagicSnippet magicSnippet);
 
-    public final Object eval(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
+    public final Object eval(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicParseException, MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new RuntimeException("Try to execute a magic snippet to improper handler.");
         }
         for (SnippetMagicHandler handler : snippetMagicHandlers()) {
             if (handler.canHandlePredicate().test(magicSnippet)) {
-                return handler.evalFunction().apply(kernel, magicSnippet);
+                return handler.evalFunction().apply(kernel, context, magicSnippet);
             }
         }
         throw new MagicEvalException(magicSnippet, "Command not executed either because there is no handler or due to a syntax error.");
     }
 
-    public final DisplayData inspect(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException, MagicParseException {
+    public final DisplayData inspect(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException, MagicParseException {
         // if we can be more specific, than do it
         if (snippetMagicHandlers().size() > 1) {
             for (var handler : snippetMagicHandlers()) {
                 if (handler.canHandlePredicate().test(magicSnippet)) {
-                    return handler.inspectFunction().apply(kernel, magicSnippet);
+                    return handler.inspectFunction().apply(kernel, context, magicSnippet);
                 }
             }
         }
