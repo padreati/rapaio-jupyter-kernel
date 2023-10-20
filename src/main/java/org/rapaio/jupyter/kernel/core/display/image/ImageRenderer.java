@@ -1,15 +1,20 @@
 package org.rapaio.jupyter.kernel.core.display.image;
 
-import org.rapaio.jupyter.kernel.core.display.DataRenderHandler;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.MIMEType;
-
-import javax.imageio.ImageIO;
 import java.awt.image.RenderedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.Base64;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.imageio.ImageIO;
+
+import org.rapaio.jupyter.kernel.core.display.DataRenderHandler;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.MIMEType;
 
 public class ImageRenderer implements DataRenderHandler {
 
@@ -50,11 +55,7 @@ public class ImageRenderer implements DataRenderHandler {
             ImageIO.write(image, allowedFormats.get(mimeType), Base64.getEncoder().wrap(out));
             String response = out.toString(StandardCharsets.UTF_8);
 
-            DisplayData displayData = DisplayData.withType(mimeType, response);
-            // Fix a bug in nbconvert which is unable to work with this attribute
-//            Map<String, Integer> sizeMap = Map.of("width", image.getWidth(), "height", image.getHeight());
-//            displayData.putMetaData(mimeType.toString(), Transform.toJson(sizeMap));
-            return displayData;
+            return DisplayData.withType(mimeType, response);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -38,7 +38,7 @@ public class JShellInputStream extends InputStream {
         }
         if (buffer.canTake(1)) {
             byte[] data = buffer.take(1);
-            return data[0];
+            return data[0] & 0xFF;
         }
         return -1;
     }

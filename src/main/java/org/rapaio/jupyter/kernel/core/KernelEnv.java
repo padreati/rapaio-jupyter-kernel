@@ -1,8 +1,5 @@
 package org.rapaio.jupyter.kernel.core;
 
-import static org.rapaio.jupyter.kernel.core.RapaioKernel.DEFAULT_COMPILER_OPTIONS;
-import static org.rapaio.jupyter.kernel.core.RapaioKernel.DEFAULT_INIT_SCRIPT;
-import static org.rapaio.jupyter.kernel.core.RapaioKernel.DEFAULT_RJK_TIMEOUT_MILLIS;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_COMPILER_OPTIONS;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_INIT_SCRIPT;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_TIMEOUT_MILLIS;
@@ -16,6 +13,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Logger;
 
+import org.rapaio.jupyter.kernel.GeneralProperties;
+
 public class KernelEnv {
 
     public static final Logger LOGGER = Logger.getLogger(KernelEnv.class.getSimpleName());
@@ -28,7 +27,7 @@ public class KernelEnv {
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
         LOGGER.finest(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
         if (envCompilerOptions == null) {
-            envCompilerOptions = DEFAULT_COMPILER_OPTIONS;
+            envCompilerOptions = GeneralProperties.getDefaultCompilerOptions();
         }
         String[] compilerTokens = Arrays.stream(envCompilerOptions.split("\\s"))
                 .filter(s -> !s.trim().isEmpty()).toArray(String[]::new);
@@ -37,7 +36,7 @@ public class KernelEnv {
         String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
         LOGGER.finest(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
         if (envTimeoutMillis == null) {
-            envTimeoutMillis = DEFAULT_RJK_TIMEOUT_MILLIS;
+            envTimeoutMillis = GeneralProperties.getDefaultTimeoutMillis();
         }
         try {
             timeoutMillis = Long.parseLong(envTimeoutMillis);
@@ -49,7 +48,7 @@ public class KernelEnv {
         String envInitScript = System.getenv(RJK_INIT_SCRIPT);
         LOGGER.finest(RJK_INIT_SCRIPT + " env: " + envInitScript);
         if (envInitScript == null) {
-            envInitScript = DEFAULT_INIT_SCRIPT;
+            envInitScript = GeneralProperties.getDefaultInitScript();
         }
         initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
     }

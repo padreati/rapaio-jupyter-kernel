@@ -1,9 +1,5 @@
 package org.rapaio.jupyter.kernel.install;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -13,6 +9,11 @@ import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Scanner;
+
+import org.rapaio.jupyter.kernel.GeneralProperties;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class Installer {
 
@@ -204,14 +205,14 @@ public class Installer {
 
     private String collectKernelDir(boolean autoInstall) {
         if (autoInstall) {
-            return KernelJsonBuilder.DEFAULT_KERNEL_DIR;
+            return GeneralProperties.getDefaultKernelDir();
         }
-        System.out.println("Select kernel dir (default '" + KernelJsonBuilder.DEFAULT_KERNEL_DIR + "'):");
+        System.out.printf("Select kernel dir (default '%s'):%n", GeneralProperties.getDefaultKernelDir());
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String line = scanner.nextLine().trim();
             if (line.isEmpty()) {
-                return KernelJsonBuilder.DEFAULT_KERNEL_DIR;
+                return GeneralProperties.getDefaultKernelDir();
             }
             if (!line.matches("[a-zA-Z0-9_.-]*")) {
                 System.out.println("Invalid name, must contain only alphanumeric, hyphen, underscore or dots.");
@@ -223,27 +224,27 @@ public class Installer {
 
     private String collectDisplayName(boolean autoInstall) {
         if (autoInstall) {
-            return KernelJsonBuilder.DEFAULT_DISPLAY_NAME;
+            return GeneralProperties.getDefaultDisplayName();
         }
-        System.out.println("Select display name (default '" + KernelJsonBuilder.DEFAULT_DISPLAY_NAME + "'):");
+        System.out.printf("Select display name (default '%s'):%n", GeneralProperties.getDefaultDisplayName());
         Scanner scanner = new Scanner(System.in);
         String line = scanner.nextLine().trim();
         if (line.isEmpty()) {
-            return KernelJsonBuilder.DEFAULT_DISPLAY_NAME;
+            return GeneralProperties.getDefaultDisplayName();
         }
         return line;
     }
 
     private String collectTimeoutMillis(boolean autoInstall) {
         if (autoInstall) {
-            return RapaioKernel.DEFAULT_RJK_TIMEOUT_MILLIS;
+            return GeneralProperties.getDefaultTimeoutMillis();
         }
         System.out.println("Select timeout in milliseconds:");
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String line = scanner.nextLine().trim();
             if (line.isEmpty()) {
-                return RapaioKernel.DEFAULT_RJK_TIMEOUT_MILLIS;
+                return GeneralProperties.getDefaultTimeoutMillis();
             }
             try {
                 Long.parseLong(line);
@@ -256,17 +257,17 @@ public class Installer {
 
     private String collectCompilerOptions(boolean autoInstall) {
         if (autoInstall) {
-            return RapaioKernel.DEFAULT_COMPILER_OPTIONS;
+            return GeneralProperties.getDefaultCompilerOptions();
         }
-        System.out.println("Select compiler options (default '" + RapaioKernel.DEFAULT_COMPILER_OPTIONS + "'):");
+        System.out.printf("Select compiler options (default '%s'):%n", GeneralProperties.getDefaultCompilerOptions());
         return new Scanner(System.in).nextLine().trim();
     }
 
     private String collectInitScript(boolean autoInstall) {
         if (autoInstall) {
-            return RapaioKernel.DEFAULT_COMPILER_OPTIONS;
+            return GeneralProperties.getDefaultCompilerOptions();
         }
-        System.out.println("Select init script (default '" + RapaioKernel.DEFAULT_INIT_SCRIPT + "'):");
+        System.out.printf("Select init script (default '%s':%n", GeneralProperties.getDefaultInitScript());
         return new Scanner(System.in).nextLine().trim();
     }
 

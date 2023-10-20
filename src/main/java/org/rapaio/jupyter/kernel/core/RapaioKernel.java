@@ -1,19 +1,5 @@
 package org.rapaio.jupyter.kernel.core;
 
-import org.rapaio.jupyter.kernel.GeneralProperties;
-import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.Renderer;
-import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
-import org.rapaio.jupyter.kernel.core.java.IsCompleteResult;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
-import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
-import org.rapaio.jupyter.kernel.core.magic.*;
-import org.rapaio.jupyter.kernel.message.Header;
-import org.rapaio.jupyter.kernel.message.Message;
-import org.rapaio.jupyter.kernel.message.MessageType;
-import org.rapaio.jupyter.kernel.message.messages.*;
-
 import java.io.InputStream;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -23,15 +9,53 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Logger;
 
+import org.rapaio.jupyter.kernel.GeneralProperties;
+import org.rapaio.jupyter.kernel.channels.Channels;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.Renderer;
+import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
+import org.rapaio.jupyter.kernel.core.java.IsCompleteResult;
+import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+import org.rapaio.jupyter.kernel.core.magic.MagicCompleteResult;
+import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
+import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
+import org.rapaio.jupyter.kernel.core.magic.MagicIsCompleteResult;
+import org.rapaio.jupyter.kernel.message.Header;
+import org.rapaio.jupyter.kernel.message.Message;
+import org.rapaio.jupyter.kernel.message.MessageType;
+import org.rapaio.jupyter.kernel.message.messages.ControlInterruptReply;
+import org.rapaio.jupyter.kernel.message.messages.ControlInterruptRequest;
+import org.rapaio.jupyter.kernel.message.messages.ControlShutdownReply;
+import org.rapaio.jupyter.kernel.message.messages.ControlShutdownRequest;
+import org.rapaio.jupyter.kernel.message.messages.CustomCommClose;
+import org.rapaio.jupyter.kernel.message.messages.CustomCommMsg;
+import org.rapaio.jupyter.kernel.message.messages.CustomCommOpen;
+import org.rapaio.jupyter.kernel.message.messages.ErrorReply;
+import org.rapaio.jupyter.kernel.message.messages.IOPubDisplayData;
+import org.rapaio.jupyter.kernel.message.messages.IOPubError;
+import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteInput;
+import org.rapaio.jupyter.kernel.message.messages.IOPubExecuteResult;
+import org.rapaio.jupyter.kernel.message.messages.IOPubUpdateDisplayData;
+import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellCommInfoRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellCompleteReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellCompleteRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellExecuteReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellHistoryRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellInspectReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellInspectRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteRequest;
+import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoReply;
+import org.rapaio.jupyter.kernel.message.messages.ShellKernelInfoRequest;
+
 public class RapaioKernel {
 
     public static final String RJK_TIMEOUT_MILLIS = "RJK_TIMEOUT_MILLIS";
     public static final String RJK_COMPILER_OPTIONS = "RJK_COMPILER_OPTIONS";
     public static final String RJK_INIT_SCRIPT = "RJK_INIT_SCRIPT";
-
-    public static final String DEFAULT_RJK_TIMEOUT_MILLIS = "-1";
-    public static final String DEFAULT_COMPILER_OPTIONS = "";
-    public static final String DEFAULT_INIT_SCRIPT = "";
 
     private static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
 
@@ -101,8 +125,8 @@ public class RapaioKernel {
 
     private ShellKernelInfoReply kernelInfo() {
 
-        String kernelName = GeneralProperties.getInstance().getKernelName();
-        String kernelVersion = GeneralProperties.getInstance().getKernelVersion();
+        String kernelName = GeneralProperties.getKernelName();
+        String kernelVersion = GeneralProperties.getKernelVersion();
         LanguageInfo languageInfo = LanguageInfo.kernelLanguageInfo();
         String banner = languageInfo.name() + " " + languageInfo.version();
 

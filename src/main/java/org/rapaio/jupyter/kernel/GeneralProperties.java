@@ -5,11 +5,9 @@ import java.util.Properties;
 
 public final class GeneralProperties {
 
-    private static final String KEY_KERNEL_NAME = "kernel.name";
-    private static final String KEY_KERNEL_VERSION = "kernel.version";
     private static final GeneralProperties instance = new GeneralProperties();
 
-    public static GeneralProperties getInstance() {
+    private static GeneralProperties getInstance() {
         return instance;
     }
 
@@ -24,11 +22,35 @@ public final class GeneralProperties {
         }
     }
 
-    public String getKernelName() {
-        return properties.getProperty(KEY_KERNEL_NAME);
+    public static String getKernelName() {
+        return getInstance().properties.getProperty("kernel.name");
     }
 
-    public String getKernelVersion() {
-        return properties.getProperty(KEY_KERNEL_VERSION);
+    public static String getKernelVersion() {
+        return getInstance().properties.getProperty("kernel.version");
+    }
+
+    public static String getDefaultDisplayName() {
+        return getInstance().properties.getProperty("default.display.name");
+    }
+
+    public static String getDefaultKernelDir() {
+        return getInstance().properties.getProperty("default.kernel.dir");
+    }
+
+    public static String getDefaultJarName() {
+        return getInstance().properties.getProperty("default.jar.name");
+    }
+
+    public static String getDefaultTimeoutMillis() {
+        return getInstance().properties.getProperty("default.timeout.limits");
+    }
+
+    public static String getDefaultCompilerOptions() {
+        return getInstance().properties.getProperty("default.compiler.options");
+    }
+
+    public static String getDefaultInitScript() {
+        return getInstance().properties.getProperty("default.init.script");
     }
 }

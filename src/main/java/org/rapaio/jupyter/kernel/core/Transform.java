@@ -70,7 +70,7 @@ public class Transform {
 
     public static <T> T fromJsonNull(byte[] raw, Class<T> clazz) {
         JsonElement parentHeaderJson = JsonParser.parseString(new String(raw, UTF_8));
-        if (parentHeaderJson.isJsonObject() && parentHeaderJson.getAsJsonObject().size() > 0) {
+        if (parentHeaderJson.isJsonObject() && !parentHeaderJson.getAsJsonObject().isEmpty()) {
             return gson.fromJson(parentHeaderJson, clazz);
         }
         return null;

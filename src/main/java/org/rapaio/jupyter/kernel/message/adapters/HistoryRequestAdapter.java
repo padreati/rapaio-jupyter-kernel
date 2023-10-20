@@ -22,15 +22,10 @@ public class HistoryRequestAdapter implements JsonDeserializer<ShellHistoryReque
         JsonPrimitive accessTypeRaw = object.getAsJsonPrimitive("hist_access_type");
 
         ShellHistoryRequest.AccessType accessType = ctx.deserialize(accessTypeRaw, ShellHistoryRequest.AccessType.class);
-        switch (accessType) {
-            case RANGE:
-                return ctx.deserialize(element, ShellHistoryRequest.Range.class);
-            case TAIL:
-                return ctx.deserialize(element, ShellHistoryRequest.Tail.class);
-            case SEARCH:
-                return ctx.deserialize(element, ShellHistoryRequest.Search.class);
-            default:
-                throw new IllegalArgumentException("Unknown hist_access_type " + String.valueOf(accessTypeRaw));
-        }
+        return switch (accessType) {
+            case RANGE -> ctx.deserialize(element, ShellHistoryRequest.Range.class);
+            case TAIL -> ctx.deserialize(element, ShellHistoryRequest.Tail.class);
+            case SEARCH -> ctx.deserialize(element, ShellHistoryRequest.Search.class);
+        };
     }
 }

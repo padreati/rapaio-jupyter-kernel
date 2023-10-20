@@ -1,17 +1,21 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.magic.*;
-
 import java.io.File;
 import java.io.FileFilter;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandlerTools;
+import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 
 public class JarMagicHandler extends MagicHandler {
 
@@ -112,19 +116,23 @@ public class JarMagicHandler extends MagicHandler {
 
         List<File> files = new ArrayList<>();
         for (int i = 1; i < magicSnippet.lines().size(); i++) {
-            String path = magicSnippet.lines().get(i).code();
-            path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
-            File file = new File(path.trim());
-            if (!file.exists()) {
-                throw new MagicEvalException(magicSnippet, "Provided path does not exist.", i, 0, path.length());
-            }
-            if (!file.isDirectory() && !file.getName().endsWith(".jar")) {
-                throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.", i, 0, path.length());
-            }
-            files.add(file);
+            files.add(getFile(context, magicSnippet, i));
         }
         files.forEach(file -> addFileToPath(kernel, file));
         return null;
+    }
+
+    private static File getFile(ExecutionContext context, MagicSnippet magicSnippet, int i) throws MagicEvalException {
+        String path = magicSnippet.lines().get(i).code();
+        path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
+        File file = new File(path.trim());
+        if (!file.exists()) {
+            throw new MagicEvalException(magicSnippet, "Provided path does not exist.", i, 0, path.length());
+        }
+        if (!file.isDirectory() && !file.getName().endsWith(".jar")) {
+            throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.", i, 0, path.length());
+        }
+        return file;
     }
 
     private void addFileToPath(RapaioKernel kernel, File file) {

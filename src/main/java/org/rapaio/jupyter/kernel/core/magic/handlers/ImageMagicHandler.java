@@ -1,13 +1,5 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.MIMEType;
-import org.rapaio.jupyter.kernel.core.magic.*;
-
-import javax.imageio.ImageIO;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -18,6 +10,19 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.imageio.ImageIO;
+
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.MIMEType;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandlerTools;
+import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 
 public class ImageMagicHandler extends MagicHandler {
 
@@ -70,11 +75,7 @@ public class ImageMagicHandler extends MagicHandler {
             ImageIO.write(bi, "png", Base64.getEncoder().wrap(out));
             String response = out.toString(StandardCharsets.UTF_8);
 
-            DisplayData dd = DisplayData.withType(MIMEType.PNG, response);
-            // disable metadata due to a problem in nbviewr export
-//            Map<String, Integer> sizeMap = Map.of("width", bi.getWidth(), "height", bi.getHeight());
-//            dd.putMetaData(MIMEType.PNG.toString(), Transform.toJson(sizeMap));
-            return dd;
+            return DisplayData.withType(MIMEType.PNG, response);
         } catch (IOException e) {
             throw new MagicEvalException(magicSnippet, "Could not read image. " + e.getMessage());
         }
