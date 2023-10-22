@@ -12,7 +12,7 @@ public class DependencyManagerTest {
 
         DependencyManager ivy = DependencyManager.getInstance();
 
-        ivy.setLatestRevisionConflictManager();
+        DependencyManager.setLatestRevisionConflictManager();
 
 
         ivy.addDependency(new Dependency("com.google.guava:guava:20.0", false));
