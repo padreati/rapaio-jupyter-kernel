@@ -1,15 +1,22 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.magic.handlers.*;
-
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
+
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.magic.handlers.BashMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.ClasspathMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.DependencyHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.HelpMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.ImageMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.handlers.LoadMagicHandler;
 
 public class MagicEngine {
 
@@ -18,7 +25,7 @@ public class MagicEngine {
     static {
         // register magic handlers
         magicHandlers.add(new JavaReplMagicHandler());
-        magicHandlers.add(new MavenCoordinates());
+        magicHandlers.add(new DependencyHandler());
         magicHandlers.add(new JarMagicHandler());
         magicHandlers.add(new LoadMagicHandler());
         magicHandlers.add(new ImageMagicHandler());

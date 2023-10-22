@@ -1,14 +1,16 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class MagicEngineTest {
 
@@ -46,7 +48,17 @@ public class MagicEngineTest {
         var result = kernel.magicEngine().complete(kernel, new ExecutionContext(null), """
                 %%jars
                 /""", 0);
-        System.out.println(result);
+        assertNotNull(result);
+        assertFalse(result.replacementOptions().replacements().isEmpty());
+        assertEquals(0, result.replacementOptions().start());
+        assertEquals(6, result.replacementOptions().end());
+
+        result = kernel.magicEngine().complete(kernel, new ExecutionContext(null), "%depen", 1);
+        assertNotNull(result);
+        var options = result.replacementOptions();
+        assertFalse(options.replacements().isEmpty());
+        assertEquals(0, options.start());
+        assertEquals(6, options.end());
     }
 
     @Test
