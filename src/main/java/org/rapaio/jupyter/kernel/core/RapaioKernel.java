@@ -22,6 +22,7 @@ import org.rapaio.jupyter.kernel.core.magic.MagicEngine;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicInspectResult;
 import org.rapaio.jupyter.kernel.core.magic.MagicIsCompleteResult;
+import org.rapaio.jupyter.kernel.core.magic.dependencies.DependencyManager;
 import org.rapaio.jupyter.kernel.message.Header;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
@@ -66,6 +67,7 @@ public class RapaioKernel {
     private final Renderer renderer;
     private final JavaEngine javaEngine;
     private final MagicEngine magicEngine;
+    private final DependencyManager dependencyManager;
     private final JShellConsole shellConsole;
 
     private Channels channels;
@@ -83,6 +85,7 @@ public class RapaioKernel {
                 .build();
         this.javaEngine.initialize();
         this.magicEngine = new MagicEngine(this);
+        this.dependencyManager = new DependencyManager();
         this.renderer = new Renderer();
     }
 
@@ -97,6 +100,10 @@ public class RapaioKernel {
 
     public MagicEngine magicEngine() {
         return magicEngine;
+    }
+
+    public DependencyManager dependencyManager() {
+        return dependencyManager;
     }
 
     public Renderer renderer() {

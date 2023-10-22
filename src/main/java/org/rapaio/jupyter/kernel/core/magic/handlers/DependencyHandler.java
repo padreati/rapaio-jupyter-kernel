@@ -12,7 +12,6 @@ import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.dependencies.Dependency;
-import org.rapaio.jupyter.kernel.core.magic.dependencies.DependencyManager;
 
 public class DependencyHandler extends MagicHandler {
 
@@ -27,7 +26,26 @@ public class DependencyHandler extends MagicHandler {
     public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
 
-
+                SnippetMagicHandler.lineMagic()
+                        .syntaxMatcher(HEADER + " /list-configuration")
+                        .syntaxHelp(List.of(HEADER + " /list-configuration"))
+                        .syntaxPrefix(HEADER + " /list-configuration")
+                        .documentation(List.of(
+                                "List all the dependency configurations"
+                        ))
+                        .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /list-configuration"))
+                        .evalFunction(this::evalLineListConfiguration)
+                        .build(),
+                SnippetMagicHandler.lineMagic()
+                        .syntaxMatcher(HEADER + " /list-artifacts")
+                        .syntaxHelp(List.of(HEADER + " /list-artifacts"))
+                        .syntaxPrefix(HEADER + " /list-artifacts")
+                        .documentation(List.of(
+                                "List artifacts loaded after the last dependency resolve"
+                        ))
+                        .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /list-artifacts"))
+                        .evalFunction(this::evalLineListArtifacts)
+                        .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher(HEADER + " /conflict-manager [a-z]+")
                         .syntaxHelp(List.of(
@@ -113,19 +131,19 @@ public class DependencyHandler extends MagicHandler {
         String args = fullCode.substring((HEADER + " /conflict-manager").length()).trim();
         switch (args) {
             case "all":
-                DependencyManager.setAllConflictManager();
+                kernel.dependencyManager().setAllConflictManager();
                 break;
             case "latest-time":
-                DependencyManager.setLatestTimeConflictManager();
+                kernel.dependencyManager().setLatestTimeConflictManager();
                 break;
             case "latest-revision":
-                DependencyManager.setLatestRevisionConflictManager();
+                kernel.dependencyManager().setLatestRevisionConflictManager();
                 break;
             case "latest-compatible":
-                DependencyManager.setLatestCompatibleConflictManager();
+                kernel.dependencyManager().setLatestCompatibleConflictManager();
                 break;
             case "strict":
-                DependencyManager.setStrictConflictManager();
+                kernel.dependencyManager().setStrictConflictManager();
                 break;
             default:
                 throw new RuntimeException("Conflict manager not recognized.");
@@ -145,7 +163,7 @@ public class DependencyHandler extends MagicHandler {
         }
 
         kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).reset().render() + "\n");
-        DependencyManager.getInstance().addDependency(new Dependency(args[0], args.length == 2));
+        kernel.dependencyManager().addDependency(new Dependency(args[0], args.length == 2));
         return null;
     }
 
@@ -157,7 +175,7 @@ public class DependencyHandler extends MagicHandler {
         String args = fullCode.substring((HEADER + " /override ").length()).trim();
 
         kernel.channels().writeToStdOut("Adding dependency override " + ANSI.start().bold().fgGreen().text(args).reset().render() + "\n");
-        DependencyManager.getInstance().addOverrideDependency(new Dependency(args, true));
+        kernel.dependencyManager().addOverrideDependency(new Dependency(args, true));
         return null;
     }
 
@@ -168,22 +186,52 @@ public class DependencyHandler extends MagicHandler {
 
         try {
             kernel.channels().writeToStdOut("Solving dependencies/n");
-            DependencyManager.getInstance().resolve();
-            ResolveReport resolveReport = DependencyManager.getInstance().resolve();
+            ResolveReport resolveReport = kernel.dependencyManager().resolve();
             var problemMessages = resolveReport.getAllProblemMessages();
             for (var problemMessage : problemMessages) {
                 kernel.channels().writeToStdErr(problemMessage);
             }
 
-            var adrs = resolveReport.getAllArtifactsReports();
-            kernel.channels().writeToStdOut("Found dependencies count: " + adrs.length + "\n");
-            for (var adr : adrs) {
+            var artifactsReports = resolveReport.getAllArtifactsReports();
+            kernel.channels().writeToStdOut("Found dependencies count: " + artifactsReports.length + "\n");
+            for (var report : artifactsReports) {
                 kernel.channels().writeToStdOut("Add to classpath: " +
-                        ANSI.start().fgGreen().text(adr.getLocalFile().getAbsolutePath()).reset().render() + "\n");
-                kernel.javaEngine().getShell().addToClasspath(adr.getLocalFile().getAbsolutePath());
+                        ANSI.start().fgGreen().text(report.getLocalFile().getAbsolutePath()).reset().render() + "\n");
+                kernel.javaEngine().getShell().addToClasspath(report.getLocalFile().getAbsolutePath());
+                kernel.dependencyManager().addLoadedArtifact(report);
             }
         } catch (ParseException | IOException e) {
             throw new RuntimeException(e);
+        }
+        return null;
+    }
+
+    Object evalLineListConfiguration(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-configuration")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet.");
+        }
+        var channels = kernel.channels();
+        var dm = kernel.dependencyManager();
+        channels.writeToStdOut("Direct dependencies count: " + dm.getDirectDependencies().size() + "\n");
+        for (var dep : dm.getDirectDependencies()) {
+            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.revisionId().toString()).nl().render());
+        }
+        channels.writeToStdOut("Dependency overrides count: " + dm.getConflictDependencies().size() + "\n");
+        for(var dep : dm.getConflictDependencies()) {
+            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.revisionId().toString()).nl().render());
+        }
+        return null;
+    }
+
+    Object evalLineListArtifacts(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-artifacts")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet.");
+        }
+        var channels = kernel.channels();
+        var dm = kernel.dependencyManager();
+        channels.writeToStdOut("Loaded artifacts count: " + dm.getLoadedArtifacts().size() + "\n");
+        for (var report : dm.getLoadedArtifacts()) {
+            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(report.getArtifact().toString()).nl().render());
         }
         return null;
     }

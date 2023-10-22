@@ -12,6 +12,7 @@ import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
 import org.apache.ivy.core.module.id.ModuleRevisionId;
+import org.apache.ivy.core.report.ArtifactDownloadReport;
 import org.apache.ivy.core.report.ResolveReport;
 import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.core.settings.IvySettings;
@@ -33,8 +34,6 @@ public class DependencyManager {
 
     private static final String[] DEFAULT_MODULE_DESC_CONFIGS = new String[] {"default", "master", "runtime"};
 
-    private static DependencyManager instance;
-
     private final Ivy ivy;
     private final DefaultModuleDescriptor md;
 
@@ -43,14 +42,9 @@ public class DependencyManager {
     private final List<Dependency> directDependencies = new ArrayList<>();
     private final List<Dependency> conflictDependencies = new ArrayList<>();
 
-    public static DependencyManager getInstance() {
-        if (instance == null) {
-            instance = new DependencyManager();
-        }
-        return instance;
-    }
+    private final List<ArtifactDownloadReport> loadedArtifacts = new ArrayList<>();
 
-    private DependencyManager() {
+    public DependencyManager() {
 
         resolver.setName("public");
         resolver.add(maven("central", "https://repo.maven.apache.org/maven2/"));
@@ -82,43 +76,54 @@ public class DependencyManager {
         for (String conf : DEFAULT_MODULE_DESC_CONFIGS) {
             md.addConfiguration(new Configuration(conf));
         }
+   }
 
+    public List<Dependency> getDirectDependencies() {
+        return directDependencies;
     }
 
-    public static void setAllConflictManager() {
+    public List<Dependency> getConflictDependencies() {
+        return conflictDependencies;
+    }
+
+    public List<ArtifactDownloadReport> getLoadedArtifacts() {
+        return loadedArtifacts;
+    }
+
+    public void setAllConflictManager() {
         NoConflictManager conflictManager = new NoConflictManager();
-        conflictManager.setSettings(getInstance().ivy.getSettings());
-        getInstance().ivy.getSettings().setDefaultConflictManager(conflictManager);
+        conflictManager.setSettings(ivy.getSettings());
+        ivy.getSettings().setDefaultConflictManager(conflictManager);
 
     }
 
-    public static void setLatestTimeConflictManager() {
+    public void setLatestTimeConflictManager() {
         LatestStrategy strategy = new LatestTimeStrategy();
         LatestConflictManager conflictManager = new LatestConflictManager(strategy);
-        conflictManager.setSettings(getInstance().ivy.getSettings());
-        getInstance().ivy.getSettings().setDefaultConflictManager(conflictManager);
+        conflictManager.setSettings(ivy.getSettings());
+        ivy.getSettings().setDefaultConflictManager(conflictManager);
     }
 
-    public static void setLatestCompatibleConflictManager() {
+    public void setLatestCompatibleConflictManager() {
         LatestCompatibleConflictManager conflictManager = new LatestCompatibleConflictManager();
-        conflictManager.setSettings(getInstance().ivy.getSettings());
-        getInstance().ivy.getSettings().setDefaultConflictManager(conflictManager);
+        conflictManager.setSettings(ivy.getSettings());
+        ivy.getSettings().setDefaultConflictManager(conflictManager);
     }
 
-    public static void setLatestRevisionConflictManager() {
+    public void setLatestRevisionConflictManager() {
         LatestStrategy strategy = new LatestRevisionStrategy();
         LatestConflictManager conflictManager = new LatestConflictManager(strategy);
-        conflictManager.setSettings(getInstance().ivy.getSettings());
-        getInstance().ivy.getSettings().setDefaultConflictManager(conflictManager);
+        conflictManager.setSettings(ivy.getSettings());
+        ivy.getSettings().setDefaultConflictManager(conflictManager);
     }
 
-    public static void setStrictConflictManager() {
+    public void setStrictConflictManager() {
         StrictConflictManager conflictManager = new StrictConflictManager();
-        conflictManager.setSettings(getInstance().ivy.getSettings());
-        getInstance().ivy.getSettings().setDefaultConflictManager(conflictManager);
+        conflictManager.setSettings(ivy.getSettings());
+        ivy.getSettings().setDefaultConflictManager(conflictManager);
     }
 
-    private static IBiblioResolver maven(String name, String urlRaw) {
+    private IBiblioResolver maven(String name, String urlRaw) {
         IBiblioResolver resolver = new IBiblioResolver();
         resolver.setM2compatible(true);
         resolver.setUseMavenMetadata(true);
@@ -150,9 +155,7 @@ public class DependencyManager {
         }
 
         for (Dependency dependency : directDependencies) {
-
             ModuleRevisionId ri = dependency.revisionId();
-
             DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ri, dependency.force(), true, true);
             for (String conf : DEFAULT_MODULE_DESC_CONFIGS) {
                 dd.addDependencyConfiguration(conf, conf);
@@ -161,8 +164,10 @@ public class DependencyManager {
             md.setLastModified(System.currentTimeMillis());
         }
 
-        return getInstance().ivy.resolve(md, ro);
+        return ivy.resolve(md, ro);
     }
 
-
+    public void addLoadedArtifact(ArtifactDownloadReport report) {
+        loadedArtifacts.add(report);
+    }
 }

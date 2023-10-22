@@ -119,6 +119,11 @@ public final class ANSI {
         return this;
     }
 
+    public ANSI nl() {
+        sb.append("\n");
+        return this;
+    }
+
     public ANSI reset() {
         sb.append(escape(RESET));
         return this;
