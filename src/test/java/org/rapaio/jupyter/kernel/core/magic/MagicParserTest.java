@@ -1,10 +1,14 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.List;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
 
 public class MagicParserTest {
 
@@ -44,7 +48,7 @@ public class MagicParserTest {
                 // comment
                                 
                 //comment
-                """, 0);
+                """, 21);
 
         assertNotNull(snippets);
         assertEquals(3, snippets.size());
@@ -53,6 +57,29 @@ public class MagicParserTest {
             assertEquals("%line " + (i + 1), snippets.get(i).line(0).code());
             assertEquals(1, snippets.get(i).lines().size());
         }
+        assertFalse(snippets.get(0).line(0).hasPosition());
+        assertTrue(snippets.get(1).line(0).hasPosition());
+        assertFalse(snippets.get(2).line(0).hasPosition());
+
+        assertEquals(21, snippets.get(1).line(0).globalPosition());
+        assertEquals(1, snippets.get(1).line(0).relativePosition());
+
+        snippets = parser.parseSnippets("%dependency /add x:y:z\n\r%dep", 25);
+        assertEquals(2, snippets.size());
+        assertFalse(snippets.get(0).line(0).hasPosition());
+        assertTrue(snippets.get(1).line(0).hasPosition());
+
+        assertEquals(25, snippets.get(1).line(0).globalPosition());
+        assertEquals(1, snippets.get(1).line(0).relativePosition());
+
+        snippets = parser.parseSnippets("%dependency /add\n"
+                + "%de", 20);
+        assertEquals(2, snippets.size());
+        assertFalse(snippets.get(0).line(0).hasPosition());
+        assertTrue(snippets.get(1).line(0).hasPosition());
+
+        assertEquals(20, snippets.get(1).line(0).globalPosition());
+        assertEquals(3, snippets.get(1).line(0).relativePosition());
     }
 
     @Test

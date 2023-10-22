@@ -59,6 +59,15 @@ public class MagicEngineTest {
         assertFalse(options.replacements().isEmpty());
         assertEquals(0, options.start());
         assertEquals(6, options.end());
+
+        String line1 = "%dependency /add x:y:z\n";
+        result = kernel.magicEngine().complete(kernel, new ExecutionContext(null),
+                line1 + "%depe", line1.length() + 1);
+        assertNotNull(result);
+        options = result.replacementOptions();
+        assertFalse(options.replacements().isEmpty());
+        assertEquals(line1.length(), options.start());
+        assertEquals(line1.length() + "%depe" .length(), options.end());
     }
 
     @Test

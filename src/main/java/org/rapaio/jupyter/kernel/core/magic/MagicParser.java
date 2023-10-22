@@ -29,20 +29,24 @@ public class MagicParser {
      * @return a list of parsed magic snippets
      */
     public List<MagicSnippet> parseSnippets(String sourceCode, int position) {
-        String[] lines = sourceCode.split("\\R");
+        String[] lines = sourceCode.split("(\\R)+");
+        int[] positions = new int[lines.length];
+        for (int i = 1; i < lines.length; i++) {
+            positions[i] = sourceCode.indexOf(lines[i], positions[i - 1] + lines[i - 1].length());
+        }
 
         List<MagicSnippet> snippets = new ArrayList<>();
 
         boolean cellMagic = false;
         List<MagicSnippet.CodeLine> cellLines = null;
 
-        int start = 0;
-        for (String line : lines) {
+        for (int i = 0; i < lines.length; i++) {
+            String line = lines[i];
+            int start = positions[i];
 
             int end = start + line.length();
             boolean hasPosition = position >= start && position <= end;
             int relativePosition = (position >= start && position <= end) ? position - start : -1;
-            start += line.length() + 1;
 
             // skip empty lines and comments
             if (isEmpty(line) || hasComment(line)) {
