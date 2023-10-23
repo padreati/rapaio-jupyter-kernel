@@ -206,7 +206,7 @@ public class DependencyHandler extends MagicHandler {
         }
 
         try {
-            kernel.channels().writeToStdOut("Solving dependencies/n");
+            kernel.channels().writeToStdOut("Solving dependencies\n");
             ResolveReport resolveReport = kernel.dependencyManager().resolve();
             var problemMessages = resolveReport.getAllProblemMessages();
             for (var problemMessage : problemMessages) {
