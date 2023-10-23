@@ -1,12 +1,15 @@
 package org.rapaio.jupyter.kernel.core.magic.dependencies;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Set;
+import java.util.stream.Collectors;
 
+import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
@@ -79,9 +82,25 @@ public class DependencyManagerTest {
         assertEquals(moduleRevisionIds.size(), report.getAllArtifactsReports().length);
         for (var ar : report.getAllArtifactsReports()) {
             assertTrue(moduleRevisionIds.contains(ar.getArtifact().getModuleRevisionId().toString()),
-                    "%s artifact not found".formatted(ar.getArtifact().getModuleRevisionId()));
+                    "%s artifact not found" .formatted(ar.getArtifact().getModuleRevisionId()));
         }
     }
 
+    @Test
+    void testRepos() {
+        var dm = kernel.dependencyManager();
 
+        Set<String> existingNames = dm.getResolver().getResolvers().stream().map(DependencyResolver::getName).collect(Collectors.toSet());
+
+        String existingName = existingNames.stream().findAny().orElse("");
+        assertThrows(RuntimeException.class, () -> dm.addMavenRepository(existingName, "url"));
+
+        dm.addMavenRepository("google", "https://maven.google.com/");
+
+        Set<String> newNames = dm.getResolver().getResolvers().stream().map(DependencyResolver::getName).collect(Collectors.toSet());
+        assertTrue(existingNames.size() != newNames.size());
+
+        assertEquals(existingNames.size(), +1, newNames.size());
+        assertTrue(newNames.contains("google"));
+    }
 }

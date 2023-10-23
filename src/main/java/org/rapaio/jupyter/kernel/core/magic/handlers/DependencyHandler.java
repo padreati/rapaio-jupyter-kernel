@@ -5,6 +5,7 @@ import java.text.ParseException;
 import java.util.List;
 
 import org.apache.ivy.core.report.ResolveReport;
+import org.apache.ivy.plugins.resolver.IBiblioResolver;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -25,6 +26,26 @@ public class DependencyHandler extends MagicHandler {
     @Override
     public List<SnippetMagicHandler> snippetMagicHandlers() {
         return List.of(
+                SnippetMagicHandler.lineMagic()
+                        .syntaxMatcher(HEADER + " /list-repos")
+                        .syntaxHelp(List.of(HEADER + " /list-repos"))
+                        .syntaxPrefix(HEADER + " /list-repos")
+                        .documentation(List.of(
+                                "List all repositories"
+                        ))
+                        .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /list-repos"))
+                        .evalFunction(this::evalLineListRepos)
+                        .build(),
+                SnippetMagicHandler.lineMagic()
+                        .syntaxMatcher(HEADER + " /add-repo (.+) (.+)")
+                        .syntaxHelp(List.of(HEADER + " /add-repo name url"))
+                        .syntaxPrefix(HEADER + " /add-repo ")
+                        .documentation(List.of(
+                                "Add Maven Repository using a name and an url"
+                        ))
+                        .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /add-repo "))
+                        .evalFunction(this::evalLineAddRepo)
+                        .build(),
 
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher(HEADER + " /list-configuration")
@@ -217,7 +238,7 @@ public class DependencyHandler extends MagicHandler {
             channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.revisionId().toString()).nl().render());
         }
         channels.writeToStdOut("Dependency overrides count: " + dm.getConflictDependencies().size() + "\n");
-        for(var dep : dm.getConflictDependencies()) {
+        for (var dep : dm.getConflictDependencies()) {
             channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.revisionId().toString()).nl().render());
         }
         return null;
@@ -233,6 +254,51 @@ public class DependencyHandler extends MagicHandler {
         for (var report : dm.getLoadedArtifacts()) {
             channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(report.getArtifact().toString()).nl().render());
         }
+        return null;
+    }
+
+    Object evalLineListRepos(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-repos")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet");
+        }
+
+        var channels = kernel.channels();
+        var dm = kernel.dependencyManager();
+
+        channels.writeToStdOut("Repositories count: " + dm.getResolver().getResolvers().size() + "\n");
+        for (var resolver : dm.getResolver().getResolvers()) {
+            String name = resolver.getName();
+            String url = "";
+            if (resolver instanceof IBiblioResolver biblioResolver) {
+                url = biblioResolver.getRoot();
+            }
+
+            channels.writeToStdOut(ANSI.start()
+                    .text("name: ").bold().fgGreen().text(name + ", ").reset()
+                    .text("url: ").bold().fgGreen().text(url).nl()
+                    .render());
+        }
+        return null;
+    }
+
+    Object evalLineAddRepo(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /add-repo ")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet");
+        }
+
+        String fullCode = snippet.line(0).code();
+        String[] tokens = fullCode.substring((HEADER+" /add-repo ").length()).trim().split(" ");
+        if (tokens.length != 2) {
+            throw new RuntimeException();
+        }
+
+        var channels = kernel.channels();
+        var dm = kernel.dependencyManager();
+
+        dm.addMavenRepository(tokens[0], tokens[1]);
+        channels.writeToStdOut(ANSI.start().text("Repository ").bold().fgGreen().text(tokens[0]).reset()
+                .text(" url: ").bold().fgGreen().text(tokens[1]).reset().text(" added.").render());
+
         return null;
     }
 }

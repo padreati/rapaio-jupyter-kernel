@@ -76,7 +76,22 @@ public class DependencyManager {
         for (String conf : DEFAULT_MODULE_DESC_CONFIGS) {
             md.addConfiguration(new Configuration(conf));
         }
-   }
+    }
+
+    public ChainResolver getResolver() {
+        return resolver;
+    }
+
+    public void addMavenRepository(String name, String url) {
+        // check first if the name is unique
+        for (var resolver : resolver.getResolvers()) {
+            if (resolver.getName().equals(name)) {
+                throw new RuntimeException(
+                        "Cannot add repository with name %s since it already exists." .formatted(resolver.getName()));
+            }
+        }
+        resolver.add(maven(name, url));
+    }
 
     public List<Dependency> getDirectDependencies() {
         return directDependencies;
