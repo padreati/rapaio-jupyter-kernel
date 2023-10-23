@@ -62,7 +62,7 @@ public class DependencyManager {
         ivySettings.addResolver(resolver);
         ivySettings.setDefaultResolver(resolver.getName());
 
-        LatestConflictManager conflictManager = new LatestConflictManager(new LatestRevisionStrategy());
+        StrictConflictManager conflictManager = new StrictConflictManager();
         conflictManager.setSettings(ivySettings);
         ivySettings.setDefaultConflictManager(conflictManager);
 

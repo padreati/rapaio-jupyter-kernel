@@ -77,13 +77,13 @@ public class DependencyHandler extends MagicHandler {
                                 "Configures a conflict manager. A conflict manager describes how conflicts are resolved.",
                                 "all: resolve conflicts by selecting all revisions, it doesn’t evict any modules.",
                                 "latest-time: selects only the latest in time revision.",
-                                "latest-revision: selects only the latest revision (default value).",
+                                "latest-revision: selects only the latest revision.",
                                 "latest-compatible: selects the latest version in the conflicts which can result in a "
                                         + "compatible set of dependencies. This conflict manager does not allow any conflicts "
                                         + "(similar to the strict conflict manager), except that it follows a best effort strategy to "
                                         + "try to find a set of compatible modules (according to the version constraints)",
                                 "strict: throws an exception (i.e. causes a build failure) whenever a conflict is found. It does not "
-                                        + "take into consideration overrides."
+                                        + "take into consideration overrides. (default value)"
                         ))
                         .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /conflict-manager"))
                         .evalFunction(this::evalLineConflictManager)
