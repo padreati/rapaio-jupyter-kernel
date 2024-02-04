@@ -6,9 +6,15 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import org.apache.ivy.Ivy;
+import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
+import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
+import org.apache.ivy.core.module.id.ModuleRevisionId;
+import org.apache.ivy.core.resolve.ResolveOptions;
 import org.apache.ivy.plugins.resolver.DependencyResolver;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -82,7 +88,7 @@ public class DependencyManagerTest {
         assertEquals(moduleRevisionIds.size(), report.getAllArtifactsReports().length);
         for (var ar : report.getAllArtifactsReports()) {
             assertTrue(moduleRevisionIds.contains(ar.getArtifact().getModuleRevisionId().toString()),
-                    "%s artifact not found" .formatted(ar.getArtifact().getModuleRevisionId()));
+                    "%s artifact not found".formatted(ar.getArtifact().getModuleRevisionId()));
         }
     }
 
@@ -103,4 +109,39 @@ public class DependencyManagerTest {
         assertEquals(existingNames.size(), +1, newNames.size());
         assertTrue(newNames.contains("google"));
     }
+
+    @Test
+    void testConfigurationMappings() throws ParseException, IOException {
+        DependencyManager dm = new DependencyManager();
+        Ivy ivy = dm.getIvy();
+        var md = dm.getMd();
+
+        Dependency dependency = new Dependency("org.lwjgl:lwjgl-glfw:3.3.3", true);
+
+        ModuleRevisionId ri = dependency.revisionId();
+        DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ri, dependency.force(), true, true);
+        dd.addDependencyConfiguration("default", "default");
+        dd.addDependencyArtifact("default", new DefaultDependencyArtifactDescriptor(
+                dd, dependency.artifactId(), "jar", "jar", null, Map.of("e:classifier", "natives-macos-arm64")));
+
+
+        md.addDependency(dd);
+        md.setLastModified(System.currentTimeMillis());
+
+        ResolveOptions ro = new ResolveOptions();
+        ro.setTransitive(true);
+        ro.setDownload(true);
+
+        var report = ivy.resolve(md, ro);
+        for (var msg : report.getAllProblemMessages()) {
+            System.out.println(msg);
+        }
+
+        for (var art : report.getAllArtifactsReports()) {
+            System.out.println(art.getLocalFile().getAbsolutePath());
+        }
+    }
 }
+
+// https://repo.maven.apache.org/maven2/org/lwjgl/lwjgl-glfw/3.3.3/lwjgl-glfw-3.3.3-natives-macos-arm64.jar
+// https://repo.maven.apache.org/maven2/org/lwjgl/lwjgl-glfw/3.3.3/lwjgl-glfw-3.3.3-native-macos-arm64.jar

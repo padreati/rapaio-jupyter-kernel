@@ -9,3 +9,5 @@ build
 /.idea/
 /.ipynb_checkpoints/example-checkpoint.ipynb
 /.ipynb_checkpoints/demo-djl-checkpoint.ipynb
+/.ipynb_checkpoints/neureka-checkpoint.ipynb
+/.ipynb_checkpoints/rapaio-tensors-checkpoint.ipynb

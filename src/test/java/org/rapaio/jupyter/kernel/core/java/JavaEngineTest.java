@@ -1,9 +1,21 @@
 package org.rapaio.jupyter.kernel.core.java;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.TestUtils;
 
-import static org.junit.jupiter.api.Assertions.*;
+import jdk.jshell.JShell;
+import jdk.jshell.Snippet;
+import jdk.jshell.SnippetEvent;
+import jdk.jshell.SourceCodeAnalysis;
 
 public class JavaEngineTest {
 
@@ -40,5 +52,70 @@ public class JavaEngineTest {
                 .build();
         var out = engine.eval(TestUtils.context(), "System.out.println(\"test\")");
         assertNull(out);
+    }
+
+    @Test
+    void testSnippetDependence() throws NoSuchFieldException, IllegalAccessException {
+        JavaEngine javaEngine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+                .withTimeoutMillis(-1L)
+                .build();
+
+        JShell shell = javaEngine.getShell();
+
+        String[] sourceSnippets = new String[] {
+                "import java.util.*;",
+                "List<Integer> l = new ArrayList<>();",
+                "System.out.println(l);",
+                "l.add(7);",
+                "var x = l.get(0)",
+                "System.out.println(l);",
+                "l.add(1)"
+        };
+
+        List<Snippet> snippets = new ArrayList<>();
+
+        for (int i = 0; i < sourceSnippets.length; i++) {
+
+            String code = sourceSnippets[i];
+
+            while (true) {
+                SourceCodeAnalysis.CompletionInfo ci = shell.sourceCodeAnalysis().analyzeCompletion(code);
+
+                if (ci.completeness().isComplete()) {
+                    System.out.println("Snippet: " + ci.source());
+                    List<SnippetEvent> snippetEvents = shell.eval(ci.source());
+                    for (var event : snippetEvents) {
+                        snippets.add(event.snippet());
+                        System.out.println(event);
+                        if (event.exception() != null) {
+                            System.out.println(event.exception().getMessage());
+                        }
+                    }
+                    String remaining = ci.remaining();
+                    if (remaining == null || remaining.isEmpty()) {
+                        break;
+                    }
+                    code = ci.remaining();
+                } else {
+                    System.out.println("Incomplete snippet: " + ci.source());
+                    break;
+                }
+            }
+        }
+
+        for (int i=0; i<snippets.size(); i++) {
+            System.out.println(i + " " + snippets.get(i).toString());
+        }
+
+        List<SnippetEvent> events = shell.drop(snippets.get(1));
+        for(var event : events) {
+            System.out.println(event);
+        }
+
+        Field maps = JShell.class.getDeclaredField("maps");
+        maps.setAccessible(true);
+        Object snippetMap = maps.get(shell);
+
+
     }
 }

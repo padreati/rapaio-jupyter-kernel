@@ -32,7 +32,7 @@ import org.apache.ivy.util.MessageLogger;
 
 public class DependencyManager {
 
-    private static final String[] DEFAULT_MODULE_DESC_CONFIGS = new String[] {"default", "master", "runtime"};
+    public static final String[] DEFAULT_MODULE_DESC_CONFIGS = new String[] {"default", "master", "runtime"};
 
     private final Ivy ivy;
     private final DefaultModuleDescriptor md;
@@ -76,6 +76,14 @@ public class DependencyManager {
         for (String conf : DEFAULT_MODULE_DESC_CONFIGS) {
             md.addConfiguration(new Configuration(conf));
         }
+    }
+
+    public Ivy getIvy() {
+        return ivy;
+    }
+
+    public DefaultModuleDescriptor getMd() {
+        return md;
     }
 
     public ChainResolver getResolver() {
