@@ -8,6 +8,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Scanner;
 
 import org.rapaio.jupyter.kernel.GeneralProperties;
@@ -128,9 +129,9 @@ public class Installer {
         System.out.println(json);
 
         if (!autoInstall) {
-            System.out.println("Installer is ready. Do you want to continue [Y/N] ?");
+            System.out.println("Installer is ready. Do you want to continue [Y|y/N|n] ?");
             String line = new Scanner(System.in).nextLine().trim();
-            if (!line.equals("Y")) {
+            if (!line.toLowerCase(Locale.ROOT).equals("y")) {
                 System.out.println("Installation process was canceled. "
                         + "Please note that you need to answer with capital Y if you want the installer to continue.");
                 System.exit(0);
