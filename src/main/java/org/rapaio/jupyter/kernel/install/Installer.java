@@ -3,6 +3,7 @@ package org.rapaio.jupyter.kernel.install;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
@@ -64,18 +65,18 @@ public class Installer {
 
         return switch (os) {
             case LINUX, SOLARIS -> List.of(
-                    getUserHome() + "/.local/share/jupyter/kernels",
-                    "/usr/local/share/jupyter/kernels",
-                    "/usr/share/jupyter/kernels"
+                    Path.of(getUserHome(), ".local", "share", "jupyter", "kernels").toString(),
+                    Path.of("/usr", "local", "share", "jupyter", "kernels").toString(),
+                    Path.of("/usr", "share", "jupyter", "kernels").toString()
             );
             case MAC -> List.of(
-                    getUserHome() + "/Library/Jupyter/kernels",
-                    "/usr/local/share/jupyter/kernels",
-                    "/usr/share/jupyter/kernels"
+                    Path.of(getUserHome(), "Library", "Jupyter", "kernels").toString(),
+                    Path.of("/usr", "local", "share", "jupyter", "kernels").toString(),
+                    Path.of("/usr", "share", "jupyter", "kernels").toString()
             );
             case WINDOWS -> List.of(
-                    System.getenv("APPDATA") + "/jupyter/kernels",
-                    System.getenv("PROGRAMDATA") + "/jupyter/kernels"
+                    Path.of(System.getenv("APPDATA"), "jupyter", "kernels").toString(),
+                    Path.of(System.getenv("PROGRAMDATA"), "jupyter", "kernels").toString()
             );
         };
     }
@@ -87,7 +88,7 @@ public class Installer {
         return Arrays.asList(args).contains(flagArg);
     }
 
-    public void install(String[] args) throws IOException {
+    public void install(String[] args) throws IOException, URISyntaxException {
 
         boolean autoInstall = hasFlag(args, INSTALL_FLAG_AUTO);
         if (autoInstall) {
@@ -170,11 +171,10 @@ public class Installer {
         }
     }
 
-    private void copyJarFile(File kernelDir) throws IOException {
-        String jarPath = Installer.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        String jarName = jarPath.substring(jarPath.lastIndexOf('/') + 1);
-
-        Files.copy(Path.of(jarPath), Path.of(kernelDir.getAbsolutePath(), jarName), StandardCopyOption.COPY_ATTRIBUTES);
+    void copyJarFile(File kernelDir) throws IOException, URISyntaxException {
+        Path jarPath = Path.of(Installer.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        Path jarName = jarPath.getFileName();
+        Files.copy(jarPath, Path.of(kernelDir.getAbsolutePath(), jarName.toString()), StandardCopyOption.COPY_ATTRIBUTES);
     }
 
     private void deleteRecursive(File file) {

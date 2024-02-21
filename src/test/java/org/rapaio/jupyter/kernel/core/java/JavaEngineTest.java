@@ -5,7 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -111,11 +110,5 @@ public class JavaEngineTest {
         for(var event : events) {
             System.out.println(event);
         }
-
-        Field maps = JShell.class.getDeclaredField("maps");
-        maps.setAccessible(true);
-        Object snippetMap = maps.get(shell);
-
-
     }
 }
