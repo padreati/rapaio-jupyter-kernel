@@ -1,6 +1,29 @@
 package org.rapaio.jupyter.kernel.core.java;
 
-import jdk.jshell.*;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.iif;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.PrintStream;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
+import java.util.EnumSet;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
@@ -10,11 +33,12 @@ import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
 
-import java.io.*;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.*;
+import jdk.jshell.EvalException;
+import jdk.jshell.JShell;
+import jdk.jshell.JShellException;
+import jdk.jshell.Snippet;
+import jdk.jshell.SnippetEvent;
+import jdk.jshell.SourceCodeAnalysis;
 
 public class JavaEngine {
 
@@ -47,7 +71,14 @@ public class JavaEngine {
     }
 
     public void initialize() {
-        startupScripts.forEach(shell::eval);
+        startupScripts.forEach(line -> {
+            var events = shell.eval(line);
+            for (var event : events) {
+                if (event.status() == Snippet.Status.REJECTED) {
+                    throw new IllegalStateException(event.exception());
+                }
+            }
+        });
     }
 
     /**
@@ -191,7 +222,7 @@ public class JavaEngine {
         String html = join(
                 each(documentations, doc -> p(join(
                                 b(texts(doc.signature())),
-                                iif(doc.javadoc() != null, () -> new Tag[]{br(), texts(JavadocTools.javadocPreprocess(doc.javadoc()))})
+                                iif(doc.javadoc() != null, () -> new Tag[] {br(), texts(JavadocTools.javadocPreprocess(doc.javadoc()))})
                         )
                 ))
         ).render();

@@ -195,11 +195,7 @@ public class Installer {
     private String collectInstallationPath(OSName os, boolean autoInstall, boolean system) {
         List<String> paths = getInstallationPaths(os);
         if (autoInstall) {
-            if (!system) {
-                return paths.get(0);
-            } else {
-                return paths.get(paths.size() - 1);
-            }
+            return !system ? paths.getFirst() : paths.getLast();
         }
         return selectInteractivePath(paths);
     }
@@ -266,7 +262,7 @@ public class Installer {
 
     private String collectInitScript(boolean autoInstall) {
         if (autoInstall) {
-            return GeneralProperties.getDefaultCompilerOptions();
+            return GeneralProperties.getDefaultInitScript();
         }
         System.out.printf("Select init script (default '%s':%n", GeneralProperties.getDefaultInitScript());
         return new Scanner(System.in).nextLine().trim();

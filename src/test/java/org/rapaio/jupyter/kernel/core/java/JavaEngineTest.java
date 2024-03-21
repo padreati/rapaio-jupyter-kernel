@@ -6,9 +6,11 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.TestUtils;
 
 import jdk.jshell.JShell;
@@ -54,7 +56,7 @@ public class JavaEngineTest {
     }
 
     @Test
-    void testSnippetDependence() throws NoSuchFieldException, IllegalAccessException {
+    void testSnippetDependence() {
         JavaEngine javaEngine = JavaEngine.builder(TestUtils.getTestJShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
@@ -73,9 +75,9 @@ public class JavaEngineTest {
 
         List<Snippet> snippets = new ArrayList<>();
 
-        for (int i = 0; i < sourceSnippets.length; i++) {
+        for (String sourceSnippet : sourceSnippets) {
 
-            String code = sourceSnippets[i];
+            String code = sourceSnippet;
 
             while (true) {
                 SourceCodeAnalysis.CompletionInfo ci = shell.sourceCodeAnalysis().analyzeCompletion(code);
@@ -110,5 +112,16 @@ public class JavaEngineTest {
         for(var event : events) {
             System.out.println(event);
         }
+    }
+
+    @Test
+    void testJavaEngineBuilder() throws Exception {
+        String compilerOptions = GeneralProperties.getDefaultCompilerOptions();
+
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+                .withCompilerOptions(Arrays.asList(compilerOptions.split(" ")))
+                .build();
+        engine.initialize();
+        engine.eval(TestUtils.context(), "");
     }
 }

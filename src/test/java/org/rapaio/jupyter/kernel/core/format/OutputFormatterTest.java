@@ -1,14 +1,15 @@
 package org.rapaio.jupyter.kernel.core.format;
 
-import jdk.jshell.EvalException;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
-import java.util.List;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import jdk.jshell.EvalException;
 
 public class OutputFormatterTest {
 
