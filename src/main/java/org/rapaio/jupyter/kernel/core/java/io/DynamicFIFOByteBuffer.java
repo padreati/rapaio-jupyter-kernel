@@ -20,7 +20,7 @@ public class DynamicFIFOByteBuffer {
     }
 
     public int availableToTake() {
-        return start - end;
+        return end - start;
     }
 
     public byte[] take(int n) {
