@@ -23,11 +23,12 @@ public class OutputFormatterTest {
     @Test
     void testEvalException() {
         EvalException e = assertThrows(EvalException.class, () -> kernel.eval("""
-                List<String> list = new ArrayList();
-                String g(int p) {
+                List<String> l = new ArrayList();
+                String g(List<String> list, int p) {
                     return list.get(p);
                 };
-                g(0);"""));
+                g(l, 0);
+                """));
         assertNotNull(e);
         List<String> output = ErrorFormatters.exceptionFormat(kernel, e);
         assertNotNull(output);

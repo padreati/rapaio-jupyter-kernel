@@ -5,9 +5,11 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.ivy.Ivy;
 import org.apache.ivy.core.module.descriptor.Configuration;
+import org.apache.ivy.core.module.descriptor.DefaultDependencyArtifactDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultDependencyDescriptor;
 import org.apache.ivy.core.module.descriptor.DefaultModuleDescriptor;
 import org.apache.ivy.core.module.descriptor.OverrideDependencyDescriptorMediator;
@@ -32,7 +34,7 @@ import org.apache.ivy.util.MessageLogger;
 
 public class DependencyManager {
 
-    public static final String[] DEFAULT_MODULE_DESC_CONFIGS = new String[] {"default", "master", "runtime"};
+    public static final String DEFAULT_MODULE_DESC_CONFIG = "default";
 
     private final Ivy ivy;
     private final DefaultModuleDescriptor md;
@@ -73,9 +75,7 @@ public class DependencyManager {
 
         md = new DefaultModuleDescriptor(
                 ModuleRevisionId.newInstance("notebook", "jupyter-kernel", "version"), "integration", null, true);
-        for (String conf : DEFAULT_MODULE_DESC_CONFIGS) {
-            md.addConfiguration(new Configuration(conf));
-        }
+        md.addConfiguration(new Configuration(DEFAULT_MODULE_DESC_CONFIG));
     }
 
     public Ivy getIvy() {
@@ -95,7 +95,7 @@ public class DependencyManager {
         for (var resolver : resolver.getResolvers()) {
             if (resolver.getName().equals(name)) {
                 throw new RuntimeException(
-                        "Cannot add repository with name %s since it already exists." .formatted(resolver.getName()));
+                        "Cannot add repository with name %s since it already exists.".formatted(resolver.getName()));
             }
         }
         resolver.add(maven(name, url));
@@ -174,14 +174,17 @@ public class DependencyManager {
 
         for (Dependency resolveDependency : conflictDependencies) {
             md.addDependencyDescriptorMediator(resolveDependency.moduleId(), new ExactPatternMatcher(),
-                    new OverrideDependencyDescriptorMediator(null, resolveDependency.version()));
+                    new OverrideDependencyDescriptorMediator(null, resolveDependency.revision()));
         }
 
         for (Dependency dependency : directDependencies) {
             ModuleRevisionId ri = dependency.revisionId();
             DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ri, dependency.force(), true, true);
-            for (String conf : DEFAULT_MODULE_DESC_CONFIGS) {
-                dd.addDependencyConfiguration(conf, conf);
+            dd.addDependencyConfiguration(DEFAULT_MODULE_DESC_CONFIG, DEFAULT_MODULE_DESC_CONFIG);
+            if (dependency.classifier() != null) {
+                dd.addDependencyArtifact(DEFAULT_MODULE_DESC_CONFIG,
+                        new DefaultDependencyArtifactDescriptor(dd, dependency.name(), "jar", dependency.ext(), null,
+                                Map.of("e:classifier", dependency.classifier())));
             }
             md.addDependency(dd);
             md.setLastModified(System.currentTimeMillis());

@@ -184,7 +184,7 @@ public class DependencyHandler extends MagicHandler {
         }
 
         kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).reset().render() + "\n");
-        kernel.dependencyManager().addDependency(new Dependency(args[0], args.length == 2));
+        kernel.dependencyManager().addDependency(Dependency.from(args[0], args.length == 2));
         return null;
     }
 
@@ -196,7 +196,7 @@ public class DependencyHandler extends MagicHandler {
         String args = fullCode.substring((HEADER + " /override ").length()).trim();
 
         kernel.channels().writeToStdOut("Adding dependency override " + ANSI.start().bold().fgGreen().text(args).reset().render() + "\n");
-        kernel.dependencyManager().addOverrideDependency(new Dependency(args, true));
+        kernel.dependencyManager().addOverrideDependency(Dependency.from(args, true));
         return null;
     }
 

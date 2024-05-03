@@ -20,8 +20,10 @@ import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
@@ -41,6 +43,8 @@ import jdk.jshell.SnippetEvent;
 import jdk.jshell.SourceCodeAnalysis;
 
 public class JavaEngine {
+
+    private static final Logger logger = Logger.getLogger(Logger.class.getSimpleName());
 
     private static final EnumSet<Snippet.SubKind> ALLOWED_LAST_OUTPUT = EnumSet.of(
             Snippet.SubKind.VAR_VALUE_SUBKIND,
@@ -75,6 +79,8 @@ public class JavaEngine {
             var events = shell.eval(line);
             for (var event : events) {
                 if (event.status() == Snippet.Status.REJECTED) {
+                    logger.severe(() -> shell.diagnostics(event.snippet()).map(diag -> diag.getMessage(Locale.getDefault())).collect(
+                            Collectors.joining(";")));
                     throw new IllegalStateException(event.exception());
                 }
             }
@@ -248,14 +254,14 @@ public class JavaEngine {
 
         private final JShellConsole shellConsole;
 
-        protected Builder(JShellConsole shellConsole) {
-            this.shellConsole = shellConsole;
-        }
-
         private long timeoutMillis = -1L;
         private final List<String> compilerOptions = new LinkedList<>();
         private final List<String> startupScripts = new LinkedList<>();
 
+        protected Builder(JShellConsole shellConsole) {
+            this.shellConsole = shellConsole;
+            this.compilerOptions.addAll(List.of("--enable-preview", "--release", "22"));
+        }
 
         public Builder withTimeoutMillis(Long timeoutMillis) {
             this.timeoutMillis = timeoutMillis;
