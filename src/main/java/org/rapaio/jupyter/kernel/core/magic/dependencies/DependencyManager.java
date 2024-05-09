@@ -75,7 +75,13 @@ public class DependencyManager {
 
         md = new DefaultModuleDescriptor(
                 ModuleRevisionId.newInstance("notebook", "jupyter-kernel", "version"), "integration", null, true);
-        md.addConfiguration(new Configuration(DEFAULT_MODULE_DESC_CONFIG));
+
+        md.addConfiguration(new Configuration("master"));
+        md.addConfiguration(new Configuration("compile", Configuration.Visibility.PUBLIC, "", new String[] {"master"}, true, null));
+        md.addConfiguration(new Configuration("runtime", Configuration.Visibility.PUBLIC, "", new String[] {"compile"}, true, null));
+        md.addConfiguration(new Configuration("default", Configuration.Visibility.PUBLIC, "", new String[] {"compile,runtime"}, true, null));
+        md.addConfiguration(new Configuration("source"));
+        md.addConfiguration(new Configuration("javadoc"));
     }
 
     public Ivy getIvy() {

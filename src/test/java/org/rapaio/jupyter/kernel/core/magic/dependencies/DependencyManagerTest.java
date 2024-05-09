@@ -57,7 +57,7 @@ public class DependencyManagerTest {
         );
         assertEquals(moduleRevisionIds.size(), report.getAllArtifactsReports().length);
         for (var ar : report.getAllArtifactsReports()) {
-            assertTrue(moduleRevisionIds.contains(ar.getArtifact().getModuleRevisionId().toString()));
+            assertTrue(moduleRevisionIds.contains(ar.getArtifact().getModuleRevisionId().toString()), "Problem at: " + ar.getArtifact());
         }
     }
 
@@ -67,9 +67,9 @@ public class DependencyManagerTest {
         var dm = kernel.dependencyManager();
 
         dm.setLatestRevisionConflictManager();
-        dm.addDependency(Dependency.from("com.google.guava:guava:20.0", true));
+        dm.addDependency(Dependency.from("com.google.guava:guava:20.0", false));
         dm.addDependency(Dependency.from("com.google.inject:guice:4.2.2", true));
-        dm.addOverrideDependency(Dependency.from("com.google.guava:guava:25.1-android", false));
+        dm.addOverrideDependency(Dependency.from("com.google.guava:guava:25.1-android", true));
 
         var report = dm.resolve();
 
@@ -78,13 +78,12 @@ public class DependencyManagerTest {
                 "com.google.inject#guice;4.2.2",
                 "javax.inject#javax.inject;1",
                 "aopalliance#aopalliance;1.0",
-//                "com.google.guava#guava;25.1-android",
-                "com.google.guava#guava;20.0"//,
-//                "com.google.code.findbugs#jsr305;3.0.1",
-//                "org.checkerframework#checker-compat-qual;2.0.0",
-//                "com.google.errorprone#error_prone_annotations;2.1.3",
-//                "com.google.j2objc#j2objc-annotations;1.1",
-//                "org.codehaus.mojo#animal-sniffer-annotations;1.14"
+                "com.google.guava#guava;25.1-android",
+                "com.google.code.findbugs#jsr305;3.0.1",
+                "org.checkerframework#checker-compat-qual;2.0.0",
+                "com.google.errorprone#error_prone_annotations;2.1.3",
+                "com.google.j2objc#j2objc-annotations;1.1",
+                "org.codehaus.mojo#animal-sniffer-annotations;1.14"
         );
         assertEquals(moduleRevisionIds.size(), report.getAllArtifactsReports().length);
         for (var ar : report.getAllArtifactsReports()) {
@@ -134,13 +133,8 @@ public class DependencyManagerTest {
         ro.setDownload(true);
 
         var report = ivy.resolve(md, ro);
-        for (var msg : report.getAllProblemMessages()) {
-            System.out.println(msg);
-        }
-
-        for (var art : report.getAllArtifactsReports()) {
-            System.out.println(art.getLocalFile().getAbsolutePath());
-        }
+        assertEquals(0, report.getAllProblemMessages().size());
+        assertEquals(2, report.getAllArtifactsReports().length);
     }
 
     @Test
