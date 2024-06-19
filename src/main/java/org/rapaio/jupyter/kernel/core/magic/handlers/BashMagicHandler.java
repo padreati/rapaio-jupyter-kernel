@@ -55,7 +55,7 @@ public class BashMagicHandler extends MagicHandler {
         }
         String firstLine = magicSnippet.line(0).code();
         if (!firstLine.trim().equals(CELL_PREFIX)) {
-            throw new MagicEvalException(magicSnippet, "Invalid command line, it should be `%%jars`",
+            throw new MagicEvalException(magicSnippet, "Invalid command line, it should be `%%bash`",
                     0, firstLine.indexOf(CELL_PREFIX) + CELL_PREFIX.length(), firstLine.length());
         }
         List<String> lines = magicSnippet.lines().stream().skip(1).map(MagicSnippet.CodeLine::code).toList();
