@@ -93,13 +93,14 @@ public class DependencyManagerTest {
     }
 
     @Test
-    void testRepos() {
+    void testRepos() throws ParseException, IOException {
         var dm = kernel.dependencyManager();
 
         Set<String> existingNames = dm.getResolver().getResolvers().stream().map(DependencyResolver::getName).collect(Collectors.toSet());
 
         String existingName = existingNames.stream().findAny().orElse("");
         assertThrows(RuntimeException.class, () -> dm.addMavenRepository(existingName, "url"));
+        // dm.getResolver().getResolvers().clear();
 
         dm.addMavenRepository("google", "https://maven.google.com/");
 
@@ -108,6 +109,11 @@ public class DependencyManagerTest {
 
         assertEquals(existingNames.size(), +1, newNames.size());
         assertTrue(newNames.contains("google"));
+
+        dm.addDependency(Dependency.from("com.google.ar:core:1.43.0", false));
+        var report = dm.resolve();
+        assertTrue(report.getAllArtifactsReports().length > 0);
+        assertTrue(report.getAllProblemMessages().isEmpty());
     }
 
     @Test
