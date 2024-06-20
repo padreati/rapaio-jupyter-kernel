@@ -5,6 +5,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.io.File;
+
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -72,6 +75,7 @@ public class MagicEngineTest {
 
     @Test
     void magicJarsEvalTest() throws MagicEvalException, MagicParseException {
+        Assumptions.assumeTrue(new File("/home/ati/work/").exists(), "No jars directory available");
         kernel.magicEngine().eval(new ExecutionContext(null), """
                 %%jars
                 /home/ati/work/rapaio-kaggle/
