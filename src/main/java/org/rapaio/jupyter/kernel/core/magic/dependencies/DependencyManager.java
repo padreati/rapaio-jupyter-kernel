@@ -160,6 +160,9 @@ public class DependencyManager {
 
         resolver.setRoot(urlRaw);
         resolver.setName(name);
+        if (ivy != null) {
+            resolver.setSettings(ivy.getSettings());
+        }
 
         return resolver;
     }
