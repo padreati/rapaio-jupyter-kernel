@@ -72,14 +72,4 @@ public class MagicEngineTest {
         assertEquals(line1.length(), options.start());
         assertEquals(line1.length() + "%depe" .length(), options.end());
     }
-
-    @Test
-    void magicJarsEvalTest() throws MagicEvalException, MagicParseException {
-        Assumptions.assumeTrue(new File("/home/ati/work/").exists(), "No jars directory available");
-        kernel.magicEngine().eval(new ExecutionContext(null), """
-                %%jars
-                /home/ati/work/rapaio-kaggle/
-                /home/ati/work/rapaio/rapaio-core/target/
-                """);
-    }
 }

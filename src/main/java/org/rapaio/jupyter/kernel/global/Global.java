@@ -1,10 +1,10 @@
 package org.rapaio.jupyter.kernel.global;
 
+import java.util.UUID;
+
 import org.rapaio.jupyter.kernel.MainApp;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
-
-import java.util.UUID;
 
 public final class Global {
 

@@ -90,10 +90,10 @@ public class JarMagicHandler extends MagicHandler {
         path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
 
         File file = new File(path);
-        if (!file.exists()) {
-            throw new MagicEvalException(magicSnippet, "Provided path does not exist.");
+        if (!file.getAbsoluteFile().exists()) {
+            throw new MagicEvalException(magicSnippet, "Provided path does not exist:" + file.getAbsolutePath());
         }
-        if (!file.getName().endsWith(".jar")) {
+        if (!file.getAbsoluteFile().getName().endsWith(".jar")) {
             throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.");
         }
         addFileToPath(kernel, file);
@@ -126,8 +126,9 @@ public class JarMagicHandler extends MagicHandler {
         String path = magicSnippet.lines().get(i).code();
         path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
         File file = new File(path.trim());
-        if (!file.exists()) {
-            throw new MagicEvalException(magicSnippet, "Provided path does not exist.", i, 0, path.length());
+        if (!file.getAbsoluteFile().exists()) {
+            throw new MagicEvalException(magicSnippet, "Provided path does not exist: " + file.getAbsolutePath(), i, 0,
+                    path.length());
         }
         if (!file.isDirectory() && !file.getName().endsWith(".jar")) {
             throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.", i, 0, path.length());
