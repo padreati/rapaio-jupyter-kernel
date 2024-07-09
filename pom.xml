@@ -39,8 +39,6 @@
         <maven.compiler.target>22</maven.compiler.target>
         <maven.compiler.release>22</maven.compiler.release>
         <java.version>22</java.version>
-        <version.mima>2.4.15</version.mima>
-        <version.slf4j>1.7.36</version.slf4j>
     </properties>
 
     <dependencies>
@@ -58,19 +56,19 @@
         <dependency>
             <groupId>eu.maveniverse.maven.mima</groupId>
             <artifactId>context</artifactId>
-            <version>${version.mima}</version>
+            <version>2.4.15</version>
         </dependency>
         <dependency>
             <groupId>eu.maveniverse.maven.mima.runtime</groupId>
             <artifactId>standalone-static</artifactId>
-            <version>${version.mima}</version>
+            <version>2.4.15</version>
             <scope>runtime</scope>
         </dependency>
         <!-- logging: runtime scope -->
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-simple</artifactId>
-            <version>${version.slf4j}</version>
+            <version>1.7.36</version>
             <scope>runtime</scope>
         </dependency>
         <dependency>
