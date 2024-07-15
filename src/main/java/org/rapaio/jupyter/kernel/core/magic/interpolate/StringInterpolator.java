@@ -3,8 +3,9 @@ package org.rapaio.jupyter.kernel.core.magic.interpolate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
 /**
@@ -26,12 +27,35 @@ public class StringInterpolator {
 
     private final Type defaultType = Type.STRING_TEMPLATE;
 
-    public final String interpolate(RapaioKernel kernel, String text) throws LexerParserException {
-        return interpolate(kernel, text, defaultType);
+    public final String interpolate(ExecutionContext context, RapaioKernel kernel, String text) throws Exception {
+        return interpolate(context, kernel, text, defaultType);
     }
 
-    public final String interpolate(RapaioKernel kernel, String text, Type type) throws LexerParserException {
+    public final String interpolate(ExecutionContext context, RapaioKernel kernel, String text, Type type) throws Exception {
         List<StringToken> tokens = lexerMap.get(type).tokenize(text);
-        return tokens.stream().map(token -> token.interpolate(kernel)).collect(Collectors.joining());
+        StringBuilder sb = new StringBuilder();
+        for (StringToken token : tokens) {
+            sb.append(interpolate(context, kernel, token));
+        }
+        return sb.toString();
     }
+
+
+    public String interpolate(ExecutionContext context, RapaioKernel kernel, StringToken token) throws Exception {
+        if (!token.canInterpolate()) {
+            return token.originalValue();
+        }
+        String tokenValue = token.innerValue().trim();
+        try {
+            Object obj = kernel.javaEngine().eval(context, tokenValue);
+            if (Objects.isNull(obj)) {
+                return "null";
+            }
+            return Objects.toString(obj);
+        }catch (Exception ex) {
+            throw new InterpolationException("Interpolation string cannot be interpreted: " + tokenValue,
+                    token.originalPosition(), token.originalValue().length());
+        }
+    }
+
 }

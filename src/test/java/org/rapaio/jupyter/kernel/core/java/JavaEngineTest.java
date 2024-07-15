@@ -1,6 +1,7 @@
 package org.rapaio.jupyter.kernel.core.java;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,12 +29,12 @@ public class JavaEngineTest {
 
         var result = engine.eval(TestUtils.context(), "int x = 3;int y = 4;y");
         assertNotNull(result);
-        assertTrue(result instanceof Integer);
+        assertInstanceOf(Integer.class, result);
         assertEquals(4, result);
 
         result = engine.eval(TestUtils.context(), "x");
         assertNotNull(result);
-        assertTrue(result instanceof Integer);
+        assertInstanceOf(Integer.class, result);
         assertEquals(3, result);
     }
 

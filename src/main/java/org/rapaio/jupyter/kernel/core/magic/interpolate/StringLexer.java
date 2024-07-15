@@ -4,5 +4,5 @@ import java.util.List;
 
 public interface StringLexer {
 
-    List<StringToken> tokenize(String text) throws LexerParserException;
+    List<StringToken> tokenize(String text) throws InterpolationException;
 }

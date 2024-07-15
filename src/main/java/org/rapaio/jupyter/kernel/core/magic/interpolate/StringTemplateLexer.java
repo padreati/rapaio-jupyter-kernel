@@ -10,7 +10,7 @@ public class StringTemplateLexer implements StringLexer {
     private static final char END = '}';
 
     @Override
-    public List<StringToken> tokenize(String text) throws LexerParserException {
+    public List<StringToken> tokenize(String text) throws InterpolationException {
 
         List<StringToken> tokens = new ArrayList<>();
 
@@ -24,7 +24,7 @@ public class StringTemplateLexer implements StringLexer {
         return tokens;
     }
 
-    private StringToken collectToken(String text, int start) throws LexerParserException {
+    private StringToken collectToken(String text, int start) throws InterpolationException {
         // if start with interpolation
         if (start + 1 < text.length() && text.charAt(start) == ESCAPE && text.charAt(start + 1) == OPEN) {
             // read until interpolation end
@@ -33,17 +33,17 @@ public class StringTemplateLexer implements StringLexer {
                 if (text.charAt(current) == END) {
                     String interpolation = text.substring(start, current + 1);
                     if (interpolation.length() <= 3) {
-                        throw new LexerParserException("Interpolating reference is empty.", start, current + 1 - start);
+                        throw new InterpolationException("Interpolating reference is empty.", start, current + 1 - start);
                     }
-                    return new StringToken(interpolation, true);
+                    return StringToken.interpolate(interpolation, start);
                 }
                 current++;
             }
-            throw new LexerParserException("Interpolating reference is not closed.", start, text.length() - start);
+            throw new InterpolationException("Interpolating reference is not closed.", start, text.length() - start);
         }
 
         if (text.length() - start < 3) {
-            return new StringToken(text.substring(start), false);
+            return StringToken.text(text.substring(start), start);
         }
         int current = start + 2;
         while (current < text.length()) {
@@ -52,10 +52,10 @@ public class StringTemplateLexer implements StringLexer {
                 continue;
             }
             if (text.charAt(current - 2) != ESCAPE && text.charAt(current - 1) == ESCAPE && text.charAt(current) != ESCAPE) {
-                return new StringToken(text.substring(start, current - 1), false);
+                return StringToken.text(text.substring(start, current - 1), start);
             }
             current++;
         }
-        return new StringToken(text.substring(start), false);
+        return StringToken.text(text.substring(start), start);
     }
 }

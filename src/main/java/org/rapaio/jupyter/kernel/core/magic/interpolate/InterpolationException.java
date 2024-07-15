@@ -1,17 +1,17 @@
 package org.rapaio.jupyter.kernel.core.magic.interpolate;
 
-public class LexerParserException extends Exception {
+public class InterpolationException extends Exception {
 
     private final int position;
     private final int length;
 
-    public LexerParserException(String message, int position, int length) {
+    public InterpolationException(String message, int position, int length) {
         super(message);
         this.position = position;
         this.length = length;
     }
 
-    public LexerParserException(String message, int position, int length, Throwable cause) {
+    public InterpolationException(String message, int position, int length, Throwable cause) {
         super(message, cause);
         this.position = position;
         this.length = length;
