@@ -17,6 +17,7 @@ import org.rapaio.jupyter.kernel.core.magic.handlers.ImageMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.JavaReplMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.LoadMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.interpolate.StringInterpolator;
 
 public class MagicEngine {
 
@@ -35,6 +36,7 @@ public class MagicEngine {
     }
 
     private final MagicParser parser = new MagicParser();
+    private final StringInterpolator interpolator = new StringInterpolator();
     private final RapaioKernel kernel;
 
     public MagicEngine(RapaioKernel kernel) {
@@ -58,6 +60,12 @@ public class MagicEngine {
 
         if (!parser.canHandleByMagic(snippets)) {
             return new MagicEvalResult(false, null);
+        }
+
+        try {
+            snippets = interpolateSnippets(context, snippets);
+        } catch (Exception ex) {
+            throw new MagicParseException("Magic interpolation failed: " + ex.getMessage());
         }
 
         // find magic handlers for each snippet
@@ -87,7 +95,26 @@ public class MagicEngine {
         return new MagicEvalResult(true, lastResult);
     }
 
-    public MagicInspectResult inspect(ExecutionContext context, String expr, int cursorPosition) throws MagicEvalException, MagicParseException {
+    public List<MagicSnippet> interpolateSnippets(ExecutionContext context, List<MagicSnippet> snippets) throws Exception {
+        List<MagicSnippet> interpolatedSnippets = new ArrayList<>();
+        for (MagicSnippet snippet : snippets) {
+            if (snippet.type() == MagicSnippet.Type.NON_MAGIC) {
+                // interpolation for magic snippets only
+                interpolatedSnippets.add(snippet);
+            }
+            List<MagicSnippet.CodeLine> interpolatedLines = new ArrayList<>();
+            for (MagicSnippet.CodeLine codeLine : snippet.lines()) {
+                interpolatedLines.add(new MagicSnippet.CodeLine(interpolator.interpolate(context, kernel, codeLine.code()),
+                        codeLine.hasPosition(), codeLine.relativePosition(), codeLine.globalPosition()));
+            }
+
+            interpolatedSnippets.add(new MagicSnippet(snippet.type(), interpolatedLines));
+        }
+        return interpolatedSnippets;
+    }
+
+    public MagicInspectResult inspect(ExecutionContext context, String expr, int cursorPosition) throws MagicEvalException,
+            MagicParseException {
 
         // parse magic snippets
         List<MagicSnippet> snippets = parser.parseSnippets(expr, cursorPosition);
@@ -132,7 +159,8 @@ public class MagicEngine {
         return new MagicInspectResult(true, null);
     }
 
-    public MagicCompleteResult complete(RapaioKernel kernel, ExecutionContext context, String expr, int cursorPosition) throws MagicEvalException,
+    public MagicCompleteResult complete(RapaioKernel kernel, ExecutionContext context, String expr, int cursorPosition) throws
+            MagicEvalException,
             MagicParseException {
 
         // parse magic snippets
