@@ -39,4 +39,8 @@ public final class Global {
         displayData.setDisplayId(id);
         MainApp.kernel.updateDisplay(displayData);
     }
+
+    public static Object eval(String code) throws Exception {
+        return MainApp.kernel.eval(code);
+    }
 }
