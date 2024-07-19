@@ -11,12 +11,9 @@ import java.text.ParseException;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import javax.naming.spi.ResolveResult;
-
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 public class MimaDependencySpecManagerTest {
@@ -104,34 +101,6 @@ public class MimaDependencySpecManagerTest {
             assertTrue(moduleRevisionIds.contains(ar.getArtifact().toString()),
                     "%s artifact not found".formatted(ar.getArtifact().toString()));
         }
-    }
-
-    @Test
-    @Disabled
-    void testConfigurationMappings() throws ParseException, IOException {
-//        MimaDependencyManager dm = new MimaDependencyManager();
-//        Ivy ivy = dm.getIvy();
-//        var md = dm.getMd();
-//
-//        DependencySpec dependencySpec = DependencySpec.from("org.lwjgl:lwjgl-glfw:3.3.3", true);
-//
-//        ModuleRevisionId ri = dependencySpec.revisionId();
-//        DefaultDependencyDescriptor dd = new DefaultDependencyDescriptor(md, ri, dependencySpec.force(), true, true);
-//        dd.addDependencyConfiguration("default", "default");
-//        dd.addDependencyArtifact("default", new DefaultDependencyArtifactDescriptor(
-//                dd, dependencySpec.name(), "jar", "jar", null, Map.of("e:classifier", "natives-macos-arm64")
-//        ));
-//
-//        md.addDependency(dd);
-//        md.setLastModified(System.currentTimeMillis());
-//
-//        ResolveOptions ro = new ResolveOptions();
-//        ro.setTransitive(true);
-//        ro.setDownload(true);
-//
-//        var report = ivy.resolve(md, ro);
-//        assertEquals(0, report.getAllProblemMessages().size());
-//        assertEquals(2, report.getAllArtifactsReports().length);
     }
 
     @Test

@@ -14,7 +14,6 @@ import java.util.stream.Collectors;
 import javax.imageio.ImageIO;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.MIMEType;
@@ -58,7 +57,7 @@ public class ImageMagicHandler extends MagicHandler {
         return canHandleOneLinePrefix(magicSnippet, PREFIX);
     }
 
-    Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Cannot handle an unmatched snippet.");
         }
@@ -81,7 +80,7 @@ public class ImageMagicHandler extends MagicHandler {
         }
     }
 
-    CompleteMatches completeLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
         Set<String> fileSuffixes = Arrays.stream(ImageIO.getReaderFileSuffixes()).map(String::toLowerCase).collect(Collectors.toSet());
         return MagicHandlerTools.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || fileSuffixes.contains(f.getName().substring(f.getName().lastIndexOf('.') + 1).toLowerCase()));

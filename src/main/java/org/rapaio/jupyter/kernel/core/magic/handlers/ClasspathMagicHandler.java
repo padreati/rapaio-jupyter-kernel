@@ -48,11 +48,11 @@ public class ClasspathMagicHandler extends MagicHandler {
         return canHandleOneLinePrefix(magicSnippet, ONE_LINE_PREFIX);
     }
 
-    private Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
-        File file = getFile(context, magicSnippet);
+        File file = getFile(kernel.getExecutionContext(), magicSnippet);
         kernel.javaEngine().getShell().addToClasspath(file.getAbsolutePath());
         kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath\n").render());
         return null;
@@ -73,7 +73,7 @@ public class ClasspathMagicHandler extends MagicHandler {
         return file;
     }
 
-    private CompleteMatches completeLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) {
+    private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {
         return MagicHandlerTools.oneLinePathComplete(ONE_LINE_PREFIX, magicSnippet, File::isDirectory);
     }
 }

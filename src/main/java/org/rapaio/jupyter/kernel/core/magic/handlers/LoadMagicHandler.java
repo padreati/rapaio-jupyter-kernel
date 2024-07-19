@@ -1,19 +1,25 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import com.google.gson.JsonElement;
-import com.google.gson.JsonParser;
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
-import org.rapaio.jupyter.kernel.core.magic.*;
-import org.rapaio.jupyter.kernel.message.messages.IOPubError;
-
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalResult;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandlerTools;
+import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
+import org.rapaio.jupyter.kernel.message.messages.IOPubError;
+
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 public class LoadMagicHandler extends MagicHandler {
 
@@ -34,7 +40,7 @@ public class LoadMagicHandler extends MagicHandler {
                         .documentation(List.of())
                         .canHandlePredicate(this::canHandleSnippet)
                         .evalFunction(this::evalLine)
-                        .inspectFunction((channels, context, magicSnippet) -> null)
+                        .inspectFunction((channels, magicSnippet) -> null)
                         .completeFunction(this::completeLine)
                         .build()
         );
@@ -52,7 +58,7 @@ public class LoadMagicHandler extends MagicHandler {
         return magicSnippet.isLineMagic() && magicSnippet.lines().size() == 1 && magicSnippet.line(0).code().startsWith(PREFIX);
     }
 
-    Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) throws MagicEvalException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new IllegalArgumentException("Magic handler cannot execute the given snippet.");
         }
@@ -78,7 +84,7 @@ public class LoadMagicHandler extends MagicHandler {
         return null;
     }
 
-    CompleteMatches completeLine(RapaioKernel kernel,ExecutionContext context,  MagicSnippet snippet) {
+    CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet snippet) {
         return MagicHandlerTools.oneLinePathComplete(PREFIX, snippet,
                 f -> f.isDirectory() || f.getName().endsWith(".ipynb") || f.getName().endsWith(".jshell"));
     }

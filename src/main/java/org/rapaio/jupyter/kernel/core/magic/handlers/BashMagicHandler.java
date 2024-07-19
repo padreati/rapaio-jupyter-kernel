@@ -12,7 +12,6 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
 
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -49,7 +48,7 @@ public class BashMagicHandler extends MagicHandler {
         );
     }
 
-    private Object evalCell(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    private Object evalCell(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Cannot handle the given snippet.");
         }

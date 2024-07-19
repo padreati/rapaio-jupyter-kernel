@@ -1,5 +1,13 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.Map;
+
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.channels.Channels;
@@ -10,14 +18,6 @@ import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.message.Message;
 import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
-
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
-import java.util.List;
-import java.util.Map;
-
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
 
 public class LoadMagicHandlerTest {
 
@@ -196,7 +196,7 @@ public class LoadMagicHandlerTest {
     void testHandler() throws MagicEvalException, MagicParseException {
         LoadMagicHandler handler = new LoadMagicHandler();
         MagicSnippet snippet = new MagicSnippet(MagicSnippet.Type.MAGIC_LINE, List.of(new MagicSnippet.CodeLine("%load /", true, 7, 7)));
-        var options = handler.snippetMagicHandlers().get(0).completeFunction().apply(null, TestUtils.context(), snippet);
+        var options = handler.snippetMagicHandlers().getFirst().completeFunction().apply(null, snippet);
         assertNotNull(options);
     }
 

@@ -62,13 +62,13 @@ public class RapaioKernel {
 
     private static final Logger LOGGER = Logger.getLogger(RapaioKernel.class.getSimpleName());
     private static final AtomicInteger executionCount = new AtomicInteger(1);
-    private static final ExecutionContext DEFAULT_EXECUTION_CONTEXT = new ExecutionContext(null);
 
     private final Renderer renderer;
     private final JavaEngine javaEngine;
     private final MagicEngine magicEngine;
     private final MimaDependencyManager dependencyManager;
     private final JShellConsole shellConsole;
+    private ExecutionContext ctx;
 
     private Channels channels;
 
@@ -85,6 +85,7 @@ public class RapaioKernel {
                 .build();
         this.javaEngine.initialize();
         this.magicEngine = new MagicEngine(this);
+        this.ctx = new ExecutionContext(null);
         this.dependencyManager = new MimaDependencyManager();
         this.renderer = new Renderer();
     }
@@ -100,6 +101,10 @@ public class RapaioKernel {
 
     public MagicEngine magicEngine() {
         return magicEngine;
+    }
+
+    public ExecutionContext getExecutionContext() {
+        return ctx;
     }
 
     public MimaDependencyManager dependencyManager() {
@@ -153,7 +158,7 @@ public class RapaioKernel {
     }
 
     public DisplayData eval(String expr) throws Exception {
-        return transformEval(javaEngine.eval(DEFAULT_EXECUTION_CONTEXT, expr));
+        return transformEval(javaEngine.eval(ctx, expr));
     }
 
     private DisplayData transformEval(Object result) {
@@ -183,7 +188,7 @@ public class RapaioKernel {
         // if magic handled the request then this is it, everything remains here
         // otherwise continue normally with java evaluation
         try {
-            MagicEvalResult magicResult = magicEngine.eval(DEFAULT_EXECUTION_CONTEXT, request.code());
+            MagicEvalResult magicResult = magicEngine.eval(ctx, request.code());
             if (magicResult.handled()) {
                 if (magicResult.result() != null) {
                     channels.publish(new IOPubExecuteResult(count, transformEval(magicResult.result())));
@@ -253,7 +258,7 @@ public class RapaioKernel {
         ShellInspectRequest request = message.content();
         channels.busyThenIdle();
         try {
-            MagicInspectResult magicResult = magicEngine.inspect(DEFAULT_EXECUTION_CONTEXT, request.code(), request.cursorPos());
+            MagicInspectResult magicResult = magicEngine.inspect(ctx, request.code(), request.cursorPos());
             if (magicResult.handled()) {
                 DisplayData inspection = magicResult.displayData();
                 channels.reply(new ShellInspectReply(inspection != null, inspection));
@@ -273,7 +278,7 @@ public class RapaioKernel {
         ShellCompleteRequest request = message.content();
         channels.busyThenIdle();
         try {
-            MagicCompleteResult magicResult = magicEngine.complete(this, DEFAULT_EXECUTION_CONTEXT, request.code(), request.cursorPos());
+            MagicCompleteResult magicResult = magicEngine.complete(this, request.code(), request.cursorPos());
 
             CompleteMatches options = magicResult.handled()
                     ? magicResult.replacementOptions()

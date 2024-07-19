@@ -1,7 +1,9 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import jdk.jshell.*;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
+
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -10,9 +12,11 @@ import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import jdk.jshell.ImportSnippet;
+import jdk.jshell.MethodSnippet;
+import jdk.jshell.Snippet;
+import jdk.jshell.TypeDeclSnippet;
+import jdk.jshell.VarSnippet;
 
 public class JavaReplMagicHandler extends MagicHandler {
 
@@ -41,7 +45,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List all active methods."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /methods"))
                         .evalFunction(this::evalMethods)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%jshell /vars")
@@ -50,7 +54,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List all active variables, with type and value."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /vars"))
                         .evalFunction(this::evalVars)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%jshell /imports")
@@ -59,7 +63,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List all active import statements."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /imports"))
                         .evalFunction(this::evalImports)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%jshell /types")
@@ -68,7 +72,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List all active types: classes, interfaces, enums and annotations."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /types"))
                         .evalFunction(this::evalTypes)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
 
                 SnippetMagicHandler.lineMagic()
@@ -78,7 +82,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List all code snippets, either active, inactive or erroneous."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list -all"))
                         .evalFunction(this::evalAllList)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%jshell /list \\w")
@@ -87,7 +91,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List snippet with the given id."))
                         .canHandlePredicate(magicSnippet -> canHandleSnippet(magicSnippet, "%jshell /list "))
                         .evalFunction(this::evalIdList)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher("%jshell /list")
@@ -96,7 +100,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                         .documentation(List.of("List all active code snippets."))
                         .canHandlePredicate(snippet -> canHandleSnippet(snippet, "%jshell /list"))
                         .evalFunction(this::evalSimpleList)
-                        .completeFunction((kernel, context, magicSnippet) -> null)
+                        .completeFunction((kernel, magicSnippet) -> null)
                         .build()
         );
     }
@@ -123,7 +127,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         return expr.startsWith(prefix);
     }
 
-    private Object evalSimpleList(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) {
+    private Object evalSimpleList(RapaioKernel kernel, MagicSnippet magicSnippet) {
         List<Snippet> snippets = kernel.javaEngine().getShell().snippets()
                 .filter(s -> kernel.javaEngine().getShell().status(s).isActive())
                 .toList();
@@ -139,7 +143,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalAllList(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) {
+    private Object evalAllList(RapaioKernel kernel, MagicSnippet magicSnippet) {
         List<Snippet> snippets = kernel.javaEngine().getShell().snippets().toList();
         StringBuilder sb = new StringBuilder();
         for (Snippet snippet : snippets) {
@@ -153,7 +157,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalIdList(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws
+    private Object evalIdList(RapaioKernel kernel, MagicSnippet magicSnippet) throws
             MagicEvalException {
         String id = magicSnippet.line(0).code().trim().substring("%jshell /list ".length()).trim();
         Optional<Snippet> optional = kernel.javaEngine().getShell().snippets().filter(s -> s.id().equals(id.trim())).findAny();
@@ -171,7 +175,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         throw new MagicEvalException(magicSnippet, "No snippet with id: " + id + " was found.");
     }
 
-    private Object evalMethods(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws
+    private Object evalMethods(RapaioKernel kernel, MagicSnippet magicSnippet) throws
             MagicEvalException {
         String command = magicSnippet.line(0).code().trim().substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
         String options = command.substring("/methods".length()).trim();
@@ -195,7 +199,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalVars(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    private Object evalVars(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         String line = magicSnippet.line(0).code().trim();
         String command = line.substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
         String options = command.substring("/vars".length()).trim();
@@ -217,7 +221,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalImports(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws
+    private Object evalImports(RapaioKernel kernel, MagicSnippet magicSnippet) throws
             MagicEvalException {
         String line = magicSnippet.line(0).code().trim();
         String command = line.substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
@@ -239,7 +243,7 @@ public class JavaReplMagicHandler extends MagicHandler {
         return DisplayData.withText(sb.toString());
     }
 
-    private Object evalTypes(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    private Object evalTypes(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         String line = magicSnippet.line(0).code().trim();
         String command = line.substring(JavaReplMagicHandler.LINE_PREFIX.length() + 1);
         String options = command.substring("/types".length()).trim();

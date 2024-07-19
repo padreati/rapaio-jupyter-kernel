@@ -1,13 +1,15 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.magic.*;
-
-import java.util.List;
-import java.util.stream.Collectors;
+import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 
 public class HelpMagicHandler extends MagicHandler {
 
@@ -48,11 +50,11 @@ public class HelpMagicHandler extends MagicHandler {
         return canHandleOneLinePrefix(magicSnippet, ONE_LINE_PREFIX);
     }
 
-    Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) throws MagicEvalException {
+    Object evalLine(RapaioKernel kernel, MagicSnippet snippet) throws MagicEvalException {
         if (!canHandleSnippet(snippet)) {
             throw new MagicEvalException(snippet, "Try to execute a magic snippet to improper handler.");
         }
-        String expr = snippet.lines().get(0).code();
+        String expr = snippet.lines().getFirst().code();
         String text = expr.trim().toLowerCase();
 
         if (text.equals(ONE_LINE_PREFIX)) {

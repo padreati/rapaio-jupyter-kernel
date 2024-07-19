@@ -81,13 +81,13 @@ public class JarMagicHandler extends MagicHandler {
         return magicSnippet.isCellMagic() && magicSnippet.line(0).code().startsWith(CELL_PREFIX);
     }
 
-    private Object evalLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    private Object evalLine(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
         String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(LINE_PREFIX.length() + 1).trim();
-        path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
+        path = kernel.getExecutionContext().getRelativePath(Path.of(path)).toAbsolutePath().toString();
 
         File file = new File(path);
         if (!file.getAbsoluteFile().exists()) {
@@ -100,7 +100,7 @@ public class JarMagicHandler extends MagicHandler {
         return null;
     }
 
-    private Object evalCell(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
+    private Object evalCell(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
         if (!canHandleCell(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
@@ -116,7 +116,7 @@ public class JarMagicHandler extends MagicHandler {
 
         List<File> files = new ArrayList<>();
         for (int i = 1; i < magicSnippet.lines().size(); i++) {
-            files.add(getFile(context, magicSnippet, i));
+            files.add(getFile(kernel.getExecutionContext(), magicSnippet, i));
         }
         files.forEach(file -> addFileToPath(kernel, file));
         return null;
@@ -154,12 +154,12 @@ public class JarMagicHandler extends MagicHandler {
         }
     }
 
-    private CompleteMatches completeLine(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) {
+    private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {
         return MagicHandlerTools.oneLinePathComplete(LINE_PREFIX, magicSnippet,
                 f -> (f.isDirectory() || f.getName().endsWith(".jar")));
     }
 
-    private CompleteMatches completeCell(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    private CompleteMatches completeCell(RapaioKernel kernel, MagicSnippet snippet) {
         FileFilter fileFilter = f -> (f.isDirectory() || f.getName().endsWith(".jar"));
         for (int i = 0; i < snippet.lines().size(); i++) {
             var line = snippet.line(i);
@@ -167,7 +167,7 @@ public class JarMagicHandler extends MagicHandler {
                 continue;
             }
             if (i == 0) {
-                return completeLine(kernel, context, snippet);
+                return completeLine(kernel, snippet);
             }
             String code = line.code();
             String path = code.substring(0, line.relativePosition());

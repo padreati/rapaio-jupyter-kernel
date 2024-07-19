@@ -49,7 +49,7 @@ public class MagicEngineTest {
 
     @Test
     void magicCompleteTest() throws MagicEvalException, MagicParseException {
-        var result = kernel.magicEngine().complete(kernel, ctx, """
+        var result = kernel.magicEngine().complete(kernel, """
                 %%jars
                 /""", 0);
         assertNotNull(result);
@@ -57,7 +57,7 @@ public class MagicEngineTest {
         assertEquals(0, result.replacementOptions().start());
         assertEquals(6, result.replacementOptions().end());
 
-        result = kernel.magicEngine().complete(kernel, ctx, "%depen", 1);
+        result = kernel.magicEngine().complete(kernel, "%depen", 1);
         assertNotNull(result);
         var options = result.replacementOptions();
         assertFalse(options.replacements().isEmpty());
@@ -65,7 +65,7 @@ public class MagicEngineTest {
         assertEquals(6, options.end());
 
         String line1 = "%dependency /add x:y:z\n";
-        result = kernel.magicEngine().complete(kernel, ctx, line1 + "%depe", line1.length() + 1);
+        result = kernel.magicEngine().complete(kernel, line1 + "%depe", line1.length() + 1);
         assertNotNull(result);
         options = result.replacementOptions();
         assertFalse(options.replacements().isEmpty());

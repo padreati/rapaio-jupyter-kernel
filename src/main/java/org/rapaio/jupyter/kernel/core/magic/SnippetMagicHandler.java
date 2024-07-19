@@ -1,16 +1,20 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import org.rapaio.jupyter.kernel.core.CompleteMatches;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.space;
+import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
 
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Predicate;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.*;
+import org.rapaio.jupyter.kernel.core.CompleteMatches;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 
 public record SnippetMagicHandler(
         MagicSnippet.Type type,
@@ -106,7 +110,7 @@ public record SnippetMagicHandler(
                     completeFunction);
         }
 
-        private DisplayData defaultInspect(RapaioKernel kernel, ExecutionContext context, MagicSnippet magicSnippet) {
+        private DisplayData defaultInspect(RapaioKernel kernel, MagicSnippet magicSnippet) {
             String html = join(
                     texts("Syntax: "), br(),
                     join(

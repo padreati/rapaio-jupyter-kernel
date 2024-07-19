@@ -88,7 +88,7 @@ public class MagicEngine {
         // if everything is fine then execute handlers
         Object lastResult = null;
         for (var pair : magicPairs) {
-            lastResult = pair.handler.eval(kernel, context, pair.snippet);
+            lastResult = pair.handler.eval(kernel, pair.snippet);
         }
 
         // return last result
@@ -150,7 +150,7 @@ public class MagicEngine {
         for (var handler : magicHandlers) {
             // first handler do the job
             if (handler.canHandleSnippet(snippet)) {
-                DisplayData dd = handler.inspect(kernel, context, snippet);
+                DisplayData dd = handler.inspect(kernel, snippet);
                 return new MagicInspectResult(true, dd);
             }
         }
@@ -159,7 +159,7 @@ public class MagicEngine {
         return new MagicInspectResult(true, null);
     }
 
-    public MagicCompleteResult complete(RapaioKernel kernel, ExecutionContext context, String expr, int cursorPosition) throws
+    public MagicCompleteResult complete(RapaioKernel kernel, String expr, int cursorPosition) throws
             MagicEvalException,
             MagicParseException {
 
@@ -200,7 +200,7 @@ public class MagicEngine {
                 boolean handled = false;
                 for (var snippetMagicHandler : handler.snippetMagicHandlers()) {
                     if (snippetMagicHandler.canHandlePredicate().test(snippet)) {
-                        CompleteMatches matches = snippetMagicHandler.completeFunction().apply(kernel, context, snippet);
+                        CompleteMatches matches = snippetMagicHandler.completeFunction().apply(kernel, snippet);
                         if (matches == null) {
                             handled = true;
                             break;

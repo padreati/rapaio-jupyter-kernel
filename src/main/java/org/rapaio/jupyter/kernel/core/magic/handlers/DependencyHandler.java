@@ -4,10 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
-import org.eclipse.aether.repository.LocalArtifactRequest;
-import org.eclipse.aether.repository.LocalArtifactResult;
 import org.eclipse.aether.resolution.DependencyResult;
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -108,7 +105,7 @@ public class DependencyHandler extends MagicHandler {
         return magicSnippet.line(0).code().startsWith(HEADER);
     }
 
-    Object evalLineAdd(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    Object evalLineAdd(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /add ")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }
@@ -124,7 +121,7 @@ public class DependencyHandler extends MagicHandler {
         return null;
     }
 
-    Object evalLineResolve(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    Object evalLineResolve(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /resolve")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }
@@ -150,7 +147,7 @@ public class DependencyHandler extends MagicHandler {
         return null;
     }
 
-    Object evalLineListConfiguration(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    Object evalLineListConfiguration(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /list-configuration")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }
@@ -163,7 +160,7 @@ public class DependencyHandler extends MagicHandler {
         return null;
     }
 
-    Object evalLineListArtifacts(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    Object evalLineListArtifacts(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /list-artifacts")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet.");
         }
@@ -176,7 +173,7 @@ public class DependencyHandler extends MagicHandler {
         return null;
     }
 
-    Object evalLineListRepos(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    Object evalLineListRepos(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /list-repos")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet");
         }
@@ -197,7 +194,7 @@ public class DependencyHandler extends MagicHandler {
         return null;
     }
 
-    Object evalLineAddRepo(RapaioKernel kernel, ExecutionContext context, MagicSnippet snippet) {
+    Object evalLineAddRepo(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /add-repo ")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet");
         }
