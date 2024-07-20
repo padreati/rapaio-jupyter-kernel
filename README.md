@@ -24,6 +24,7 @@ Below are listed some features, besides running Java code, since this is the mai
 * Console output with ANSI code colors
 * Autocompletion and documentation
 * Magic help function to facilitate navigation through the magic functions
+* Placeholders in magic commands
 * Display items and update items based on references
 * JShell commands (not all command are implemented since some of them are not applicable)
 * Loading notebooks and JShell scripts
@@ -31,6 +32,8 @@ Below are listed some features, besides running Java code, since this is the mai
 * Adding directories with compiled classes to classpath
 * Display image from local file systems or URL
 * Manage dependencies (with transitivity). More details: [DEPENDENCY-MANAGEMENT.md](DEPENDENCY-MANAGEMENT.md).
+
+For a brief tour into the features check out the example notebook [here](example.ipynb).
 
 ## Installation
 
