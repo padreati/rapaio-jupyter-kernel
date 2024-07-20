@@ -23,14 +23,14 @@ This property is called transitivity. All the recursive dependencies of a depend
 called *transitive dependencies*.
 
 The way how a dependency is identified is the common Ivy way. A dependency is identified
-using three tokens: `organization`, `name` and `revision`. The terminology differs for Maven, but retains its
-meaning. For Maven the identifier is composed of `groupId`, `artifactId` and `version`.
+using five tokens: `groupId`, `artifactId` and `version` which are required and `extension` and `classifier` which
+are optional. The identifier has the following syntax `<groupId>:<artifactId>[:<extension>[:<classifier>]]:<version>`.
 
 The syntax used in dependency magic commands is the following:
 
     com.google.code.gson:gson:2.10.1
 
-the three identifier tokens in the specified order separated by colons. The previous dependency identifier has
+All the identifier tokens in the specified order separated by colons. The previous dependency identifier has
 the following for in a Maven pom file:
 
     <dependencies>
@@ -79,101 +79,6 @@ finally brings the artifacts in the local cached repository and loads the into t
 From that moment, the classes defined in dependencies are available to the JVM through class loaders, and import instructions
 can be executed successfully.
 
-## Conflict dependencies
-
-Ivy allows multiple ways to solve dependency conflicts through policies implemented into dependency conflict managers.
-Those are the conflict managers available:
-
-Here is a list of built-in conflict managers (which do not require anything in the settings file):
-
-- *all*: this conflict manager resolve conflicts by selecting all revisions. Also called the NoConflictManager,
-  it doesn’t evict any modules.
-- *latest-time*: this conflict manager selects only the latest revision, latest being defined as the latest in time.
-  Note that latest in time is costly to compute, so prefer latest-revision if you can.
-- *latest-revision*: this conflict manager selects only the latest revision, latest being defined by a string comparison of revisions.
-- *latest-compatible*: this conflict manager selects the latest version in the conflicts which can result
-  in a compatible set of dependencies. This means that in the end, this conflict manager does not allow any conflicts (similar to the strict
-  conflict manager), except that it follows a best effort strategy to try to find a set of compatible modules (according to the version
-  constraints)
-- *strict*: this conflict manager throws an exception (i.e. causes a build failure) whenever a conflict is found. (default value)
-
-To select a conflict manager one can use magic commands. The following is an example:
-
-    %dependency /conflict-manager latest-revision
-
-The default conflict manager is *strict* (which is different than the usual one in Ivy, which is *all*). The main reason why
-the default conflict manager is *strict* is for awareness. If a conflict appears it will be signaled immediately.
-If a conflict arise, than changing the conflict manager can solve the problem, but at least the user knows there is an issue.
-
-## Dependency overrides
-
-Sometimes, when we have to deal with dependency conflicts, the simple selection of a dependency conflict manager is not enough.
-For example, we might want to select a specific version of a given dependency, no matter if that dependency is a transitive
-dependency with another revision. For that purpose we can use *dependency overrides**. In Ivy we can specify dependency overrides
-at module level or at dependency level. We have choose to specify at module level since it is a simple way and avoids the
-need to specify the same override for multiple dependencies. A dependency override is a directive given to dependency resolvers
-to replace all occurrences of a given dependency identified by organization and name, with a dependency having a specific version.
-
-To illustrate this situation we will use the following scenario.
-
-Suppose that we are in the following situation:
-
-    %dependency /add com.github.fakemongo:fongo:2.1.1
-    %dependency /add org.apache.avro:avro:1.11.3
-    %dependency /resolve
-
-Since the default conflict manager is *strict* the following happens:
-
-    StrictConflictException: com.fasterxml.jackson.core#jackson-core;2.14.2 (needed by [org.apache.avro#avro;1.11.3]) 
-    conflicts with com.fasterxml.jackson.core#jackson-core;2.2.2 (needed by [de.grundid.opendatalab#geojson-jackson;1.2, 
-    com.fasterxml.jackson.core#jackson-databind;2.2.2])
-    
-    at org.apache.ivy.plugins.conflict.StrictConflictManager.resolveConflicts(StrictConflictManager.java:42)
-    at org.apache.ivy.core.resolve.ResolveEngine.resolveConflicts(ResolveEngine.java:1055)
-    at org.apache.ivy.core.resolve.ResolveEngine.resolveConflict(ResolveEngine.java:933)
-    at org.apache.ivy.core.resolve.ResolveEngine.resolveConflict(ResolveEngine.java:982)
-    at org.apache.ivy.core.resolve.ResolveEngine.resolveConflict(ResolveEngine.java:852)
-    at org.apache.ivy.core.resolve.ResolveEngine.fetchDependencies(ResolveEngine.java:719)
-    at org.apache.ivy.core.resolve.ResolveEngine.doFetchDependencies(ResolveEngine.java:801)
-    at org.apache.ivy.core.resolve.ResolveEngine.fetchDependencies(ResolveEngine.java:729)
-    at org.apache.ivy.core.resolve.ResolveEngine.doFetchDependencies(ResolveEngine.java:792)
-    at org.apache.ivy.core.resolve.ResolveEngine.fetchDependencies(ResolveEngine.java:729)
-    at org.apache.ivy.core.resolve.ResolveEngine.doFetchDependencies(ResolveEngine.java:792)
-    at org.apache.ivy.core.resolve.ResolveEngine.fetchDependencies(ResolveEngine.java:729)
-    at org.apache.ivy.core.resolve.ResolveEngine.doFetchDependencies(ResolveEngine.java:801)
-    at org.apache.ivy.core.resolve.ResolveEngine.fetchDependencies(ResolveEngine.java:729)
-    at org.apache.ivy.core.resolve.ResolveEngine.getDependencies(ResolveEngine.java:607)
-    at org.apache.ivy.core.resolve.ResolveEngine.resolve(ResolveEngine.java:250)
-    at org.apache.ivy.Ivy.resolve(Ivy.java:522)
-    at org.rapaio.jupyter.kernel.core.magic.dependencies.DependencyManager.resolve(DependencyManager.java:182)
-    at org.rapaio.jupyter.kernel.core.magic.handlers.DependencyHandler.evalLineResolve(DependencyHandler.java:210)
-    at org.rapaio.jupyter.kernel.core.magic.MagicHandler.eval(MagicHandler.java:36)
-    at org.rapaio.jupyter.kernel.core.magic.MagicEngine.eval(MagicEngine.java:83)
-    at org.rapaio.jupyter.kernel.core.RapaioKernel.handleExecuteRequest(RapaioKernel.java:186)
-    at org.rapaio.jupyter.kernel.channels.ShellChannel.lambda$bind$0(ShellChannel.java:52)
-    at org.rapaio.jupyter.kernel.channels.LoopThread.run(LoopThread.java:21)
-
-We understand that `jackson-core` package has a conflict. We can solve the conflict in multiple ways.
-
-We can choose the latest version through a conflict manager. The following would solve the problem:
-
-    %dependency /conflict-manager latest-time
-    %dependency /resolve
-
-We can choose a different strategy to select the version (through a different conflict manager), and there is even
-the possibility to load all the revisions in memory, which I would not advice, since you will not know what
-version of the library will be used at runtime.
-
-Another flexible option would be to configure a dependency override. If we don't want the latest revision for this specific package,
-we can simply instruct the resolve to choose a specific one.
-
-    %dependency /conflict-manager latest-revision
-    %dependency /override de.grundid.opendatalab:geojson-jackson:1.2
-    %dependency /resolve
-
-Dependency override is a flexible way to solve conflicts, but also is a way to do overrides in general, even if we do
-not have conflicts.
-
 ## Listing commands
 
 Now that we know what we can do, we have also a set of magic commands which allows one to inspect the current state of 
@@ -187,36 +92,24 @@ As always, we have also the listing from magic help available:
     ...
     Dependency manager
     Documentation:
-      Find and resolve a dependency using coordinates: group_id, artifact_id and version id.
-      The maven public repositories are searched for dependencies. Additionally, any maven 
-      transitive dependency declared with magic handlers are included in classpath.
+    Find and resolve a dependency using coordinates: group_id, artifact_id and version id.
+    The maven public repositories are searched for dependencies. Additionally, any maven transitive dependency declared with magic handlers are included in classpath.
     Syntax:
-      %dependency /list-repos
-        List all repositories
-      %dependency /add-repo name url
-        Add Maven Repository using a name and an url
-      %dependency /list-configuration
-        List all the dependency configurations
-      %dependency /list-artifacts
-        List artifacts loaded after the last dependency resolve
-      %dependency /conflict-manager all|latest-time|latest-revision(default)|latest-compatible|strict
-        Configures a conflict manager. A conflict manager describes how conflicts are resolved.
-          all: resolve conflicts by selecting all revisions, it doesn’t evict any modules.
-          latest-time: selects only the latest in time revision.
-          latest-revision: selects only the latest revision.
-          latest-compatible: selects the latest version in the conflicts which can result in a compatible set of dependencies. This conflict manager does not allow any conflicts (similar to the strict conflict manager), except that it follows a best effort strategy to try to find a set of compatible modules (according to the version constraints)
-          strict: throws an exception (i.e. causes a build failure) whenever a conflict is found. It does not take into consideration overrides. (default value)
-      %dependency /resolve
-        Resolve dependencies
-      %dependency /add group_id:artifact_id:version
-      %dependency /add group_id:artifact_id:version --force
-        Declares a direct dependency to dependency manager.
-        Flag /force can be used in order to force version overrides.
-        This command does not resolve dependencies.
-      %dependency /override group_id:artifact_id:version
-        Declares an override, dependencies matched by group_id and artifact_id will be replaced with this override.
-        A more flexible way to solve conflicts, even if a conflict actually does not exist.
-        It cannot be used to override forced direct dependencies.
+    %dependency /list-repos
+    List all repositories
+    %dependency /add-repo name url
+    Add Maven Repository using a name and an url
+    %dependency /list-configuration
+    List all the dependency configurations
+    %dependency /list-artifacts
+    List artifacts loaded after the last dependency resolve
+    %dependency /resolve
+    Resolve dependencies
+    %dependency /add groupId:artifactId[:extension[:classifier]]:version
+    %dependency /add groupId:artifactId[:extension[:classifier]]:version --optional
+    Declares a dependency to the current notebook. Artifact's extension (default value jar) and classifier (default value is empty string) values are optional.
+    ...
+
 
 
 [Back to README.md](README.md)

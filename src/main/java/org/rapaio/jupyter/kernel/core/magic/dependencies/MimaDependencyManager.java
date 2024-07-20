@@ -1,6 +1,5 @@
 package org.rapaio.jupyter.kernel.core.magic.dependencies;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -11,11 +10,6 @@ import java.util.stream.Collectors;
 
 import org.eclipse.aether.collection.CollectRequest;
 import org.eclipse.aether.graph.Dependency;
-import org.eclipse.aether.installation.InstallRequest;
-import org.eclipse.aether.installation.InstallResult;
-import org.eclipse.aether.installation.InstallationException;
-import org.eclipse.aether.repository.LocalArtifactRequest;
-import org.eclipse.aether.repository.LocalArtifactResult;
 import org.eclipse.aether.repository.RemoteRepository;
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.ArtifactResult;
@@ -41,7 +35,6 @@ public class MimaDependencyManager {
                 .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), "mima_cache"))
                 .build();
         context = Runtimes.INSTANCE.getRuntime().create(contextOverrides);
-//        addMavenRepository("central", "https://repo.maven.apache.org/maven2/");
         addMavenRepository("jcenter", "https://jcenter.bintray.com/");
         addMavenRepository("jboss", "https://repository.jboss.org/nexus/content/repositories/releases/");
         addMavenRepository("atlassian", "https://packages.atlassian.com/maven/public");

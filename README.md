@@ -1,6 +1,6 @@
 # rapaio-jupyter-kernel
 
-Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java = 21.
+Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java = 22.
 
 ## Introduction
 
@@ -11,8 +11,8 @@ However, this kernel has no connection with this library, and it is a general pu
 Currently, this project is in a stable mode, and it contains the features I need. As such, I am the only maintainer. If the 
 kernel prove useful and additional contributors jump into this boat, an organization can be created and a shared ownership 
 can also be added, all of those for the sole purpose of continuity of improvements. The plan is to add new features if requested, 
-so please add issues if you want this tool to be better and fit your needs, if you cannot contribute with code, also. 
-Any feedback is appreciated and supported, if possible.
+so please add issues if you want this tool to be better and fit your needs. If possible you can contribute with code. 
+Any feedback is appreciated.
 
 ## Features
 
@@ -38,7 +38,7 @@ The latest version can be found as a download in the releases section. Rapaio Ju
 installing tool which allow users to quickly set up the kernel. The installer is contained in the jar distribution archive 
 and can be called with:
 
-    java -jar ./rapaio-jupyter-kernel-1.4.0.jar -i -auto
+    java -jar ./rapaio-jupyter-kernel-2.0.0.jar -i -auto
 
 The `-auto` option uses an automatic mode for installing the kernel. The installer has also an interactive mode, and the kernel installation can be realized manually, also. 
 For more details you can follow [INSTALL.md](INSTALL.md).
@@ -50,10 +50,10 @@ The project is also stored in maven central repositories and can be added as dep
     <dependency>
         <groupId>io.github.padreati</groupId>
         <artifactId>rapaio-jupyter-kernel</artifactId>
-        <version>1.4.0</version>
+        <version>2.0.0</version>
     </dependency>
 
-This is not necessary now, since the kernel is packaged as a self-contained jar archive (it includes all dependencies), 
+This is not necessary, since the kernel is packaged as a self-contained jar archive (it includes all dependencies), 
 and can be downloaded from releases. In the future it would be possible to introduce a plug-in mechanism to allow others to 
 extend library for their own purposes. I see possibilities to allow others to create custom display code for objects of their 
 own type or to implement new magic features. This kind of extension of notebook can work for custom features, for generic features 
