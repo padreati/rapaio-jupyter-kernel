@@ -52,7 +52,7 @@ public class ClasspathMagicHandler extends MagicHandler {
         if (!canHandleSnippet(magicSnippet)) {
             throw new MagicEvalException(magicSnippet, "Snippet cannot be handled by this magic handler.");
         }
-        File file = getFile(kernel.getExecutionContext(), magicSnippet);
+        File file = getFile(kernel.executionContext(), magicSnippet);
         kernel.javaEngine().getShell().addToClasspath(file.getAbsolutePath());
         kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath\n").render());
         return null;

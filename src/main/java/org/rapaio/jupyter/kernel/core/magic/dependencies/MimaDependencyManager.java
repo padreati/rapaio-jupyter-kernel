@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -25,7 +26,8 @@ public class MimaDependencyManager {
 
     private final Context context;
 
-    private final List<DependencySpec> directDependencies = new ArrayList<>();
+    private final List<DependencySpec> proposedDependencies = new ArrayList<>();
+    private final List<DependencySpec> resolvedDependencies = new ArrayList<>();
     private final List<ArtifactResult> loadedArtifacts = new ArrayList<>();
 
     public MimaDependencyManager() {
@@ -57,36 +59,44 @@ public class MimaDependencyManager {
         return context.remoteRepositories();
     }
 
-    public List<DependencySpec> getDirectDependencies() {
-        return directDependencies;
+    public List<DependencySpec> getProposedDependencies() {
+        return Collections.unmodifiableList(proposedDependencies);
     }
 
-    public void addDependency(DependencySpec dependencySpec) {
-        directDependencies.add(dependencySpec);
+    public List<DependencySpec> getResolvedDependencies() {
+        return Collections.unmodifiableList(resolvedDependencies);
     }
 
-    public DependencyResult resolve() throws ParseException, IOException {
-        try {
-            List<Dependency> dependencies = new ArrayList<>();
+    public void cleanProposedDependencies() {
+        proposedDependencies.clear();
+    }
 
-            for (DependencySpec ds : directDependencies) {
-                dependencies.add(ds.getDependency());
-            }
+    public void proposeDependency(DependencySpec dependencySpec) {
+        proposedDependencies.add(dependencySpec);
+    }
 
-            Dependency root = null;
-            CollectRequest collectRequest = new CollectRequest(root, dependencies, context.remoteRepositories());
-            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
+    public void promoteDependencies() {
+        resolvedDependencies.addAll(proposedDependencies);
+    }
 
-            context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
+    public DependencyResult resolve() throws ParseException, IOException, DependencyResolutionException {
+        List<Dependency> dependencies = new ArrayList<>();
 
-            // This is intentionally repeated!
-            // I do not understand why at first try the local artifacts are missing, I suppose it is due to the
-            // my lack of understanding on how maven works
-            // However, at the second time the local files are properly updated and collected
-            return context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
-        } catch (DependencyResolutionException e) {
-            throw new RuntimeException(e);
+        for (DependencySpec ds : this.proposedDependencies) {
+            dependencies.add(ds.getDependency());
         }
+
+        Dependency root = null;
+        CollectRequest collectRequest = new CollectRequest(root, dependencies, context.remoteRepositories());
+        DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
+
+        context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
+
+        // This is intentionally repeated!
+        // I do not understand why at first try the local artifacts are missing, I suppose it is due to the
+        // my lack of understanding on how maven works
+        // However, at the second time the local files are properly updated and collected
+        return context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
     }
 
     public List<ArtifactResult> getLoadedArtifacts() {

@@ -87,7 +87,7 @@ public class JarMagicHandler extends MagicHandler {
         }
         String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(LINE_PREFIX.length() + 1).trim();
-        path = kernel.getExecutionContext().getRelativePath(Path.of(path)).toAbsolutePath().toString();
+        path = kernel.executionContext().getRelativePath(Path.of(path)).toAbsolutePath().toString();
 
         File file = new File(path);
         if (!file.getAbsoluteFile().exists()) {
@@ -116,7 +116,7 @@ public class JarMagicHandler extends MagicHandler {
 
         List<File> files = new ArrayList<>();
         for (int i = 1; i < magicSnippet.lines().size(); i++) {
-            files.add(getFile(kernel.getExecutionContext(), magicSnippet, i));
+            files.add(getFile(kernel.executionContext(), magicSnippet, i));
         }
         files.forEach(file -> addFileToPath(kernel, file));
         return null;

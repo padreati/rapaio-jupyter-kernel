@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
@@ -44,16 +45,15 @@ public class DependencyHandler extends MagicHandler {
                         .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /add-repo "))
                         .evalFunction(this::evalLineAddRepo)
                         .build(),
-
                 SnippetMagicHandler.lineMagic()
-                        .syntaxMatcher(HEADER + " /list-configuration")
-                        .syntaxHelp(List.of(HEADER + " /list-configuration"))
-                        .syntaxPrefix(HEADER + " /list-configuration")
+                        .syntaxMatcher(HEADER + " /list-dependencies")
+                        .syntaxHelp(List.of(HEADER + " /list-dependencies"))
+                        .syntaxPrefix(HEADER + " /list-dependencies")
                         .documentation(List.of(
-                                "List all the dependency configurations"
+                                "List proposed and resolved dependencies"
                         ))
-                        .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /list-configuration"))
-                        .evalFunction(this::evalLineListConfiguration)
+                        .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /list-dependencies"))
+                        .evalFunction(this::evalLineListDependencies)
                         .build(),
                 SnippetMagicHandler.lineMagic()
                         .syntaxMatcher(HEADER + " /list-artifacts")
@@ -105,74 +105,6 @@ public class DependencyHandler extends MagicHandler {
         return magicSnippet.line(0).code().startsWith(HEADER);
     }
 
-    Object evalLineAdd(RapaioKernel kernel, MagicSnippet snippet) {
-        if (!canHandleOneLinePrefix(snippet, HEADER + " /add ")) {
-            throw new RuntimeException("Cannot evaluate the given magic snippet.");
-        }
-        String fullCode = snippet.line(0).code();
-        String[] args = fullCode.substring((HEADER + " /add ").length()).trim().split(" ");
-
-        if (args.length == 2 && !args[1].equals("--optional")) {
-            throw new RuntimeException("Error parsing '" + fullCode + "'");
-        }
-
-        kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).reset().render() + "\n");
-        kernel.dependencyManager().addDependency(new DependencySpec(args[0], null, "runtime", args.length == 2, null));
-        return null;
-    }
-
-    Object evalLineResolve(RapaioKernel kernel, MagicSnippet snippet) {
-        if (!canHandleOneLinePrefix(snippet, HEADER + " /resolve")) {
-            throw new RuntimeException("Cannot evaluate the given magic snippet.");
-        }
-
-        try {
-            kernel.channels().writeToStdOut("Solving dependencies\n");
-            DependencyResult resolveReport = kernel.dependencyManager().resolve();
-            for (var exception : resolveReport.getCollectExceptions()) {
-                kernel.channels().writeToStdErr(exception.getMessage());
-            }
-
-            var artifactsResults = resolveReport.getArtifactResults();
-            kernel.channels().writeToStdOut("Found dependencies count: " + artifactsResults.size() + "\n");
-            for (var result : artifactsResults) {
-                kernel.channels().writeToStdOut("Add to classpath: " +
-                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().render() + "\n");
-                kernel.javaEngine().getShell().addToClasspath(result.getLocalArtifactResult().getFile().getAbsolutePath());
-                kernel.dependencyManager().addLoadedArtifact(result);
-            }
-        } catch (ParseException | IOException e) {
-            throw new RuntimeException(e);
-        }
-        return null;
-    }
-
-    Object evalLineListConfiguration(RapaioKernel kernel, MagicSnippet snippet) {
-        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-configuration")) {
-            throw new RuntimeException("Cannot evaluate the given magic snippet.");
-        }
-        var channels = kernel.channels();
-        var dm = kernel.dependencyManager();
-        channels.writeToStdOut("Direct dependencies count: " + dm.getDirectDependencies().size() + "\n");
-        for (var dep : dm.getDirectDependencies()) {
-            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.getArtifact().toString()).nl().render());
-        }
-        return null;
-    }
-
-    Object evalLineListArtifacts(RapaioKernel kernel, MagicSnippet snippet) {
-        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-artifacts")) {
-            throw new RuntimeException("Cannot evaluate the given magic snippet.");
-        }
-        var channels = kernel.channels();
-        var dm = kernel.dependencyManager();
-        channels.writeToStdOut("Loaded artifacts count: " + dm.getLoadedArtifacts().size() + "\n");
-        for (var la : dm.getLoadedArtifacts()) {
-            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(la.getArtifact().toString()).nl().render());
-        }
-        return null;
-    }
-
     Object evalLineListRepos(RapaioKernel kernel, MagicSnippet snippet) {
         if (!canHandleOneLinePrefix(snippet, HEADER + " /list-repos")) {
             throw new RuntimeException("Cannot evaluate the given magic snippet");
@@ -212,6 +144,97 @@ public class DependencyHandler extends MagicHandler {
         channels.writeToStdOut(ANSI.start().text("Repository ").bold().fgGreen().text(tokens[0]).reset()
                 .text(" url: ").bold().fgGreen().text(tokens[1]).reset().text(" added.").render());
 
+        return null;
+    }
+
+    Object evalLineAdd(RapaioKernel kernel, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /add ")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet.");
+        }
+        String fullCode = snippet.line(0).code();
+        String[] args = fullCode.substring((HEADER + " /add ").length()).trim().split(" ");
+
+        if (args.length == 2 && !args[1].equals("--optional")) {
+            throw new RuntimeException("Error parsing '" + fullCode + "'");
+        }
+
+        kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).reset().render() + "\n");
+        kernel.dependencyManager().proposeDependency(new DependencySpec(args[0], null, "runtime", args.length == 2, null));
+        return null;
+    }
+
+    Object evalLineResolve(RapaioKernel kernel, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /resolve")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet.");
+        }
+
+        try {
+            if(kernel.dependencyManager().getProposedDependencies().isEmpty()) {
+                kernel.channels().writeToStdOut("No proposed dependency to be solved.");
+                return null;
+            }
+
+            var previousArtifacts = kernel.dependencyManager().getLoadedArtifacts();
+
+            kernel.channels().writeToStdOut("Solving dependencies\n");
+            DependencyResult resolveReport = kernel.dependencyManager().resolve();
+            for (var exception : resolveReport.getCollectExceptions()) {
+                kernel.channels().writeToStdErr(exception.getMessage());
+            }
+
+            if(!resolveReport.getCollectExceptions().isEmpty()) {
+                // we have an error
+                kernel.channels().writeToStdErr("Proposed dependencies could not be resolved, clear proposals.");
+                kernel.dependencyManager().cleanProposedDependencies();
+                return null;
+            }
+
+            var artifactsResults = resolveReport.getArtifactResults();
+            artifactsResults = artifactsResults.subList(previousArtifacts.size(), artifactsResults.size());
+            kernel.channels().writeToStdOut("Resolved artifacts count: " + artifactsResults.size() + "\n");
+            for (var result : artifactsResults) {
+                kernel.channels().writeToStdOut("Add to classpath: " +
+                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().render() + "\n");
+                kernel.javaEngine().getShell().addToClasspath(result.getLocalArtifactResult().getFile().getAbsolutePath());
+                kernel.dependencyManager().addLoadedArtifact(result);
+            }
+            kernel.dependencyManager().promoteDependencies();
+            kernel.dependencyManager().cleanProposedDependencies();
+        } catch (ParseException | IOException  | DependencyResolutionException e) {
+            kernel.dependencyManager().cleanProposedDependencies();
+            kernel.channels().writeToStdErr("Could not resolve dependencies.");
+            kernel.channels().writeToStdErr(e.getMessage());
+        }
+        return null;
+    }
+
+    Object evalLineListArtifacts(RapaioKernel kernel, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-artifacts")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet.");
+        }
+        var channels = kernel.channels();
+        var dm = kernel.dependencyManager();
+        channels.writeToStdOut("Loaded artifacts count: " + dm.getLoadedArtifacts().size() + "\n");
+        for (var la : dm.getLoadedArtifacts()) {
+            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(la.getArtifact().toString()).nl().render());
+        }
+        return null;
+    }
+
+    Object evalLineListDependencies(RapaioKernel kernel, MagicSnippet snippet) {
+        if (!canHandleOneLinePrefix(snippet, HEADER + " /list-dependencies")) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet.");
+        }
+        var channels = kernel.channels();
+        var dm = kernel.dependencyManager();
+        channels.writeToStdOut("Proposed dependencies count: " + dm.getProposedDependencies().size() + "\n");
+        for (var dep : dm.getProposedDependencies()) {
+            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.getDependency().toString()).nl().render());
+        }
+        channels.writeToStdOut("Resolved dependencies count: " + dm.getResolvedDependencies().size() + "\n");
+        for (var dep : dm.getResolvedDependencies()) {
+            channels.writeToStdOut(ANSI.start().text(" - ").bold().fgGreen().text(dep.getDependency().toString()).nl().render());
+        }
         return null;
     }
 }

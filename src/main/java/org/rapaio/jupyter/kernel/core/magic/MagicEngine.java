@@ -46,6 +46,10 @@ public class MagicEngine {
     private record MagicPair(MagicSnippet snippet, MagicHandler handler) {
     }
 
+    public MagicEvalResult eval(String expr) throws MagicParseException, MagicEvalException {
+        return eval(kernel.executionContext(), expr);
+    }
+
     public MagicEvalResult eval(ExecutionContext context, String expr) throws MagicParseException, MagicEvalException {
 
         // parse magic snippets

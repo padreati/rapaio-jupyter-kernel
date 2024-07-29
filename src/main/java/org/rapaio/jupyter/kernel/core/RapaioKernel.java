@@ -103,7 +103,7 @@ public class RapaioKernel {
         return magicEngine;
     }
 
-    public ExecutionContext getExecutionContext() {
+    public ExecutionContext executionContext() {
         return ctx;
     }
 

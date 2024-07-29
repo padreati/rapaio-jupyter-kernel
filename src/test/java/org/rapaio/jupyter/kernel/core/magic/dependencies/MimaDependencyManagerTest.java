@@ -12,11 +12,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.eclipse.aether.repository.RemoteRepository;
+import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class MimaDependencySpecManagerTest {
+public class MimaDependencyManagerTest {
 
     private MimaDependencyManager dm;
 
@@ -26,7 +27,7 @@ public class MimaDependencySpecManagerTest {
     }
 
     @Test
-    void testRepos() throws ParseException, IOException {
+    void testRepos() throws ParseException, IOException, DependencyResolutionException {
 
         Set<String> existingNames = dm.getMavenRepositories().stream().map(RemoteRepository::getId).collect(Collectors.toSet());
 
@@ -42,18 +43,18 @@ public class MimaDependencySpecManagerTest {
         assertEquals(existingNames.size(), +1, newNames.size());
         assertTrue(newNames.contains("google"));
 
-        dm.addDependency(new DependencySpec("com.google.ar:core:pom:1.43.0", true));
+        dm.proposeDependency(new DependencySpec("com.google.ar:core:pom:1.43.0", true));
         var report = dm.resolve();
         assertFalse(report.getArtifactResults().isEmpty());
         assertTrue(report.getCollectExceptions().isEmpty());
     }
 
     @Test
-    void testUnforcedResolveConflicts() throws ParseException, IOException {
+    void testUnforcedResolveConflicts() throws ParseException, IOException, DependencyResolutionException {
 
-        dm.addDependency(new DependencySpec("com.google.guava:guava:20.0", true));
-        dm.addDependency(new DependencySpec("com.google.inject:guice:4.2.2", true));
-        dm.addDependency(new DependencySpec("com.google.guava:guava:25.1-android", true));
+        dm.proposeDependency(new DependencySpec("com.google.guava:guava:20.0", true));
+        dm.proposeDependency(new DependencySpec("com.google.inject:guice:4.2.2", true));
+        dm.proposeDependency(new DependencySpec("com.google.guava:guava:25.1-android", true));
 
         var report = dm.resolve();
 
@@ -76,11 +77,11 @@ public class MimaDependencySpecManagerTest {
     }
 
     @Test
-    void testForcedResolveConflicts() throws ParseException, IOException {
+    void testForcedResolveConflicts() throws ParseException, IOException, DependencyResolutionException {
 
-        dm.addDependency(new DependencySpec("com.google.guava:guava:20.0", true));
-        dm.addDependency(new DependencySpec("com.google.inject:guice:4.2.2", false));
-        dm.addDependency(new DependencySpec("com.google.guava:guava:25.1-android", false));
+        dm.proposeDependency(new DependencySpec("com.google.guava:guava:20.0", true));
+        dm.proposeDependency(new DependencySpec("com.google.inject:guice:4.2.2", false));
+        dm.proposeDependency(new DependencySpec("com.google.guava:guava:25.1-android", false));
 
         var report = dm.resolve();
 
@@ -104,9 +105,9 @@ public class MimaDependencySpecManagerTest {
     }
 
     @Test
-    void testArtifactWithExtra() throws ParseException, IOException {
+    void testArtifactWithExtra() throws ParseException, IOException, DependencyResolutionException {
         DependencySpec dependencySpec = new DependencySpec("org.lwjgl:lwjgl-glfw:jar:natives-macos-arm64:3.3.3", false);
-        dm.addDependency(dependencySpec);
+        dm.proposeDependency(dependencySpec);
         DependencyResult report = dm.resolve();
         assertNotNull(report.getArtifactResults());
         assertEquals(2, report.getArtifactResults().size());
