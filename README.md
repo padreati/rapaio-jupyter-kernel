@@ -8,16 +8,15 @@ I started implementing this kernel since I believe Java deserves a full feature 
 Personally, I need that kernel to use features from a library I contribute to for statistics, ML, and data manipulation. 
 However, this kernel has no connection with this library, and it is a general-purpose Java kernel.
 
-Currently, this project is in a stable mode, and it contains the features I need. As such, I am the only maintainer. If the 
-kernel prove useful and additional contributors jump into this boat, an organization can be created and a shared ownership 
-can also be added, all of those for the sole purpose of continuity of improvements. The plan is to add new features if requested, 
-so please add issues if you want this tool to be better and fit your needs. If possible you can contribute with code. 
-Any feedback is appreciated.
+Currently, this project is in a production mode, and it contains the features I need and some other requested features. As such, I am 
+the only maintainer. If the kernel prove useful and additional contributors jump into this boat, an organization can be created and a 
+shared ownership can also be added, all of those for the sole purpose of continuity of improvements. 
+The plan is to add new features if requested, so please add issues if you want this tool to be better and fit your needs. 
+If possible you can contribute with code. Any feedback is appreciated.
 
 ## Features
 
-Since this is a work in progress, many desirable features will come in the next releases. However, some of them are 
-already implemented. Follow issues, vote on them, and create new ones, if you need improvements. 
+ Follow issues, vote on them, and create new ones, if you need improvements. 
 Below are listed some features, besides running Java code, since this is the main purpose of the kernel:
 
 * Display Javadoc documentation (need styling and HTML postprocessing to make it nicer)

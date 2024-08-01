@@ -174,8 +174,6 @@ public class DependencyHandler extends MagicHandler {
                 return null;
             }
 
-            var previousArtifacts = kernel.dependencyManager().getLoadedArtifacts();
-
             kernel.channels().writeToStdOut("Solving dependencies\n");
             DependencyResult resolveReport = kernel.dependencyManager().resolve();
             for (var exception : resolveReport.getCollectExceptions()) {
@@ -190,7 +188,6 @@ public class DependencyHandler extends MagicHandler {
             }
 
             var artifactsResults = resolveReport.getArtifactResults();
-            artifactsResults = artifactsResults.subList(previousArtifacts.size(), artifactsResults.size());
             kernel.channels().writeToStdOut("Resolved artifacts count: " + artifactsResults.size() + "\n");
             for (var result : artifactsResults) {
                 kernel.channels().writeToStdOut("Add to classpath: " +

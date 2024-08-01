@@ -35,6 +35,7 @@ public class MimaDependencyManager {
         String kernelPath = MimaDependencyManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         ContextOverrides contextOverrides = ContextOverrides.create()
                 .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), "mima_cache"))
+                .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS)
                 .build();
         context = Runtimes.INSTANCE.getRuntime().create(contextOverrides);
         addMavenRepository("jcenter", "https://jcenter.bintray.com/");
@@ -49,10 +50,11 @@ public class MimaDependencyManager {
             throw new RuntimeException("Existing maven repository: " + id);
         }
         RemoteRepository remoteRepository = (new RemoteRepository.Builder(id, "default", url))
-                .setReleasePolicy(new RepositoryPolicy(true, "never", "warn"))
-                .setSnapshotPolicy(new RepositoryPolicy(false, "never", "warn"))
+                .setReleasePolicy(new RepositoryPolicy(true, "always", "warn"))
+                .setSnapshotPolicy(new RepositoryPolicy(true, "always", "warn"))
                 .build();
         context.remoteRepositories().add(remoteRepository);
+
     }
 
     public List<RemoteRepository> getMavenRepositories() {
