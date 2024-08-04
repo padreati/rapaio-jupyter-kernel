@@ -48,8 +48,8 @@ public class DependencyHandler extends MagicHandler {
                                 "    Snapshot enabled is obtained by specified snapshot|update-policy.",
                                 "    Update policy can be: never/always/daily/interval.",
                                 "    If any flag is not specified we have the following default options:",
-                                "     - release enabled with always, snapshot enabled with always for repos with url starting with file://",
-                                "     - release enabled with always, snapshot disabled for repos with url not starting with file://"
+                                "     - release enabled with never, snapshot enabled with never for repos with url starting with file://",
+                                "     - release enabled with never, snapshot disabled for repos with url not starting with file://"
                         ))
                         .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /add-repo "))
                         .evalFunction(this::evalLineAddRepo)
@@ -127,9 +127,17 @@ public class DependencyHandler extends MagicHandler {
             String name = resolver.getId();
             String url = resolver.getUrl();
 
-            channels.writeToStdOut(ANSI.start()
-                    .text("name: ").bold().fgGreen().text(name + ", ").reset()
-                    .text("url: ").bold().fgGreen().text(url).nl()
+            RepositoryPolicy releasePolicy = resolver.getPolicy(false);
+            RepositoryPolicy snapshotPolicy = resolver.getPolicy(true);
+
+            channels.writeToStdOut(ANSI
+                    .start().text("name: ").bold().fgGreen().text(name + " ")
+                    .reset().text("url: ").bold().fgGreen().text(url + " ")
+                    .reset().text("release:").fgGreen().text(releasePolicy.isEnabled() + " ")
+                    .reset().text("update:").fgGreen().text(releasePolicy.getUpdatePolicy() + " ")
+                    .reset().text("snapshot:").fgGreen().text(snapshotPolicy.isEnabled() + " ")
+                    .reset().text("update:").fgGreen().text(snapshotPolicy.getUpdatePolicy() + " ")
+                    .nl()
                     .render());
         }
         return null;
@@ -151,7 +159,7 @@ public class DependencyHandler extends MagicHandler {
 
         dm.addMavenRepository(tokens[0], tokens[1], parseRepoParams(tokens));
         channels.writeToStdOut(ANSI.start().text("Repository ").bold().fgGreen().text(tokens[0]).reset()
-                .text(" url: ").bold().fgGreen().text(tokens[1]).reset().text(" added.").render());
+                .text(" url: ").bold().fgGreen().text(tokens[1]).reset().text(" added.").nl().render());
 
         return null;
     }
@@ -202,7 +210,7 @@ public class DependencyHandler extends MagicHandler {
             throw new RuntimeException("Error parsing '" + fullCode + "'");
         }
 
-        kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).reset().render() + "\n");
+        kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).nl().render() + "\n");
         kernel.dependencyManager().proposeDependency(new DependencySpec(args[0], null, "runtime", args.length == 2, null));
         return null;
     }
@@ -235,7 +243,7 @@ public class DependencyHandler extends MagicHandler {
             kernel.channels().writeToStdOut("Resolved artifacts count: " + artifactsResults.size() + "\n");
             for (var result : artifactsResults) {
                 kernel.channels().writeToStdOut("Add to classpath: " +
-                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().render() + "\n");
+                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().nl().render() + "\n");
                 kernel.javaEngine().getShell().addToClasspath(result.getLocalArtifactResult().getFile().getAbsolutePath());
                 kernel.dependencyManager().addLoadedArtifact(result);
             }
