@@ -17,6 +17,7 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.rapaio.jupyter.kernel.core.magic.handlers.RepoParam;
 
 import eu.maveniverse.maven.mima.context.Context;
 import eu.maveniverse.maven.mima.context.ContextOverrides;
@@ -38,20 +39,23 @@ public class MimaDependencyManager {
                 .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS)
                 .build();
         context = Runtimes.INSTANCE.getRuntime().create(contextOverrides);
-        addMavenRepository("jcenter", "https://jcenter.bintray.com/");
-        addMavenRepository("jboss", "https://repository.jboss.org/nexus/content/repositories/releases/");
-        addMavenRepository("atlassian", "https://packages.atlassian.com/maven/public");
+        addMavenRepository("jcenter", "https://jcenter.bintray.com/",
+                RepoParam.defaultRemote());
+        addMavenRepository("jboss", "https://repository.jboss.org/nexus/content/repositories/releases/",
+                RepoParam.defaultRemote());
+        addMavenRepository("atlassian", "https://packages.atlassian.com/maven/public",
+                RepoParam.defaultRemote());
     }
 
-    public void addMavenRepository(String id, String url) {
+    public void addMavenRepository(String id, String url, RepoParam repoParam) {
 
         Set<String> repositoryIds = context.remoteRepositories().stream().map(RemoteRepository::getId).collect(Collectors.toSet());
         if (repositoryIds.contains(id)) {
             throw new RuntimeException("Existing maven repository: " + id);
         }
         RemoteRepository remoteRepository = (new RemoteRepository.Builder(id, "default", url))
-                .setReleasePolicy(new RepositoryPolicy(true, "always", "warn"))
-                .setSnapshotPolicy(new RepositoryPolicy(true, "always", "warn"))
+                .setReleasePolicy(new RepositoryPolicy(repoParam.release(), repoParam.releaseUpdate(), "warn"))
+                .setSnapshotPolicy(new RepositoryPolicy(repoParam.snapshot(), repoParam.snapshotUpdate(), "warn"))
                 .build();
         context.remoteRepositories().add(remoteRepository);
 

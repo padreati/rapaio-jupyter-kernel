@@ -2,8 +2,10 @@ package org.rapaio.jupyter.kernel.core.magic.handlers;
 
 import java.io.IOException;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 
+import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
@@ -36,11 +38,18 @@ public class DependencyHandler extends MagicHandler {
                         .evalFunction(this::evalLineListRepos)
                         .build(),
                 SnippetMagicHandler.lineMagic()
-                        .syntaxMatcher(HEADER + " /add-repo (.+) (.+)")
-                        .syntaxHelp(List.of(HEADER + " /add-repo name url"))
+                        .syntaxMatcher(HEADER + " /add-repo (.+) (.+) (.+)?")
+                        .syntaxHelp(List.of(HEADER + " /add-repo name url[ release|update-policy]?[ snapshot|update-policy]?"))
                         .syntaxPrefix(HEADER + " /add-repo ")
                         .documentation(List.of(
-                                "Add Maven Repository using a name and an url"
+                                "Add Maven Repository using a name and an url. Optional parameters are available. ",
+                                "    Release enabled is obtained by specifying release|update-policy.",
+                                "    Update policy can be: never/always/daily/interval.",
+                                "    Snapshot enabled is obtained by specified snapshot|update-policy.",
+                                "    Update policy can be: never/always/daily/interval.",
+                                "    If any flag is not specified we have the following default options:",
+                                "     - release enabled with always, snapshot enabled with always for repos with url starting with file://",
+                                "     - release enabled with always, snapshot disabled for repos with url not starting with file://"
                         ))
                         .canHandlePredicate(snippet -> canHandleOneLinePrefix(snippet, HEADER + " /add-repo "))
                         .evalFunction(this::evalLineAddRepo)
@@ -133,18 +142,53 @@ public class DependencyHandler extends MagicHandler {
 
         String fullCode = snippet.line(0).code();
         String[] tokens = fullCode.substring((HEADER + " /add-repo ").length()).trim().split(" ");
-        if (tokens.length != 2) {
-            throw new RuntimeException();
+        if (tokens.length < 2) {
+            throw new RuntimeException("Cannot evaluate the given magic snippet");
         }
 
         var channels = kernel.channels();
         var dm = kernel.dependencyManager();
 
-        dm.addMavenRepository(tokens[0], tokens[1]);
+        dm.addMavenRepository(tokens[0], tokens[1], parseRepoParams(tokens));
         channels.writeToStdOut(ANSI.start().text("Repository ").bold().fgGreen().text(tokens[0]).reset()
                 .text(" url: ").bold().fgGreen().text(tokens[1]).reset().text(" added.").render());
 
         return null;
+    }
+
+    private RepoParam parseRepoParams(String[] tokens) {
+        boolean local = tokens[1].startsWith("file://");
+        RepoParam param = local ? RepoParam.defaultLocal() : RepoParam.defaultRemote();
+        if (tokens.length == 2) {
+            return param;
+        }
+        for (int i = 2; i < tokens.length; i++) {
+            String[] options = Arrays.stream(tokens[i].split("\\|")).map(String::trim).map(String::toLowerCase).toArray(String[]::new);
+            String update = options.length > 1 ? options[1] : "always";
+            boolean validUpdate = update.equals(RepositoryPolicy.UPDATE_POLICY_NEVER) ||
+                    update.equals(RepositoryPolicy.UPDATE_POLICY_ALWAYS) ||
+                    update.equals(RepositoryPolicy.UPDATE_POLICY_DAILY) ||
+                    update.equals(RepositoryPolicy.UPDATE_POLICY_INTERVAL);
+            switch (options[0]) {
+                case "release":
+                    if (validUpdate) {
+                        param = new RepoParam(true, update, param.snapshot(), param.snapshotUpdate());
+                    } else {
+                        throw new RuntimeException("Invalid update policy: " + update);
+                    }
+                    break;
+                case "snapshot":
+                    if (validUpdate) {
+                        param = new RepoParam(param.release(), param.releaseUpdate(), true, update);
+                    } else {
+                        throw new RuntimeException("Invalid update policy: " + update);
+                    }
+                    break;
+                default:
+                    throw new RuntimeException("Invalid flag: " + update + ". Valid values are release or snapshot.");
+            }
+        }
+        return param;
     }
 
     Object evalLineAdd(RapaioKernel kernel, MagicSnippet snippet) {
@@ -169,7 +213,7 @@ public class DependencyHandler extends MagicHandler {
         }
 
         try {
-            if(kernel.dependencyManager().getProposedDependencies().isEmpty()) {
+            if (kernel.dependencyManager().getProposedDependencies().isEmpty()) {
                 kernel.channels().writeToStdOut("No proposed dependency to be solved.");
                 return null;
             }
@@ -180,7 +224,7 @@ public class DependencyHandler extends MagicHandler {
                 kernel.channels().writeToStdErr(exception.getMessage());
             }
 
-            if(!resolveReport.getCollectExceptions().isEmpty()) {
+            if (!resolveReport.getCollectExceptions().isEmpty()) {
                 // we have an error
                 kernel.channels().writeToStdErr("Proposed dependencies could not be resolved, clear proposals.");
                 kernel.dependencyManager().cleanProposedDependencies();
@@ -197,7 +241,7 @@ public class DependencyHandler extends MagicHandler {
             }
             kernel.dependencyManager().promoteDependencies();
             kernel.dependencyManager().cleanProposedDependencies();
-        } catch (ParseException | IOException  | DependencyResolutionException e) {
+        } catch (ParseException | IOException | DependencyResolutionException e) {
             kernel.dependencyManager().cleanProposedDependencies();
             kernel.channels().writeToStdErr("Could not resolve dependencies.");
             kernel.channels().writeToStdErr(e.getMessage());
@@ -234,4 +278,5 @@ public class DependencyHandler extends MagicHandler {
         }
         return null;
     }
+
 }

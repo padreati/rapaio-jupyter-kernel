@@ -16,6 +16,7 @@ import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.core.magic.handlers.RepoParam;
 
 public class MimaDependencyManagerTest {
 
@@ -32,10 +33,10 @@ public class MimaDependencyManagerTest {
         Set<String> existingNames = dm.getMavenRepositories().stream().map(RemoteRepository::getId).collect(Collectors.toSet());
 
         String existingName = existingNames.stream().findAny().orElse("");
-        RuntimeException ex = assertThrows(RuntimeException.class, () -> dm.addMavenRepository(existingName, "url"));
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> dm.addMavenRepository(existingName, "url", RepoParam.defaultRemote()));
         assertEquals("Existing maven repository: " + existingName, ex.getMessage());
 
-        dm.addMavenRepository("google", "https://maven.google.com/");
+        dm.addMavenRepository("google", "https://maven.google.com/", RepoParam.defaultRemote());
 
         Set<String> newNames = dm.getMavenRepositories().stream().map(RemoteRepository::getId).collect(Collectors.toSet());
         assertTrue(existingNames.size() != newNames.size());
