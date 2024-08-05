@@ -41,4 +41,19 @@ public class JarMagicHandlerTest {
         assertEquals(6, ex.errorStart());
         assertEquals(code.length(), ex.errorEnd());
     }
+
+    @Test
+    void testLineMagicEmptyDir() throws Exception {
+        String code = "%jar src";
+        handler.eval(kernel,
+                new MagicSnippet(MagicSnippet.Type.MAGIC_LINE, List.of(new MagicSnippet.CodeLine(code, false, 0, 0))));
+    }
+
+    @Test
+    void testCellMagicEmptyDir() throws Exception {
+        String code[] = new String[] {"%%jars", "src"};
+        handler.eval(kernel,
+                new MagicSnippet(MagicSnippet.Type.MAGIC_CELL, List.of(new MagicSnippet.CodeLine(code[0], false, 0, 0),
+                new MagicSnippet.CodeLine(code[1], false, 0, 0))));
+    }
 }

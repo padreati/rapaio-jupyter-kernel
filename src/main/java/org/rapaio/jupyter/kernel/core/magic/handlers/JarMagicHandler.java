@@ -93,7 +93,7 @@ public class JarMagicHandler extends MagicHandler {
         if (!file.getAbsoluteFile().exists()) {
             throw new MagicEvalException(magicSnippet, "Provided path does not exist:" + file.getAbsolutePath());
         }
-        if (!file.getAbsoluteFile().getName().endsWith(".jar")) {
+        if (!file.isDirectory() && !file.getAbsoluteFile().getName().endsWith(".jar")) {
             throw new MagicEvalException(magicSnippet, "Provided input is not a jar file.");
         }
         addFileToPath(kernel, file);
