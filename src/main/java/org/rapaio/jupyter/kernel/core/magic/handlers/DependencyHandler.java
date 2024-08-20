@@ -1,10 +1,5 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import java.io.IOException;
-import java.text.ParseException;
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
@@ -14,6 +9,11 @@ import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.dependencies.DependencySpec;
+
+import java.io.IOException;
+import java.text.ParseException;
+import java.util.Arrays;
+import java.util.List;
 
 public class DependencyHandler extends MagicHandler {
 
@@ -210,7 +210,7 @@ public class DependencyHandler extends MagicHandler {
             throw new RuntimeException("Error parsing '" + fullCode + "'");
         }
 
-        kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).nl().render() + "\n");
+        kernel.channels().writeToStdOut("Adding dependency " + ANSI.start().bold().fgGreen().text(args[0]).nl().render());
         kernel.dependencyManager().proposeDependency(new DependencySpec(args[0], null, "runtime", args.length == 2, null));
         return null;
     }
@@ -243,7 +243,7 @@ public class DependencyHandler extends MagicHandler {
             kernel.channels().writeToStdOut("Resolved artifacts count: " + artifactsResults.size() + "\n");
             for (var result : artifactsResults) {
                 kernel.channels().writeToStdOut("Add to classpath: " +
-                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().nl().render() + "\n");
+                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().nl().render());
                 kernel.javaEngine().getShell().addToClasspath(result.getLocalArtifactResult().getFile().getAbsolutePath());
                 kernel.dependencyManager().addLoadedArtifact(result);
             }
