@@ -22,6 +22,7 @@ import org.rapaio.jupyter.kernel.core.magic.handlers.RepoParam;
 import eu.maveniverse.maven.mima.context.Context;
 import eu.maveniverse.maven.mima.context.ContextOverrides;
 import eu.maveniverse.maven.mima.context.Runtimes;
+import org.rapaio.jupyter.kernel.install.Installer;
 
 public class MimaDependencyManager {
 
@@ -34,6 +35,11 @@ public class MimaDependencyManager {
     public MimaDependencyManager() {
 
         String kernelPath = MimaDependencyManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        if(Installer.findOSName()== Installer.OSName.WINDOWS) {
+            if(kernelPath.startsWith("/")) {
+                kernelPath = kernelPath.substring(1);
+            }
+        }
         ContextOverrides contextOverrides = ContextOverrides.create()
                 .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), "mima_cache"))
                 .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS)

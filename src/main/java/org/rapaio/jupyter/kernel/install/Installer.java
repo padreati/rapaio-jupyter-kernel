@@ -22,14 +22,14 @@ public class Installer {
     private static final String INSTALL_FLAG_AUTO = "-auto";
     private static final String INSTALL_FLAG_SYSTEM = "-system";
 
-    private enum OSName {
+    public enum OSName {
         LINUX,
         WINDOWS,
         MAC,
         SOLARIS
     }
 
-    private OSName findOSName() {
+    public static OSName findOSName() {
         String os = System.getProperty("os.name").toLowerCase();
 
         if (os.contains("win")) {
