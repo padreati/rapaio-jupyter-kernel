@@ -26,7 +26,8 @@ import org.rapaio.jupyter.kernel.install.Installer;
 
 public class MimaDependencyManager {
 
-    private final Context context;
+    private final ContextOverrides contextOverrides;
+    private final List<RemoteRepository> remoteRepositories;
 
     private final List<DependencySpec> proposedDependencies = new ArrayList<>();
     private final List<DependencySpec> resolvedDependencies = new ArrayList<>();
@@ -40,13 +41,14 @@ public class MimaDependencyManager {
                 kernelPath = kernelPath.substring(1);
             }
         }
-        ContextOverrides contextOverrides = ContextOverrides.create()
+        this.contextOverrides = ContextOverrides.create()
                 .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), "mima_cache"))
-                .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS)
-                .build();
-        context = Runtimes.INSTANCE.getRuntime().create(contextOverrides);
-        addMavenRepository("jcenter", "https://jcenter.bintray.com/",
-                RepoParam.defaultRemote());
+                .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS).build();
+        this.remoteRepositories = new ArrayList<>();
+        remoteRepositories.add(ContextOverrides.CENTRAL);
+        // this one is gone https://jfrog.com/blog/jcenter-sunset/
+        //addMavenRepository("jcenter", "https://jcenter.bintray.com/",
+        //        RepoParam.defaultRemote()); //
         addMavenRepository("jboss", "https://repository.jboss.org/nexus/content/repositories/releases/",
                 RepoParam.defaultRemote());
         addMavenRepository("atlassian", "https://packages.atlassian.com/maven/public",
@@ -54,8 +56,7 @@ public class MimaDependencyManager {
     }
 
     public void addMavenRepository(String id, String url, RepoParam repoParam) {
-
-        Set<String> repositoryIds = context.remoteRepositories().stream().map(RemoteRepository::getId).collect(Collectors.toSet());
+        Set<String> repositoryIds = remoteRepositories.stream().map(RemoteRepository::getId).collect(Collectors.toSet());
         if (repositoryIds.contains(id)) {
             throw new RuntimeException("Existing maven repository: " + id);
         }
@@ -63,12 +64,11 @@ public class MimaDependencyManager {
                 .setReleasePolicy(new RepositoryPolicy(repoParam.release(), repoParam.releaseUpdate(), "warn"))
                 .setSnapshotPolicy(new RepositoryPolicy(repoParam.snapshot(), repoParam.snapshotUpdate(), "warn"))
                 .build();
-        context.remoteRepositories().add(remoteRepository);
-
+        remoteRepositories.add(remoteRepository);
     }
 
     public List<RemoteRepository> getMavenRepositories() {
-        return context.remoteRepositories();
+        return remoteRepositories;
     }
 
     public List<DependencySpec> getProposedDependencies() {
@@ -92,17 +92,22 @@ public class MimaDependencyManager {
     }
 
     public DependencyResult resolve() throws ParseException, IOException, DependencyResolutionException {
-        List<Dependency> dependencies = new ArrayList<>();
+        try (Context context = Runtimes.INSTANCE.getRuntime().create(
+                contextOverrides.toBuilder()
+                        .repositories(remoteRepositories)
+                        .addRepositoriesOp(ContextOverrides.AddRepositoriesOp.REPLACE)
+                        .build())) {
+            List<Dependency> dependencies = new ArrayList<>();
 
-        for (DependencySpec ds : this.proposedDependencies) {
-            dependencies.add(ds.getDependency());
+            for (DependencySpec ds : this.proposedDependencies) {
+                dependencies.add(ds.getDependency());
+            }
+
+            CollectRequest collectRequest = new CollectRequest((Dependency) null, dependencies, context.remoteRepositories());
+            DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
+
+            return context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
         }
-
-        Dependency root = null;
-        CollectRequest collectRequest = new CollectRequest(root, dependencies, context.remoteRepositories());
-        DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
-
-        return context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
     }
 
     public List<ArtifactResult> getLoadedArtifacts() {
