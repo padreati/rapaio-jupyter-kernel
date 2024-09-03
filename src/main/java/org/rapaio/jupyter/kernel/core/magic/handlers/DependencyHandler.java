@@ -243,8 +243,8 @@ public class DependencyHandler extends MagicHandler {
             kernel.channels().writeToStdOut("Resolved artifacts count: " + artifactsResults.size() + "\n");
             for (var result : artifactsResults) {
                 kernel.channels().writeToStdOut("Add to classpath: " +
-                        ANSI.start().fgGreen().text(result.getLocalArtifactResult().getFile().getAbsolutePath()).reset().nl().render());
-                kernel.javaEngine().getShell().addToClasspath(result.getLocalArtifactResult().getFile().getAbsolutePath());
+                        ANSI.start().fgGreen().text(result.getArtifact().getFile().getAbsolutePath()).reset().nl().render());
+                kernel.javaEngine().getShell().addToClasspath(result.getArtifact().getFile().getAbsolutePath());
                 kernel.dependencyManager().addLoadedArtifact(result);
             }
             kernel.dependencyManager().promoteDependencies();

@@ -102,12 +102,6 @@ public class MimaDependencyManager {
         CollectRequest collectRequest = new CollectRequest(root, dependencies, context.remoteRepositories());
         DependencyRequest dependencyRequest = new DependencyRequest(collectRequest, null);
 
-        context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
-
-        // This is intentionally repeated!
-        // I do not understand why at first try the local artifacts are missing, I suppose it is due to the
-        // my lack of understanding on how maven works
-        // However, at the second time the local files are properly updated and collected
         return context.repositorySystem().resolveDependencies(context.repositorySystemSession(), dependencyRequest);
     }
 
