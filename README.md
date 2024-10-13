@@ -4,15 +4,24 @@ Jupyter kernel for Java language based on JShell. It implements Jupyter message 
 
 ## Introduction
 
-I started implementing this kernel since I believe Java deserves a full feature and properly maintained jupyter kernel. 
-Personally, I need that kernel to use features from a library I contribute to for statistics, ML, and data manipulation. 
-However, this kernel has no connection with this library, and it is a general-purpose Java kernel.
+I believe Java deserves a full feature and properly maintained jupyter kernel.
 
-Currently, this project is in a production mode, and it contains the features I need and some other requested features. As such, I am 
-the only maintainer. If the kernel prove useful and additional contributors jump into this boat, an organization can be created and a 
+This kernel was inspired by [IJava kernel](https://github.com/SpencerPark/IJava), that is not actively maintained.
+Even from the beginning the project diverged from its source of inspiration: magics have a specific parser 
+and interpreter, dependency management uses Maven (not Ivy), to enumerate some notable differences.
+
+The project is in a production mode, and it contains mine and some other requested features.
+The plan is to add new features if requested, so please add issues if you want this tool to be better and fit your needs.
+If you find the kernel useful and additional contributors jump into this boat, an organization can be created and a 
 shared ownership can also be added, all of those for the sole purpose of continuity of improvements. 
-The plan is to add new features if requested, so please add issues if you want this tool to be better and fit your needs. 
-If possible you can contribute with code. Any feedback is appreciated.
+If possible, you are welcome to contribute with code. Any feedback is appreciated.
+
+_About the name_: Personally, I need that kernel to use features from a library I contribute to for statistics, ML, 
+and data manipulation. Its name is *rapaio*. As a consequence, the name of this kernel uses the name of the library
+and I kept that for continuity. If there will be a critical mass of contributors who will want to change the kernel's 
+name, that will not be an issue whatsoever. 
+However, this kernel has no connection with my library, it is completely independent, 
+and it is a general-purpose Java kernel.
 
 ## Features
 
@@ -30,7 +39,8 @@ Below are listed some features, besides running Java code, since this is the mai
 * Loading jar or jars from the directory to the classpath
 * Adding directories with compiled classes to the classpath
 * Display image from local file systems or URL
-* Manage dependencies (with transitivity). More details: [DEPENDENCY-MANAGEMENT.md](DEPENDENCY-MANAGEMENT.md).
+* Manage dependencies (with transitivity). More details: [DEPENDENCY-MANAGEMENT.md](DEPENDENCY-MANAGEMENT.md)
+* Magic commands allows string interpolation (write stuff like `%dependency /add ${group}:${artifact}:${version}`)
 
 For a brief tour of the features check out the example notebook [here](example.ipynb).
 

@@ -1,13 +1,5 @@
-# Ignore Gradle project-specific cache directory
-.gradle
-
-# Ignore Gradle build output directory
 build
 /target/
 /out/
-/ivy/
 /.idea/
-/.ipynb_checkpoints/example-checkpoint.ipynb
-/.ipynb_checkpoints/demo-djl-checkpoint.ipynb
-/.ipynb_checkpoints/neureka-checkpoint.ipynb
-/.ipynb_checkpoints/rapaio-tensors-checkpoint.ipynb
+/.ipynb_checkpoints/

@@ -260,7 +260,7 @@ public class JavaEngine {
 
         protected Builder(JShellConsole shellConsole) {
             this.shellConsole = shellConsole;
-            this.compilerOptions.addAll(List.of("--enable-preview", "--release", "22"));
+//            this.compilerOptions.addAll(List.of("--enable-preview", "--release", "23"));
         }
 
         public Builder withTimeoutMillis(Long timeoutMillis) {

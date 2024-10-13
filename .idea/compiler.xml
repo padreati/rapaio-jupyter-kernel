@@ -9,6 +9,11 @@
         <module name="rapaio-jupyter-kernel" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="17" />
+    <bytecodeTargetLevel target="23" />
+  </component>
+  <component name="JavacSettings">
+    <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="rapaio-jupyter-kernel" options="" />
+    </option>
   </component>
 </project>
