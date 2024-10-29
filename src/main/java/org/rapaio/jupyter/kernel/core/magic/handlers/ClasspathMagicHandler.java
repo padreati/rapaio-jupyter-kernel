@@ -59,7 +59,7 @@ public class ClasspathMagicHandler extends MagicHandler {
     }
 
     private static File getFile(ExecutionContext context, MagicSnippet magicSnippet) throws MagicEvalException {
-        String fullCode = magicSnippet.lines().getFirst().code();
+        String fullCode = magicSnippet.lines().get(0).code();
         String path = fullCode.substring(ONE_LINE_PREFIX.length()).trim();
         path = context.getRelativePath(Path.of(path)).toAbsolutePath().toString();
 

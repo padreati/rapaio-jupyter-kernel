@@ -27,7 +27,7 @@ public class KernelEnv {
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
         LOGGER.finest(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
         if (envCompilerOptions == null) {
-            envCompilerOptions = GeneralProperties.getDefaultCompilerOptions();
+            envCompilerOptions = GeneralProperties.defaultProperties().getDefaultCompilerOptions();
         }
         String[] compilerTokens = Arrays.stream(envCompilerOptions.split("\\s"))
                 .filter(s -> !s.trim().isEmpty()).toArray(String[]::new);
@@ -36,7 +36,7 @@ public class KernelEnv {
         String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
         LOGGER.finest(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
         if (envTimeoutMillis == null) {
-            envTimeoutMillis = GeneralProperties.getDefaultTimeoutMillis();
+            envTimeoutMillis = GeneralProperties.defaultProperties().getDefaultTimeoutMillis();
         }
         try {
             timeoutMillis = Long.parseLong(envTimeoutMillis);
@@ -48,7 +48,7 @@ public class KernelEnv {
         String envInitScript = System.getenv(RJK_INIT_SCRIPT);
         LOGGER.finest(RJK_INIT_SCRIPT + " env: " + envInitScript);
         if (envInitScript == null) {
-            envInitScript = GeneralProperties.getDefaultInitScript();
+            envInitScript = GeneralProperties.defaultProperties().getDefaultInitScript();
         }
         initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
     }

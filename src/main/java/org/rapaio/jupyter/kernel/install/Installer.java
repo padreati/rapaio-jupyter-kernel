@@ -21,6 +21,11 @@ public class Installer {
 
     private static final String INSTALL_FLAG_AUTO = "-auto";
     private static final String INSTALL_FLAG_SYSTEM = "-system";
+    private static final String DEFAULT_PROFILE = "default";
+    private static final String[] PROFILES = {
+            "preview22",
+            "preview23"
+    };
 
     public enum OSName {
         LINUX,
@@ -88,6 +93,18 @@ public class Installer {
         return Arrays.asList(args).contains(flagArg);
     }
 
+    public String getProfile(String[] args) {
+        if (args == null || args.length == 0) {
+            return DEFAULT_PROFILE;
+        }
+        for (String profile : PROFILES) {
+            if (Arrays.asList(args).contains("-" + profile)) {
+                return profile;
+            }
+        }
+        return DEFAULT_PROFILE;
+    }
+
     public void install(String[] args) throws IOException, URISyntaxException {
 
         boolean autoInstall = hasFlag(args, INSTALL_FLAG_AUTO);
@@ -98,6 +115,8 @@ public class Installer {
         }
 
         boolean system = hasFlag(args, INSTALL_FLAG_SYSTEM);
+        String profile = getProfile(args);
+        GeneralProperties properties = new GeneralProperties(profile);
 
         OSName os = findOSName();
         if (os == null) {
@@ -105,13 +124,13 @@ public class Installer {
         }
 
         String installationPath = collectInstallationPath(os, autoInstall, system);
-        String kernelDir = collectKernelDir(autoInstall);
-        String displayName = collectDisplayName(autoInstall);
-        String timeoutMillis = collectTimeoutMillis(autoInstall);
-        String compilerOptions = collectCompilerOptions(autoInstall);
-        String initScript = collectInitScript(autoInstall);
+        String kernelDir = collectKernelDir(autoInstall, properties);
+        String displayName = collectDisplayName(autoInstall, properties);
+        String timeoutMillis = collectTimeoutMillis(autoInstall, properties);
+        String compilerOptions = collectCompilerOptions(autoInstall, properties);
+        String initScript = collectInitScript(autoInstall, properties);
 
-        KernelJson kj = new KernelJsonBuilder()
+        KernelJson kj = new KernelJsonBuilder(properties)
                 .withJarPath(installationPath)
                 .withKernelDir(kernelDir)
                 .withDisplayName(displayName)
@@ -195,21 +214,21 @@ public class Installer {
     private String collectInstallationPath(OSName os, boolean autoInstall, boolean system) {
         List<String> paths = getInstallationPaths(os);
         if (autoInstall) {
-            return !system ? paths.getFirst() : paths.getLast();
+            return !system ? paths.get(0) : paths.get(paths.size() - 1);
         }
         return selectInteractivePath(paths);
     }
 
-    private String collectKernelDir(boolean autoInstall) {
+    private String collectKernelDir(boolean autoInstall, GeneralProperties properties) {
         if (autoInstall) {
-            return GeneralProperties.getDefaultKernelDir();
+            return properties.getDefaultKernelDir();
         }
-        System.out.printf("Select kernel dir (default '%s'):%n", GeneralProperties.getDefaultKernelDir());
+        System.out.printf("Select kernel dir (default '%s'):%n", properties.getDefaultKernelDir());
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String line = scanner.nextLine().trim();
             if (line.isEmpty()) {
-                return GeneralProperties.getDefaultKernelDir();
+                return properties.getDefaultKernelDir();
             }
             if (!line.matches("[a-zA-Z0-9_.-]*")) {
                 System.out.println("Invalid name, must contain only alphanumeric, hyphen, underscore or dots.");
@@ -219,29 +238,29 @@ public class Installer {
         }
     }
 
-    private String collectDisplayName(boolean autoInstall) {
+    private String collectDisplayName(boolean autoInstall, GeneralProperties properties) {
         if (autoInstall) {
-            return GeneralProperties.getDefaultDisplayName();
+            return properties.getDefaultDisplayName();
         }
-        System.out.printf("Select display name (default '%s'):%n", GeneralProperties.getDefaultDisplayName());
+        System.out.printf("Select display name (default '%s'):%n", properties.getDefaultDisplayName());
         Scanner scanner = new Scanner(System.in);
         String line = scanner.nextLine().trim();
         if (line.isEmpty()) {
-            return GeneralProperties.getDefaultDisplayName();
+            return properties.getDefaultDisplayName();
         }
         return line;
     }
 
-    private String collectTimeoutMillis(boolean autoInstall) {
+    private String collectTimeoutMillis(boolean autoInstall, GeneralProperties properties) {
         if (autoInstall) {
-            return GeneralProperties.getDefaultTimeoutMillis();
+            return properties.getDefaultTimeoutMillis();
         }
         System.out.println("Select timeout in milliseconds:");
         Scanner scanner = new Scanner(System.in);
         while (true) {
             String line = scanner.nextLine().trim();
             if (line.isEmpty()) {
-                return GeneralProperties.getDefaultTimeoutMillis();
+                return properties.getDefaultTimeoutMillis();
             }
             try {
                 Long.parseLong(line);
@@ -252,19 +271,19 @@ public class Installer {
         }
     }
 
-    private String collectCompilerOptions(boolean autoInstall) {
+    private String collectCompilerOptions(boolean autoInstall, GeneralProperties properties) {
         if (autoInstall) {
-            return GeneralProperties.getDefaultCompilerOptions();
+            return properties.getDefaultCompilerOptions();
         }
-        System.out.printf("Select compiler options (default '%s'):%n", GeneralProperties.getDefaultCompilerOptions());
+        System.out.printf("Select compiler options (default '%s'):%n", properties.getDefaultCompilerOptions());
         return new Scanner(System.in).nextLine().trim();
     }
 
-    private String collectInitScript(boolean autoInstall) {
+    private String collectInitScript(boolean autoInstall, GeneralProperties properties) {
         if (autoInstall) {
-            return GeneralProperties.getDefaultInitScript();
+            return properties.getDefaultInitScript();
         }
-        System.out.printf("Select init script (default '%s':%n", GeneralProperties.getDefaultInitScript());
+        System.out.printf("Select init script (default '%s':%n", properties.getDefaultInitScript());
         return new Scanner(System.in).nextLine().trim();
     }
 

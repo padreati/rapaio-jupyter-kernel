@@ -1,11 +1,5 @@
 package org.rapaio.jupyter.kernel;
 
-import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.ConnectionProperties;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.Transform;
-import org.rapaio.jupyter.kernel.install.Installer;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -15,6 +9,12 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.logging.LogManager;
 import java.util.logging.Logger;
+
+import org.rapaio.jupyter.kernel.channels.Channels;
+import org.rapaio.jupyter.kernel.core.ConnectionProperties;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.Transform;
+import org.rapaio.jupyter.kernel.install.Installer;
 
 public class MainApp {
 

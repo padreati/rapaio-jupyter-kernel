@@ -68,14 +68,13 @@ public class RapaioKernel {
     private final MagicEngine magicEngine;
     private final MimaDependencyManager dependencyManager;
     private final JShellConsole shellConsole;
-    private ExecutionContext ctx;
+    private final ExecutionContext ctx;
 
     private Channels channels;
 
     public RapaioKernel() {
 
         KernelEnv kernelEnv = new KernelEnv();
-
         this.shellConsole = new JShellConsole();
         this.javaEngine = JavaEngine.builder(shellConsole)
                 .withCompilerOptions(kernelEnv.compilerOptions())
@@ -137,8 +136,9 @@ public class RapaioKernel {
 
     private ShellKernelInfoReply kernelInfo() {
 
-        String kernelName = GeneralProperties.getKernelName();
-        String kernelVersion = GeneralProperties.getKernelVersion();
+        GeneralProperties properties = new GeneralProperties("default");
+        String kernelName = properties.getKernelName();
+        String kernelVersion = properties.getKernelVersion();
         LanguageInfo languageInfo = LanguageInfo.kernelLanguageInfo();
         String banner = languageInfo.name() + " " + languageInfo.version();
 

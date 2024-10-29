@@ -54,7 +54,7 @@ public class HelpMagicHandler extends MagicHandler {
         if (!canHandleSnippet(snippet)) {
             throw new MagicEvalException(snippet, "Try to execute a magic snippet to improper handler.");
         }
-        String expr = snippet.lines().getFirst().code();
+        String expr = snippet.lines().get(0).code();
         String text = expr.trim().toLowerCase();
 
         if (text.equals(ONE_LINE_PREFIX)) {

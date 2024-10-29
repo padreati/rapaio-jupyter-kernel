@@ -16,7 +16,6 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -45,12 +44,6 @@ import jdk.jshell.SourceCodeAnalysis;
 public class JavaEngine {
 
     private static final Logger logger = Logger.getLogger(Logger.class.getSimpleName());
-
-    private static final EnumSet<Snippet.SubKind> ALLOWED_LAST_OUTPUT = EnumSet.of(
-            Snippet.SubKind.VAR_VALUE_SUBKIND,
-            Snippet.SubKind.OTHER_EXPRESSION_SUBKIND,
-            Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND
-    );
 
     private final String executionId;
     private final RapaioExecutionControlProvider controlProvider;
@@ -142,7 +135,7 @@ public class JavaEngine {
             }
             Snippet.SubKind subKind = event.snippet().subKind();
             Object value = subKind.isExecutable() ? control.takeResult(key) : event.value();
-            result = (ALLOWED_LAST_OUTPUT.contains(subKind)) ? value : null;
+            result = allowedOutputs(event) ? value : null;
         }
 
         for (SnippetEvent event : events) {
@@ -167,6 +160,27 @@ public class JavaEngine {
         }
 
         return result;
+    }
+
+    private boolean allowedOutputs(SnippetEvent event) {
+
+//        System.out.println("--------");
+//        System.out.println("source: " + event.snippet().source());
+//        System.out.println("subkind: " + event.snippet().subKind());
+//        System.out.println("prev status: " + event.previousStatus());
+//        System.out.println("status: " + event.status());
+
+        Snippet.SubKind subkind = event.snippet().subKind();
+        if (subkind == Snippet.SubKind.VAR_VALUE_SUBKIND) {
+            return true;
+        }
+        if (subkind == Snippet.SubKind.OTHER_EXPRESSION_SUBKIND) {
+            return true;
+        }
+        if (subkind == Snippet.SubKind.TEMP_VAR_EXPRESSION_SUBKIND) {
+            return true;
+        }
+        return false;
     }
 
     public IsCompleteResult isComplete(String code) {

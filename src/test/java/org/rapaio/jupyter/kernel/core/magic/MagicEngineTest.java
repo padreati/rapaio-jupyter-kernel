@@ -13,6 +13,7 @@ import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.display.DisplayData;
 
 public class MagicEngineTest {
 
@@ -31,7 +32,10 @@ public class MagicEngineTest {
     @Test
     void magicHelpTest() throws Exception {
         MagicEvalResult result = kernel.magicEngine().eval(new ExecutionContext(null), "%help");
-        System.out.println(result.result());
+        DisplayData dd = (DisplayData) result.result();
+        assertNotNull(dd);
+        assertNotNull(dd.data());
+        assertTrue(dd.data().containsKey("text/plain"));
     }
 
     @Test
@@ -44,7 +48,10 @@ public class MagicEngineTest {
     void magicInspectMagicCode() throws MagicEvalException, MagicParseException {
         var result = kernel.magicEngine().inspect(ctx, "%load", 3);
         assertTrue(result.handled());
-        System.out.println(result.displayData());
+        DisplayData dd = result.displayData();
+        assertNotNull(dd);
+        assertNotNull(dd.data());
+        assertTrue(dd.data().containsKey("text/html"));
     }
 
     @Test

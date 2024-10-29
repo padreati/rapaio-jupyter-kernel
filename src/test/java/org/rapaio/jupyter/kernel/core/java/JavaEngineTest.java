@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -43,8 +42,11 @@ public class JavaEngineTest {
         JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
                 .withTimeoutMillis(-1L)
                 .build();
-        var replacements = engine.complete("Sys", 3);
-        System.out.println(replacements);
+        var matches = engine.complete("Sys", 3);
+        assertEquals(0, matches.start());
+        assertEquals(3, matches.end());
+        assertEquals(1, matches.replacements().size());
+        assertEquals("System", matches.replacements().get(0));
     }
 
     @Test
@@ -105,24 +107,53 @@ public class JavaEngineTest {
             }
         }
 
-        for (int i=0; i<snippets.size(); i++) {
+        for (int i = 0; i < snippets.size(); i++) {
             System.out.println(i + " " + snippets.get(i).toString());
         }
 
         List<SnippetEvent> events = shell.drop(snippets.get(1));
-        for(var event : events) {
+        for (var event : events) {
             System.out.println(event);
         }
     }
 
     @Test
     void testJavaEngineBuilder() throws Exception {
-        String compilerOptions = GeneralProperties.getDefaultCompilerOptions();
+        String compilerOptions = GeneralProperties.defaultProperties().getDefaultCompilerOptions();
 
         JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
                 .withCompilerOptions(Arrays.asList(compilerOptions.split(" ")))
                 .build();
         engine.initialize();
         engine.eval(TestUtils.context(), "");
+    }
+
+    @Test
+    void outputOnAssignmentTest() throws Exception {
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+                .withTimeoutMillis(-1L)
+                .build();
+
+        var result = engine.eval(TestUtils.context(), "10");
+        assertNotNull(result);
+        assertEquals("10", result.toString());
+
+        result = engine.eval(TestUtils.context(), "int x = 1;");
+        assertNull(result);
+
+        result = engine.eval(TestUtils.context(), "x");
+        assertNotNull(result);
+        assertEquals("1", result.toString());
+
+        result = engine.eval(TestUtils.context(), "int[] y = new int[10];");
+        assertNull(result);
+
+        result = engine.eval(TestUtils.context(), "y[0] = 1;");
+        // TODO: it would be nice to isolate that and output nothing
+        //assertNull(result);
+        assertNotNull(result);
+
+        result = engine.eval(TestUtils.context(), "int[] x = new int[1]; x[0] = 3;");
+        assertNotNull(result);
     }
 }

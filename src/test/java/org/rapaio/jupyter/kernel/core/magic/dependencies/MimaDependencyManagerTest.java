@@ -112,7 +112,7 @@ public class MimaDependencyManagerTest {
         DependencyResult report = dm.resolve();
         assertNotNull(report.getArtifactResults());
         assertEquals(2, report.getArtifactResults().size());
-        assertTrue(report.getArtifactResults().getFirst().getArtifact().getFile()
+        assertTrue(report.getArtifactResults().get(0).getArtifact().getFile()
                         .getAbsolutePath().endsWith("lwjgl-glfw-3.3.3-natives-macos-arm64.jar"));
         assertTrue(report.getArtifactResults().get(1).getArtifact().getFile()
                 .getAbsolutePath().endsWith("lwjgl-3.3.3.jar"));

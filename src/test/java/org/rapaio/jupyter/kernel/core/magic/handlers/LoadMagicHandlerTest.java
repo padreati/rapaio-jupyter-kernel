@@ -196,7 +196,7 @@ public class LoadMagicHandlerTest {
     void testHandler() throws MagicEvalException, MagicParseException {
         LoadMagicHandler handler = new LoadMagicHandler();
         MagicSnippet snippet = new MagicSnippet(MagicSnippet.Type.MAGIC_LINE, List.of(new MagicSnippet.CodeLine("%load /", true, 7, 7)));
-        var options = handler.snippetMagicHandlers().getFirst().completeFunction().apply(null, snippet);
+        var options = handler.snippetMagicHandlers().get(0).completeFunction().apply(null, snippet);
         assertNotNull(options);
     }
 

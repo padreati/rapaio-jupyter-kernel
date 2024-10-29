@@ -1,56 +1,63 @@
 package org.rapaio.jupyter.kernel;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.Properties;
 
 public final class GeneralProperties {
 
-    private static final GeneralProperties instance = new GeneralProperties();
-
-    private static GeneralProperties getInstance() {
-        return instance;
+    public static GeneralProperties defaultProperties() {
+        return new GeneralProperties("default");
     }
 
     private final Properties properties;
 
-    private GeneralProperties() {
+    public GeneralProperties(String profile) {
         try {
             properties = new Properties();
-            properties.load(GeneralProperties.class.getClassLoader().getResourceAsStream("general.properties"));
+            properties.load(GeneralProperties.class.getClassLoader().getResourceAsStream("profile-" + profile + ".properties"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
     }
 
-    public static String getKernelName() {
-        return getInstance().properties.getProperty("kernel.name");
+    public String getKernelName() {
+        return properties.getProperty("kernel.name");
     }
 
-    public static String getKernelVersion() {
-        return getInstance().properties.getProperty("kernel.version");
+    public String getKernelVersion() {
+        return properties.getProperty("kernel.version");
     }
 
-    public static String getDefaultDisplayName() {
-        return getInstance().properties.getProperty("default.display.name");
+    public String getDefaultDisplayName() {
+        return properties.getProperty("default.display.name");
     }
 
-    public static String getDefaultKernelDir() {
-        return getInstance().properties.getProperty("default.kernel.dir");
+    public String getDefaultKernelDir() {
+        return properties.getProperty("default.kernel.dir");
     }
 
-    public static String getDefaultJarName() {
-        return getInstance().properties.getProperty("default.jar.name");
+    public String getDefaultJarName() {
+        return properties.getProperty("default.jar.name");
     }
 
-    public static String getDefaultTimeoutMillis() {
-        return getInstance().properties.getProperty("default.timeout.limits");
+    public String getDefaultTimeoutMillis() {
+        return properties.getProperty("default.timeout.limits");
     }
 
-    public static String getDefaultCompilerOptions() {
-        return getInstance().properties.getProperty("default.compiler.options");
+    public String getDefaultCompilerOptions() {
+        return properties.getProperty("default.compiler.options");
     }
 
-    public static String getDefaultInitScript() {
-        return getInstance().properties.getProperty("default.init.script");
+    public String getDefaultInitScript() {
+        return properties.getProperty("default.init.script");
+    }
+
+    public String[] getDefaultJavaArgv() {
+        String javaArgv = properties.getProperty("default.java.argv");
+        if (javaArgv == null) {
+            return new String[0];
+        }
+        return Arrays.stream(javaArgv.split(" ")).filter(s -> !s.isEmpty()).toArray(String[]::new);
     }
 }

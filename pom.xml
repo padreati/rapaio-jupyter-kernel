@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>2.1.1</version>
+    <version>2.2.0</version>
     <name>rapaio-jupyter-kernel</name>
     <description>Rapaio Jupyter Kernel</description>
     <url>https://github.com/padreati/rapaio-jupyter-kernel</url>
@@ -35,10 +35,10 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>23</maven.compiler.source>
-        <maven.compiler.target>23</maven.compiler.target>
-        <maven.compiler.release>23</maven.compiler.release>
-        <java.version>23</java.version>
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+<!--        <maven.compiler.release>17</maven.compiler.release>-->
+        <java.version>17</java.version>
 <!--        <maven.plugin.validation>VERBOSE</maven.plugin.validation>-->
     </properties>
 
@@ -111,7 +111,7 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>3.13.0</version>
                 <configuration>
-                    <release>${maven.compiler.release}</release>
+<!--                    <release>${maven.compiler.release}</release>-->
                     <source>${maven.compiler.source}</source>
                     <target>${maven.compiler.target}</target>
                 </configuration>

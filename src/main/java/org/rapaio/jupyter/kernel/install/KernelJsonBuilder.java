@@ -1,6 +1,7 @@
 package org.rapaio.jupyter.kernel.install;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -16,14 +17,25 @@ public class KernelJsonBuilder {
     private static final String LANGUAGE = "java";
     private static final String INTERRUPT_MODE = "message";
 
-    private String displayName = GeneralProperties.getDefaultDisplayName();
-    private String kernelDir = GeneralProperties.getDefaultKernelDir();
+    private String displayName;
+    private String kernelDir;
     private String jarPath = null;
-    private final Map<String, String> env = new HashMap<>() {{
-        put(RapaioKernel.RJK_COMPILER_OPTIONS, GeneralProperties.getDefaultCompilerOptions());
-        put(RapaioKernel.RJK_TIMEOUT_MILLIS, GeneralProperties.getDefaultTimeoutMillis());
-        put(RapaioKernel.RJK_INIT_SCRIPT, GeneralProperties.getDefaultInitScript());
-    }};
+    private final Map<String, String> env;
+    private final String defaultJarName;
+    private final String[] args;
+
+    public KernelJsonBuilder(GeneralProperties properties) {
+        displayName = properties.getDefaultDisplayName();
+        kernelDir = properties.getDefaultKernelDir();
+        env = new HashMap<>() {{
+            put(RapaioKernel.RJK_COMPILER_OPTIONS, properties.getDefaultCompilerOptions());
+            put(RapaioKernel.RJK_TIMEOUT_MILLIS, properties.getDefaultTimeoutMillis());
+            put(RapaioKernel.RJK_INIT_SCRIPT, properties.getDefaultInitScript());
+        }};
+        defaultJarName = properties.getDefaultJarName();
+        args = properties.getDefaultJavaArgv();
+    }
+
 
     private void validate() {
         Objects.requireNonNull(jarPath);
@@ -69,14 +81,12 @@ public class KernelJsonBuilder {
         String fullPath = KernelJsonBuilder.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         String jarName = fullPath.substring(fullPath.lastIndexOf('/') + 1);
         if (jarName.isEmpty()) {
-            jarName = GeneralProperties.getDefaultJarName();
+            jarName = defaultJarName;
         }
 
         List<String> argv = new ArrayList<>();
         argv.add("java");
-        argv.add("--enable-preview");
-        argv.add("--add-modules");
-        argv.add("java.base,jdk.incubator.vector");
+        argv.addAll(Arrays.asList(args));
         argv.add("-jar");
         argv.add(jarPath + SEPARATOR + kernelDir + SEPARATOR + jarName);
         argv.add(CONNECTION_FILE_MARKER);
