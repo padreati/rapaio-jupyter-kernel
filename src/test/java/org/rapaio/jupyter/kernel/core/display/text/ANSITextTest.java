@@ -1,18 +1,20 @@
 package org.rapaio.jupyter.kernel.core.display.text;
 
-import jdk.jshell.DeclarationSnippet;
-import jdk.jshell.Snippet;
-import jdk.jshell.SnippetEvent;
-import org.junit.jupiter.api.Test;
-import org.rapaio.jupyter.kernel.TestUtils;
-import org.rapaio.jupyter.kernel.core.java.CompilerException;
-import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.TestUtils;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import org.rapaio.jupyter.kernel.core.java.CompilerException;
+import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+
+import jdk.jshell.DeclarationSnippet;
+import jdk.jshell.Snippet;
+import jdk.jshell.SnippetEvent;
 
 public class ANSITextTest {
 
@@ -23,7 +25,7 @@ public class ANSITextTest {
                 y=12;
             }
             """;
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole()).build();
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null)).build();
         CompilerException ce = assertThrows(CompilerException.class, () -> engine.eval(TestUtils.context(), code));
 
         List<String> msgs = new ArrayList<>();

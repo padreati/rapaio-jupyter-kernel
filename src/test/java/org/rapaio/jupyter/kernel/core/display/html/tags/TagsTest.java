@@ -3,6 +3,7 @@ package org.rapaio.jupyter.kernel.core.display.html.tags;
 import jdk.jshell.SourceCodeAnalysis;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.TestUtils;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.display.html.Tag;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -16,7 +17,7 @@ public class TagsTest {
     @Test
     void tagsTest() {
 
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withTimeoutMillis(-1L)
                 .build();
 

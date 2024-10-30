@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.TestUtils;
+import org.rapaio.jupyter.kernel.core.ExecutionContext;
 
 import jdk.jshell.JShell;
 import jdk.jshell.Snippet;
@@ -22,7 +23,7 @@ public class JavaEngineTest {
 
     @Test
     void buildTest() throws Exception {
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withTimeoutMillis(-1L)
                 .build();
 
@@ -39,7 +40,7 @@ public class JavaEngineTest {
 
     @Test
     void completionTest() {
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withTimeoutMillis(-1L)
                 .build();
         var matches = engine.complete("Sys", 3);
@@ -51,7 +52,7 @@ public class JavaEngineTest {
 
     @Test
     void printerTest() throws Exception {
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withTimeoutMillis(-1L)
                 .build();
         var out = engine.eval(TestUtils.context(), "System.out.println(\"test\")");
@@ -60,7 +61,7 @@ public class JavaEngineTest {
 
     @Test
     void testSnippetDependence() {
-        JavaEngine javaEngine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine javaEngine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withTimeoutMillis(-1L)
                 .build();
 
@@ -121,7 +122,7 @@ public class JavaEngineTest {
     void testJavaEngineBuilder() throws Exception {
         String compilerOptions = GeneralProperties.defaultProperties().getDefaultCompilerOptions();
 
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withCompilerOptions(Arrays.asList(compilerOptions.split(" ")))
                 .build();
         engine.initialize();
@@ -130,7 +131,7 @@ public class JavaEngineTest {
 
     @Test
     void outputOnAssignmentTest() throws Exception {
-        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole())
+        JavaEngine engine = JavaEngine.builder(TestUtils.getTestJShellConsole(), new ExecutionContext(null))
                 .withTimeoutMillis(-1L)
                 .build();
 

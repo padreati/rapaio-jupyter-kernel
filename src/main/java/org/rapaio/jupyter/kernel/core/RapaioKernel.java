@@ -57,6 +57,7 @@ public class RapaioKernel {
     public static final String RJK_TIMEOUT_MILLIS = "RJK_TIMEOUT_MILLIS";
     public static final String RJK_COMPILER_OPTIONS = "RJK_COMPILER_OPTIONS";
     public static final String RJK_INIT_SCRIPT = "RJK_INIT_SCRIPT";
+    public static final String RJK_CLASSPATH = "RJK_CLASSPATH";
 
     private static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
 
@@ -75,16 +76,17 @@ public class RapaioKernel {
     public RapaioKernel() {
 
         KernelEnv kernelEnv = new KernelEnv();
+        this.ctx = new ExecutionContext(null);
         this.shellConsole = new JShellConsole();
-        this.javaEngine = JavaEngine.builder(shellConsole)
+        this.javaEngine = JavaEngine.builder(shellConsole, ctx)
                 .withCompilerOptions(kernelEnv.compilerOptions())
                 .withStartupScript(RapaioKernel.class.getClassLoader().getResourceAsStream(SHELL_INIT_RESOURCE_PATH))
                 .withStartupScript(kernelEnv.initScriptContent())
                 .withTimeoutMillis(kernelEnv.timeoutMillis())
+                .withClasspath(kernelEnv.classpath())
                 .build();
         this.javaEngine.initialize();
         this.magicEngine = new MagicEngine(this);
-        this.ctx = new ExecutionContext(null);
         this.dependencyManager = new MimaDependencyManager();
         this.renderer = new Renderer();
     }

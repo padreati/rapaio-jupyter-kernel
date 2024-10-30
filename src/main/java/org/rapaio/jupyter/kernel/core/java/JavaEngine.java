@@ -13,7 +13,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
+import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.UUID;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
@@ -32,6 +35,7 @@ import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.core.display.html.Tag;
 import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+import org.rapaio.jupyter.kernel.core.util.Glob;
 import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
 
 import jdk.jshell.EvalException;
@@ -260,21 +264,23 @@ public class JavaEngine {
         return dd;
     }
 
-    public static Builder builder(JShellConsole shellConsole) {
-        return new Builder(shellConsole);
+    public static Builder builder(JShellConsole shellConsole, ExecutionContext ctx) {
+        return new Builder(shellConsole, ctx);
     }
 
     public static class Builder {
 
         private final JShellConsole shellConsole;
+        private final ExecutionContext ctx;
 
         private long timeoutMillis = -1L;
         private final List<String> compilerOptions = new LinkedList<>();
         private final List<String> startupScripts = new LinkedList<>();
+        private final List<String> classpath = new LinkedList<>();
 
-        protected Builder(JShellConsole shellConsole) {
+        protected Builder(JShellConsole shellConsole, ExecutionContext ctx) {
             this.shellConsole = shellConsole;
-//            this.compilerOptions.addAll(List.of("--enable-preview", "--release", "23"));
+            this.ctx = ctx;
         }
 
         public Builder withTimeoutMillis(Long timeoutMillis) {
@@ -284,6 +290,11 @@ public class JavaEngine {
 
         public Builder withCompilerOptions(Collection<String> options) {
             this.compilerOptions.addAll(options);
+            return this;
+        }
+
+        public Builder withClasspath(String classpathBulk) {
+            this.classpath.addAll(Arrays.asList(classpathBulk.split(";")));
             return this;
         }
 
@@ -321,6 +332,7 @@ public class JavaEngine {
             controlParameterMap.put(RapaioExecutionControlProvider.EXECUTION_TIMEOUT_KEY, String.valueOf(timeoutMillis));
 
             RapaioExecutionControlProvider controlProvider = new RapaioExecutionControlProvider();
+
             JShell shell = JShell.builder()
                     .compilerOptions(compilerOptions.toArray(String[]::new))
                     .executionEngine(controlProvider, controlParameterMap)
@@ -328,6 +340,26 @@ public class JavaEngine {
                     .out(new PrintStream(shellConsole.getOut(), true))
                     .err(new PrintStream(shellConsole.getErr(), true))
                     .build();
+
+            final Pattern BLANK = Pattern.compile("^\\s*$");
+            for (String cp : this.classpath) {
+                if (BLANK.matcher(cp).matches()) {
+                    continue;
+                }
+
+                Glob glob = new Glob();
+                try {
+                    System.out.println("Parsing classpath: " + cp);
+                    for (Path entry : glob.findPaths(ctx, cp)) {
+                        shell.addToClasspath(entry.toAbsolutePath().toString());
+                        System.out.println("Add " + entry + " to classpath");
+                    }
+                } catch (IOException e) {
+                    throw new RuntimeException(
+                            String.format("IOException while computing classpath entries for '%s': %s", cp, e.getMessage()), e);
+                }
+            }
+
             return new JavaEngine(executionId, controlProvider, shell, startupScripts);
         }
     }

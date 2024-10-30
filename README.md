@@ -57,6 +57,8 @@ java -jar ./rapaio-jupyter-kernel-2.2.0.jar -i -auto
 The `-auto` option uses an automatic mode for installing the kernel. The installer has also an interactive mode, and the kernel installation can be realized manually, also. 
 For more details, you can follow [INSTALL.md](INSTALL.md).
 
+To dive deeper into how the kernel is configured and create custom kernel configurations you can follow [KERNEL.md](KERNEL.md).
+
 ## Maven central
 
 The project is also stored in maven central repositories and can be added as a dependency in maven as:
@@ -65,7 +67,7 @@ The project is also stored in maven central repositories and can be added as a d
 <dependency>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>2.1.0</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
@@ -74,3 +76,5 @@ and can be downloaded from releases. In the future, it would be possible to intr
 extend the library for their own purposes. I see possibilities to allow others to create custom display code for objects of their 
 own type or to implement new magic features. This kind of notebook extension can work for custom features, for generic features 
 one can consider contributing to this project.
+
+ 

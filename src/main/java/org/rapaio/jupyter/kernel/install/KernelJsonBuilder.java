@@ -31,6 +31,7 @@ public class KernelJsonBuilder {
             put(RapaioKernel.RJK_COMPILER_OPTIONS, properties.getDefaultCompilerOptions());
             put(RapaioKernel.RJK_TIMEOUT_MILLIS, properties.getDefaultTimeoutMillis());
             put(RapaioKernel.RJK_INIT_SCRIPT, properties.getDefaultInitScript());
+            put(RapaioKernel.RJK_CLASSPATH, "");
         }};
         defaultJarName = properties.getDefaultJarName();
         args = properties.getDefaultJavaArgv();

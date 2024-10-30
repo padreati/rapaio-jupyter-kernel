@@ -1,5 +1,6 @@
 package org.rapaio.jupyter.kernel.core;
 
+import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_CLASSPATH;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_COMPILER_OPTIONS;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_INIT_SCRIPT;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_TIMEOUT_MILLIS;
@@ -22,6 +23,7 @@ public class KernelEnv {
     private final List<String> compilerOptions;
     private final long timeoutMillis;
     private final String initScriptContent;
+    private final String classpath;
 
     public KernelEnv() {
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
@@ -51,6 +53,13 @@ public class KernelEnv {
             envInitScript = GeneralProperties.defaultProperties().getDefaultInitScript();
         }
         initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
+
+        String envClasspath = System.getenv(RJK_CLASSPATH);
+        LOGGER.finest(RJK_CLASSPATH + " env: " + envClasspath);
+        if (envClasspath == null) {
+            envClasspath = "";
+        }
+        classpath = envClasspath;
     }
 
     private String loadInitScript(String path) {
@@ -83,5 +92,9 @@ public class KernelEnv {
 
     public String initScriptContent() {
         return initScriptContent;
+    }
+
+    public String classpath() {
+        return classpath;
     }
 }

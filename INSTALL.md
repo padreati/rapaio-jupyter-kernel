@@ -55,6 +55,7 @@ An example of interactive installer mode:
     "language": "java",
     "interrupt_mode": "message",
     "env": {
+    "RJK_CLASSPATH": "",
     "RJK_COMPILER_OPTIONS": "",
     "RJK_INIT_SCRIPT": "",
     "RJK_TIMEOUT_MILLIS": "-1"
