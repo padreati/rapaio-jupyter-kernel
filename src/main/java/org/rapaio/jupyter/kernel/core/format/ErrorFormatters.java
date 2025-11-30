@@ -2,7 +2,7 @@ package org.rapaio.jupyter.kernel.core.format;
 
 import jdk.jshell.*;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import org.rapaio.jupyter.kernel.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationInterruptedException;
 import org.rapaio.jupyter.kernel.core.java.EvaluationTimeoutException;

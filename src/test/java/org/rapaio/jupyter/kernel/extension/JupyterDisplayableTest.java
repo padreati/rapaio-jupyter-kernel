@@ -1,28 +1,30 @@
 package org.rapaio.jupyter.kernel.extension;
 
-import org.junit.jupiter.api.Test;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.MIMEType;
-import org.rapaio.jupyter.kernel.core.display.Renderer;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import static org.junit.jupiter.api.Assertions.*;
+import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.Displayable;
+import org.rapaio.jupyter.kernel.display.MIMEType;
+import org.rapaio.jupyter.kernel.display.Renderer;
 
 public class JupyterDisplayableTest {
 
     @Test
     void smokeTest() {
-        var obj = new JupyterDisplayable() {
+        var obj = new Displayable() {
 
             @Override
-            public MIMEType defaultMIMEType() {
-                return MIMEType.TEXT;
+            public String defaultMIME() {
+                return "text/plain";
             }
 
             @Override
-            public DisplayData render(MIMEType mimeType) {
-                MIMEType callMimeType =  (mimeType != MIMEType.HTML) ? defaultMIMEType() : mimeType;
-                String data = callMimeType.toString();
-                return DisplayData.withType(callMimeType, data);
+            public DisplayData render(String mimeType) {
+                String callMimeType =  (mimeType != MIMEType.HTML.toString()) ? defaultMIME() : mimeType;
+                return DisplayData.withType(callMimeType, callMimeType);
             }
         };
 
@@ -34,13 +36,13 @@ public class JupyterDisplayableTest {
         assertTrue(defaultDisplay.data().containsKey("text/plain"));
         assertEquals("text/plain", defaultDisplay.data().get("text/plain"));
 
-        var implementedDisplay = renderer.render(MIMEType.HTML, obj);
+        var implementedDisplay = renderer.render(MIMEType.HTML.toString(), obj);
         assertNotNull(implementedDisplay);
         assertNotNull(implementedDisplay.data());
         assertTrue(implementedDisplay.data().containsKey("text/html"));
         assertEquals("text/html", implementedDisplay.data().get("text/html"));
 
-        var notImplementedDisplay = renderer.render(MIMEType.JPEG, obj);
+        var notImplementedDisplay = renderer.render(MIMEType.JPEG.toString(), obj);
         assertNotNull(notImplementedDisplay);
         assertNotNull(notImplementedDisplay.data());
         assertTrue(notImplementedDisplay.data().containsKey("text/plain"));

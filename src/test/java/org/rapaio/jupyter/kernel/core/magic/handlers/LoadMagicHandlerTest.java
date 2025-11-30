@@ -8,6 +8,8 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.channels.Channels;
@@ -20,6 +22,21 @@ import org.rapaio.jupyter.kernel.message.MessageType;
 import org.rapaio.jupyter.kernel.message.messages.ShellExecuteRequest;
 
 public class LoadMagicHandlerTest {
+
+    private RapaioKernel kernel;
+    private Channels channels;
+
+    @BeforeEach
+    void beforeEach() throws NoSuchAlgorithmException, InvalidKeyException {
+        kernel = new RapaioKernel();
+        channels = TestUtils.spyChannels();
+        channels.connect(kernel);
+    }
+
+    @AfterEach
+    void afterEach() {
+        channels.close();
+    }
 
     private static final String content1 = """
             {
@@ -203,9 +220,6 @@ public class LoadMagicHandlerTest {
     @Test
     void loadNotebook() throws MagicEvalException, NoSuchAlgorithmException, InvalidKeyException {
         LoadMagicHandler handler = new LoadMagicHandler();
-        RapaioKernel kernel = new RapaioKernel();
-        Channels channels = TestUtils.spyChannels();
-        kernel.registerChannels(channels);
         MagicSnippet snippet = mock(MagicSnippet.class);
 
         handler.evalNotebook(kernel, TestUtils.context(), snippet, content1);
@@ -213,10 +227,8 @@ public class LoadMagicHandlerTest {
 
     @Test
     void testAbsolutePath() throws NoSuchAlgorithmException, InvalidKeyException {
-        RapaioKernel kernel = new RapaioKernel();
-        Channels channels = TestUtils.spyChannels();
-        kernel.registerChannels(channels);
-
-        kernel.handleExecuteRequest(new Message<>(MessageType.SHELL_EXECUTE_REQUEST, new ShellExecuteRequest("%load /home/ati/work/rapaio-notebooks/rapaio-bootstrap.ipynb", true, false, Map.of(), false, false)));
+        kernel.handleExecuteRequest(new Message<>(MessageType.SHELL_EXECUTE_REQUEST,
+                new ShellExecuteRequest("%load /home/ati/work/rapaio-notebooks/rapaio-bootstrap.ipynb", true, false, Map.of(), false,
+                        false)));
     }
 }

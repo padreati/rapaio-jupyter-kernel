@@ -24,7 +24,8 @@ public class Installer {
     private static final String DEFAULT_PROFILE = "default";
     private static final String[] PROFILES = {
             "preview22",
-            "preview23"
+            "preview23",
+            "preview24"
     };
 
     public enum OSName {

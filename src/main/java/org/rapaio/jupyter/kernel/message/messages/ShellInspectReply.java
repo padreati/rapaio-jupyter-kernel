@@ -2,7 +2,7 @@ package org.rapaio.jupyter.kernel.message.messages;
 
 import java.util.Collections;
 
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 

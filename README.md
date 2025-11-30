@@ -1,6 +1,6 @@
 # rapaio-jupyter-kernel
 
-Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java = 17.
+Jupyter kernel for Java language based on JShell. It implements Jupyter message specification version 5.4, and it requires Java >= 17 (supports up to Java 25 with preview features).
 
 ## Introduction
 
@@ -67,7 +67,7 @@ The project is also stored in maven central repositories and can be added as a d
 <dependency>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>2.2.0</version>
+    <version>2.3.0</version>
 </dependency>
 ```
 

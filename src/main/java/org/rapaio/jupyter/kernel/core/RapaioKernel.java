@@ -11,8 +11,8 @@ import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.channels.Channels;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.Renderer;
+import org.rapaio.jupyter.kernel.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.Renderer;
 import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
 import org.rapaio.jupyter.kernel.core.java.IsCompleteResult;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -120,11 +120,6 @@ public class RapaioKernel {
         if (channels.hasMsgId()) {
             channels.publish(new IOPubDisplayData(dd));
         }
-    }
-
-    public void updateDisplay(String id, DisplayData dd) {
-        dd.setDisplayId(id);
-        updateDisplay(dd);
     }
 
     public void updateDisplay(DisplayData dd) {

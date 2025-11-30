@@ -8,7 +8,7 @@ import java.util.Optional;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.core.magic.handlers.BashMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.ClasspathMagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.handlers.DependencyHandler;

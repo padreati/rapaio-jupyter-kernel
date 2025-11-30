@@ -26,7 +26,7 @@ public class ConnectionPropertiesTest {
                   "iopub_port": 40885,
                   "key": "a0436f6c-1916-498b-8eb9-e81ab9368e84"
                 }
-                                """;
+                """;
 
         var kcp = Transform.fromJson(text, ConnectionProperties.class);
         assertEquals(50160, kcp.controlPort());

@@ -1,12 +1,12 @@
 package org.rapaio.jupyter.kernel.core.java;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.iif;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.p;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
+import static org.rapaio.jupyter.kernel.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.display.html.Tags.br;
+import static org.rapaio.jupyter.kernel.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.display.html.Tags.iif;
+import static org.rapaio.jupyter.kernel.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.display.html.Tags.p;
+import static org.rapaio.jupyter.kernel.display.html.Tags.texts;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
@@ -30,12 +29,12 @@ import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.html.JavadocTools;
-import org.rapaio.jupyter.kernel.core.display.html.Tag;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
 import org.rapaio.jupyter.kernel.core.util.Glob;
+import org.rapaio.jupyter.kernel.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.html.JavadocTools;
+import org.rapaio.jupyter.kernel.display.html.Tag;
+import org.rapaio.jupyter.kernel.display.text.ANSI;
 import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
 
 import jdk.jshell.EvalException;
@@ -52,14 +51,12 @@ public class JavaEngine {
     private final String executionId;
     private final RapaioExecutionControlProvider controlProvider;
     private final JShell shell;
-    private final SourceCodeAnalysis sourceAnalysis;
     private final List<String> startupScripts;
 
     protected JavaEngine(String executionId, RapaioExecutionControlProvider controlProvider, JShell shell, List<String> startupScripts) {
         this.executionId = executionId;
         this.controlProvider = controlProvider;
         this.shell = shell;
-        this.sourceAnalysis = shell.sourceCodeAnalysis();
         this.startupScripts = startupScripts;
     }
 
@@ -68,7 +65,7 @@ public class JavaEngine {
     }
 
     public SourceCodeAnalysis getSourceAnalysis() {
-        return sourceAnalysis;
+        return shell.sourceCodeAnalysis();
     }
 
     public void initialize() {
@@ -106,7 +103,7 @@ public class JavaEngine {
         // the last result will be displayed if we have the result of an expression,
         // or it's the value of a variable (emulate the behavior from ipython)
         Object lastResult = null;
-        SourceCodeAnalysis.CompletionInfo info = sourceAnalysis.analyzeCompletion(code);
+        SourceCodeAnalysis.CompletionInfo info = shell.sourceCodeAnalysis().analyzeCompletion(code);
 
         while (info.completeness().isComplete()) {
             // pay attention to trim, new lines can broke code evaluation
@@ -114,7 +111,7 @@ public class JavaEngine {
             if (!trimmedSource.isEmpty()) {
                 lastResult = evalSnippet(trimmedSource);
             }
-            info = sourceAnalysis.analyzeCompletion(info.remaining());
+            info = shell.sourceCodeAnalysis().analyzeCompletion(info.remaining());
         }
 
         // ignore eventual last empty snippet, but throw error if not empty
@@ -188,9 +185,9 @@ public class JavaEngine {
     }
 
     public IsCompleteResult isComplete(String code) {
-        SourceCodeAnalysis.CompletionInfo info = sourceAnalysis.analyzeCompletion(code);
+        SourceCodeAnalysis.CompletionInfo info = shell.sourceCodeAnalysis().analyzeCompletion(code);
         while (info.completeness().isComplete()) {
-            info = sourceAnalysis.analyzeCompletion(info.remaining());
+            info = shell.sourceCodeAnalysis().analyzeCompletion(info.remaining());
         }
 
         return switch (info.completeness()) {
@@ -208,7 +205,7 @@ public class JavaEngine {
 
     public CompleteMatches complete(String code, int at) {
         int[] anchor = new int[1];
-        List<SourceCodeAnalysis.Suggestion> suggestions = sourceAnalysis.completionSuggestions(code, at, anchor);
+        List<SourceCodeAnalysis.Suggestion> suggestions = shell.sourceCodeAnalysis().completionSuggestions(code, at, anchor);
         if (suggestions == null || suggestions.isEmpty()) {
             return null;
         }
@@ -238,7 +235,7 @@ public class JavaEngine {
             pos = parenIdx + 1;
         }
 
-        List<SourceCodeAnalysis.Documentation> documentations = sourceAnalysis.documentation(source, pos + 1, true);
+        List<SourceCodeAnalysis.Documentation> documentations = shell.sourceCodeAnalysis().documentation(source, pos + 1, true);
         if (documentations == null || documentations.isEmpty()) {
             return null;
         }
@@ -259,7 +256,7 @@ public class JavaEngine {
             sb.append("\n");
         }
 
-        DisplayData dd = DisplayData.withHtml(html);
+        DisplayData dd = DisplayData.fromHtml(html);
         dd.putText(sb.toString());
         return dd;
     }
@@ -327,9 +324,10 @@ public class JavaEngine {
 
             String executionId = UUID.randomUUID().toString();
 
-            Map<String, String> controlParameterMap = new HashMap<>();
-            controlParameterMap.put(RapaioExecutionControlProvider.EXECUTION_ID_KEY, executionId);
-            controlParameterMap.put(RapaioExecutionControlProvider.EXECUTION_TIMEOUT_KEY, String.valueOf(timeoutMillis));
+            Map<String, String> controlParameterMap = Map.of(
+                    RapaioExecutionControlProvider.EXECUTION_ID_KEY, executionId,
+                    RapaioExecutionControlProvider.EXECUTION_TIMEOUT_KEY, String.valueOf(timeoutMillis)
+            );
 
             RapaioExecutionControlProvider controlProvider = new RapaioExecutionControlProvider();
 

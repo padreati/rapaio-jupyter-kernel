@@ -10,7 +10,7 @@ public record Message<T>(
         Header<?> parentHeader,
         Map<String, Object> metadata,
         T content,
-        List<byte[]> blobs) {
+        List<byte[]> buffers) {
 
 
     public Message(MessageId<?> msgId, MessageType<T> type, T content) {

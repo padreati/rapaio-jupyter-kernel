@@ -1,17 +1,17 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.b;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.br;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.each;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.join;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.space;
-import static org.rapaio.jupyter.kernel.core.display.html.Tags.texts;
+import static org.rapaio.jupyter.kernel.display.html.Tags.b;
+import static org.rapaio.jupyter.kernel.display.html.Tags.br;
+import static org.rapaio.jupyter.kernel.display.html.Tags.each;
+import static org.rapaio.jupyter.kernel.display.html.Tags.join;
+import static org.rapaio.jupyter.kernel.display.html.Tags.space;
+import static org.rapaio.jupyter.kernel.display.html.Tags.texts;
 
 import java.util.List;
 
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import org.rapaio.jupyter.kernel.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.text.ANSI;
 
 public abstract class MagicHandler {
 
@@ -76,7 +76,7 @@ public abstract class MagicHandler {
             }
         }
 
-        DisplayData dd = DisplayData.withHtml(inspectHtml);
+        DisplayData dd = DisplayData.fromHtml(inspectHtml);
         dd.putText(sb.toString());
         return dd;
     }

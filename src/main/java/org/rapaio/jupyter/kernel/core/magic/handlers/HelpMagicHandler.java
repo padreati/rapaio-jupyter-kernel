@@ -4,8 +4,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import org.rapaio.jupyter.kernel.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -82,6 +82,6 @@ public class HelpMagicHandler extends MagicHandler {
                 sb.append("    ").append(String.join("\n", snippetMagicHandler.documentation())).append("\n");
             }
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 }

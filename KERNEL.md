@@ -7,10 +7,10 @@ the installation process. One configuration file which I have on my host looks l
         "argv": [
             "java",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-2.2.0.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-2.3.0.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 2.2.0)",
+        "display_name": "Java (rjk 2.3.0)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
@@ -38,15 +38,15 @@ The changed kernel file looks like the following:
             "--add-modules",
             "java.base,jdk.incubator.vector",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-2.2.0.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-2.3.0.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 2.2.0 preview23)",
+        "display_name": "Java (rjk 2.3.0 preview24)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
             "RJK_CLASSPATH": "",
-            "RJK_COMPILER_OPTIONS": "--enable-preview --release 23",
+            "RJK_COMPILER_OPTIONS": "--enable-preview --release 25",
             "RJK_INIT_SCRIPT": "",
             "RJK_TIMEOUT_MILLIS": "-1"
         }
@@ -66,10 +66,10 @@ An illustrative example you can found below:
         "argv": [
             "java",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-2.2.0.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-2.3.0.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 2.2.0)",
+        "display_name": "Java (rjk 2.3.0)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {

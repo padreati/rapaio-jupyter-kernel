@@ -41,12 +41,12 @@ public class MagicParserTest {
         List<MagicSnippet> snippets = parser.parseSnippets("""
                 %line 1
                 // comment
-                                
+                
                 %line 2
                 // comment
                 %line 3
                 // comment
-                                
+                
                 //comment
                 """, 21);
 

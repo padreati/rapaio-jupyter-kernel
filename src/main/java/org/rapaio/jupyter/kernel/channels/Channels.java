@@ -19,7 +19,7 @@ import org.rapaio.jupyter.kernel.message.messages.IOPubStatus;
 import org.rapaio.jupyter.kernel.message.messages.IOPubStream;
 import org.zeromq.ZMQ;
 
-@SuppressWarnings({"unchecked", "rawtypes"})
+@SuppressWarnings( {"unchecked", "rawtypes"})
 public final class Channels {
 
     private final ConnectionProperties connProps;

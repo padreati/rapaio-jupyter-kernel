@@ -2,7 +2,7 @@ package org.rapaio.jupyter.kernel.core;
 
 import java.util.List;
 
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.DisplayData;
 
 import com.google.gson.annotations.SerializedName;
 

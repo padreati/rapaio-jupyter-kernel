@@ -58,14 +58,17 @@ public class RapaioKernelTest {
                     // update output based on the id
                     updateDisplay(id, "update_"+i);
                     Thread.sleep(200);
-                }""";
+                }
+                """;
 
-        kernel.handleInspectRequest(new Message<>(MessageType.SHELL_INSPECT_REQUEST, new ShellInspectRequest(code, 15, 0)));
-        ArgumentCaptor<ShellInspectReply> captor = ArgumentCaptor.forClass(ShellInspectReply.class);
+        kernel.handleInspectRequest(new Message<>(MessageType.SHELL_INSPECT_REQUEST, new ShellInspectRequest(code, 18, 0)));
+
+        var captor = ArgumentCaptor.forClass(ShellInspectReply.class);
         Mockito.verify(channels).reply(captor.capture());
 
-        assertNotNull(captor.getValue().data());
         var dd = captor.getValue().data();
+
+        assertNotNull(dd);
         assertEquals(2, dd.size());
         assertTrue(dd.containsKey("text/html"));
         assertTrue(dd.containsKey("text/plain"));

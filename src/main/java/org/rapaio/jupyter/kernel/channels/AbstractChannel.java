@@ -119,8 +119,8 @@ public abstract sealed class AbstractChannel extends Thread
         chunks.add(parentHeaderRaw);
         chunks.add(metadata);
         chunks.add(content);
-        if (message.blobs() != null) {
-            chunks.addAll(message.blobs());
+        if (message.buffers() != null) {
+            chunks.addAll(message.buffers());
         }
 
         for (int i = 0; i < chunks.size() - 1; i++) {

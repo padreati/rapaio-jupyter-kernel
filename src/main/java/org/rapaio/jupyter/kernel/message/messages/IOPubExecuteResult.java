@@ -1,6 +1,6 @@
 package org.rapaio.jupyter.kernel.message.messages;
 
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.message.ContentType;
 import org.rapaio.jupyter.kernel.message.MessageType;
 

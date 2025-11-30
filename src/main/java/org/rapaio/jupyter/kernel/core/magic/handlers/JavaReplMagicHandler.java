@@ -5,8 +5,8 @@ import java.util.List;
 import java.util.Optional;
 
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.core.display.DisplayData;
-import org.rapaio.jupyter.kernel.core.display.text.ANSI;
+import org.rapaio.jupyter.kernel.display.DisplayData;
+import org.rapaio.jupyter.kernel.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
@@ -140,7 +140,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                 sb.append(line).append("\n");
             }
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 
     private Object evalAllList(RapaioKernel kernel, MagicSnippet magicSnippet) {
@@ -154,7 +154,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                 sb.append(line).append("\n");
             }
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 
     private Object evalIdList(RapaioKernel kernel, MagicSnippet magicSnippet) throws
@@ -170,7 +170,7 @@ public class JavaReplMagicHandler extends MagicHandler {
             for (String line : ANSI.sourceCode(snippet.source())) {
                 sb.append(line).append("\n");
             }
-            return DisplayData.withText(sb.toString());
+            return DisplayData.fromText(sb.toString());
         }
         throw new MagicEvalException(magicSnippet, "No snippet with id: " + id + " was found.");
     }
@@ -196,7 +196,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                 sb.append(sourceLine).append("\n");
             }
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 
     private Object evalVars(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
@@ -218,7 +218,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                     .reset().text(kernel.javaEngine().getShell().varValue(snippet)).text("\n")
                     .render());
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 
     private Object evalImports(RapaioKernel kernel, MagicSnippet magicSnippet) throws
@@ -240,7 +240,7 @@ public class JavaReplMagicHandler extends MagicHandler {
                 sb.append(sourceLine).append("\n");
             }
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 
     private Object evalTypes(RapaioKernel kernel, MagicSnippet magicSnippet) throws MagicEvalException {
@@ -269,6 +269,6 @@ public class JavaReplMagicHandler extends MagicHandler {
                 sb.append(sourceLine).append("\n");
             }
         }
-        return DisplayData.withText(sb.toString());
+        return DisplayData.fromText(sb.toString());
     }
 }
