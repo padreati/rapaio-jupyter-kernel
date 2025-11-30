@@ -6,6 +6,7 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="rapaio-jupyter-interfaces" />
         <module name="rapaio-jupyter-kernel" />
       </profile>
     </annotationProcessing>
@@ -13,7 +14,7 @@
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
-      <module name="rapaio-jupyter-kernel" options="" />
+      <module name="rapaio-jupyter" options="" />
     </option>
   </component>
 </project>

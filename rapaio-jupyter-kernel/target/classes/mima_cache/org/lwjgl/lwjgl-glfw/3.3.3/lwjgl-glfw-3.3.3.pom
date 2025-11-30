@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>org.lwjgl</groupId>
+  <artifactId>lwjgl-glfw</artifactId>
+  <version>3.3.3</version>
+  <name>LWJGL - GLFW bindings</name>
+  <description>A multi-platform library for OpenGL, OpenGL ES and Vulkan development on the desktop. It provides a simple API for creating windows, contexts and surfaces, receiving input and events.</description>
+  <url>https://www.lwjgl.org</url>
+  <licenses>
+    <license>
+      <name>BSD-3-Clause</name>
+      <url>https://www.lwjgl.org/license</url>
+      <distribution>repo</distribution>
+    </license>
+  </licenses>
+  <developers>
+    <developer>
+      <id>spasi</id>
+      <name>Ioannis Tsakpinis</name>
+      <email>iotsakp@gmail.com</email>
+      <url>https://github.com/Spasi</url>
+    </developer>
+  </developers>
+  <scm>
+    <connection>scm:git:https://github.com/LWJGL/lwjgl3.git</connection>
+    <developerConnection>scm:git:https://github.com/LWJGL/lwjgl3.git</developerConnection>
+    <url>https://github.com/LWJGL/lwjgl3.git</url>
+  </scm>
+  <dependencies>
+    <dependency>
+      <groupId>org.lwjgl</groupId>
+      <artifactId>lwjgl</artifactId>
+      <version>3.3.3</version>
+      <scope>compile</scope>
+    </dependency>
+  </dependencies>
+</project>
