@@ -1,4 +1,4 @@
 -------------------------------------------------------------------------------
 Test set: org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandlerTest
 -------------------------------------------------------------------------------
-Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.194 s -- in org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandlerTest
+Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.263 s -- in org.rapaio.jupyter.kernel.core.magic.handlers.JarMagicHandlerTest

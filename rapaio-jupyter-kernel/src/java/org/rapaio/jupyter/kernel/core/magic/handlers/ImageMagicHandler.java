@@ -16,7 +16,7 @@ import javax.imageio.ImageIO;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.display.DisplayData;
-import org.rapaio.jupyter.kernel.display.MIMEType;
+import org.rapaio.jupyter.kernel.display.MimeType;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandlerTools;
@@ -74,7 +74,7 @@ public class ImageMagicHandler extends MagicHandler {
             ImageIO.write(bi, "png", Base64.getEncoder().wrap(out));
             String response = out.toString(StandardCharsets.UTF_8);
 
-            return DisplayData.withType(MIMEType.PNG.toString(), response);
+            return DisplayData.withType(MimeType.PNG.toString(), response);
         } catch (IOException e) {
             throw new MagicEvalException(magicSnippet, "Could not read image. " + e.getMessage());
         }

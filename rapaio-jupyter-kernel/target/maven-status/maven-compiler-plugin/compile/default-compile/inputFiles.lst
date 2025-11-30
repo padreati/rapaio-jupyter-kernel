@@ -64,10 +64,9 @@
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/DefaultDisplayHandler.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/DisplayData.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/DisplayHandler.java
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/DisplayWrapper.java
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/DisplayRegistry.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/Displayable.java
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/MIMEType.java
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/Renderer.java
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/MimeType.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/html/BaseHtmlStyle.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/html/HtmlStyle.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/html/JavadocTools.java
@@ -81,8 +80,8 @@
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/html/tags/TagP.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/html/tags/TagTexts.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/image/ImageDisplayHandler.java
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/table/TableDisplay.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/table/TableDisplayHandler.java
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/table/TableDisplayModel.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/display/text/ANSI.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/global/Global.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java/org/rapaio/jupyter/kernel/install/Installer.java

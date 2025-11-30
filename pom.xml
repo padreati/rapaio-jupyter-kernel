@@ -45,9 +45,16 @@
     </properties>
 
     <modules>
-        <module>rapaio-jupyter-interfaces</module>
         <module>rapaio-jupyter-kernel</module>
     </modules>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+    </dependencies>
 
     <distributionManagement>
         <snapshotRepository>

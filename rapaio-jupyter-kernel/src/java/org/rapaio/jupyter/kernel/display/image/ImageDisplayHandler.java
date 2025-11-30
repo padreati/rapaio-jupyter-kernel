@@ -14,15 +14,15 @@ import javax.imageio.ImageIO;
 
 import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.display.DisplayHandler;
-import org.rapaio.jupyter.kernel.display.MIMEType;
+import org.rapaio.jupyter.kernel.display.MimeType;
 
 public class ImageDisplayHandler implements DisplayHandler {
 
     private static final Set<String> availableMimeTypes = new HashSet<>(List.of(ImageIO.getWriterMIMETypes()));
-    private static final Map<MIMEType, String> allowedFormats = Map.of(
-            MIMEType.PNG, "png",
-            MIMEType.GIF, "gif",
-            MIMEType.JPEG, "jpeg"
+    private static final Map<MimeType, String> allowedFormats = Map.of(
+            MimeType.PNG, "png",
+            MimeType.GIF, "gif",
+            MimeType.JPEG, "jpeg"
     );
 
     @Override
@@ -32,7 +32,7 @@ public class ImageDisplayHandler implements DisplayHandler {
 
     @Override
     public String defaultMIMEType() {
-        return MIMEType.PNG.toString();
+        return MimeType.PNG.toString();
     }
 
     @Override
@@ -52,7 +52,7 @@ public class ImageDisplayHandler implements DisplayHandler {
 
         RenderedImage image = (RenderedImage) o;
         try {
-            ImageIO.write(image, allowedFormats.get(MIMEType.fromString(mime)), Base64.getEncoder().wrap(out));
+            ImageIO.write(image, allowedFormats.get(MimeType.fromString(mime)), Base64.getEncoder().wrap(out));
             String response = out.toString(StandardCharsets.UTF_8);
 
             return DisplayData.withType(mime, response);

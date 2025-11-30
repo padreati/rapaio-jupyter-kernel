@@ -11,16 +11,16 @@ import javax.imageio.ImageIO;
 
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.display.DisplayData;
-import org.rapaio.jupyter.kernel.display.MIMEType;
-import org.rapaio.jupyter.kernel.display.Renderer;
+import org.rapaio.jupyter.kernel.display.MimeType;
+import org.rapaio.jupyter.kernel.display.DisplayRegistry;
 
 public class ImageDisplayHandlerTest {
 
     @Test
     void testImageRender() throws IOException {
         BufferedImage image = ImageIO.read(URI.create("http://www.xmpie.com/VDPSoftware/assets/images/untitled-11-1046x547.png").toURL());
-        DisplayData dd = new Renderer().render(image);
+        DisplayData dd = new DisplayRegistry().render(image);
         assertNotNull(dd);
-        assertTrue(dd.data().containsKey(MIMEType.PNG.toString()));
+        assertTrue(dd.data().containsKey(MimeType.PNG.toString()));
     }
 }

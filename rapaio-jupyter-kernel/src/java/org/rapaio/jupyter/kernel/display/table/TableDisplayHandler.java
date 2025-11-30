@@ -4,41 +4,41 @@ import java.util.UUID;
 
 import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.display.DisplayHandler;
-import org.rapaio.jupyter.kernel.display.MIMEType;
+import org.rapaio.jupyter.kernel.display.MimeType;
 
 public class TableDisplayHandler implements DisplayHandler {
 
     @Override
     public boolean canRender(Object o) {
-        return o instanceof TableDisplay;
+        return o instanceof TableDisplayModel;
     }
 
     @Override
     public String defaultMIMEType() {
-        return MIMEType.HTML.toString();
+        return MimeType.HTML.toString();
     }
 
     @Override
     public DisplayData render(String mimeType, Object o) {
-        if (!(o instanceof TableDisplay td)) {
+        if (!(o instanceof TableDisplayModel td)) {
             return null;
         }
 
         String mime = mimeType != null ? mimeType : defaultMIMEType();
 
-        if (mime.equals(MIMEType.HTML.toString())) {
+        if (mime.equals(MimeType.HTML.toString())) {
             return displayHtml(td);
         }
-        if (mime.equals(MIMEType.MARKDOWN.toString())) {
+        if (mime.equals(MimeType.MARKDOWN.toString())) {
             return displayMarkdown(td);
         }
-        if (mime.equals(MIMEType.TEXT.toString())) {
+        if (mime.equals(MimeType.TEXT.toString())) {
             return displayText(td);
         }
         return null;
     }
 
-    private DisplayData displayHtml(TableDisplay td) {
+    private DisplayData displayHtml(TableDisplayModel td) {
         String id = UUID.randomUUID().toString();
 
         StringBuilder sb = new StringBuilder();
@@ -95,7 +95,7 @@ public class TableDisplayHandler implements DisplayHandler {
         return dd;
     }
 
-    private DisplayData displayMarkdown(TableDisplay td) {
+    private DisplayData displayMarkdown(TableDisplayModel td) {
         String id = UUID.randomUUID().toString();
 
         StringBuilder sb = new StringBuilder();
@@ -120,12 +120,12 @@ public class TableDisplayHandler implements DisplayHandler {
             sb.append("\n");
         }
 
-        DisplayData dd = DisplayData.withType(MIMEType.MARKDOWN.toString(), sb.toString());
+        DisplayData dd = DisplayData.withType(MimeType.MARKDOWN.toString(), sb.toString());
         dd.setDisplayId(id);
         return dd;
     }
 
-    private DisplayData displayText(TableDisplay td) {
+    private DisplayData displayText(TableDisplayModel td) {
         return DisplayData.fromText("Not implemented yet.");
     }
 }

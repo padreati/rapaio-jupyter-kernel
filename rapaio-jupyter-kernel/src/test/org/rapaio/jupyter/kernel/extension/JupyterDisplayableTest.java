@@ -7,8 +7,8 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.display.Displayable;
-import org.rapaio.jupyter.kernel.display.MIMEType;
-import org.rapaio.jupyter.kernel.display.Renderer;
+import org.rapaio.jupyter.kernel.display.MimeType;
+import org.rapaio.jupyter.kernel.display.DisplayRegistry;
 
 public class JupyterDisplayableTest {
 
@@ -23,12 +23,12 @@ public class JupyterDisplayableTest {
 
             @Override
             public DisplayData render(String mimeType) {
-                String callMimeType =  (mimeType != MIMEType.HTML.toString()) ? defaultMIME() : mimeType;
+                String callMimeType =  (mimeType != MimeType.HTML.toString()) ? defaultMIME() : mimeType;
                 return DisplayData.withType(callMimeType, callMimeType);
             }
         };
 
-        Renderer renderer = new Renderer();
+        DisplayRegistry renderer = new DisplayRegistry();
 
         var defaultDisplay = renderer.render(obj);
         assertNotNull(defaultDisplay);
@@ -36,13 +36,13 @@ public class JupyterDisplayableTest {
         assertTrue(defaultDisplay.data().containsKey("text/plain"));
         assertEquals("text/plain", defaultDisplay.data().get("text/plain"));
 
-        var implementedDisplay = renderer.render(MIMEType.HTML.toString(), obj);
+        var implementedDisplay = renderer.render(MimeType.HTML.toString(), obj);
         assertNotNull(implementedDisplay);
         assertNotNull(implementedDisplay.data());
         assertTrue(implementedDisplay.data().containsKey("text/html"));
         assertEquals("text/html", implementedDisplay.data().get("text/html"));
 
-        var notImplementedDisplay = renderer.render(MIMEType.JPEG.toString(), obj);
+        var notImplementedDisplay = renderer.render(MimeType.JPEG.toString(), obj);
         assertNotNull(notImplementedDisplay);
         assertNotNull(notImplementedDisplay.data());
         assertTrue(notImplementedDisplay.data().containsKey("text/plain"));

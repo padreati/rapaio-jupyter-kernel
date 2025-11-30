@@ -1,5 +1,12 @@
 package org.rapaio.jupyter.kernel.display;
 
+/**
+ * Implements a generic display handler for all kins of objects.
+ * This handler acts as a back-off handler, meaning that it will be used
+ * only if no other handler is found for the object to be rendered.
+ * <p>
+ * The default handler displays the string representation of the object.
+ */
 public class DefaultDisplayHandler implements DisplayHandler {
 
     @Override
@@ -9,7 +16,7 @@ public class DefaultDisplayHandler implements DisplayHandler {
 
     @Override
     public String defaultMIMEType() {
-        return MIMEType.TEXT.toString();
+        return MimeType.TEXT.toString();
     }
 
     @Override
@@ -17,7 +24,6 @@ public class DefaultDisplayHandler implements DisplayHandler {
         if (o == null) {
             return null;
         }
-        return DisplayData.withType(mimeType, o.toString());
+        return DisplayData.withType(mimeType == null ? defaultMIMEType() : mimeType, o.toString());
     }
-
 }

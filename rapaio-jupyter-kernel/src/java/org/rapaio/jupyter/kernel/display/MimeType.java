@@ -1,19 +1,19 @@
 package org.rapaio.jupyter.kernel.display;
 
-public final class MIMEType {
+public final class MimeType {
 
-    public static final MIMEType TEXT = new MIMEType("text", "text/plain");
-    public static final MIMEType HTML = new MIMEType("html", "text/html");
-    public static final MIMEType MARKDOWN = new MIMEType("markdown", "text/markdown");
-    public static final MIMEType JAVASCRIPT = new MIMEType("javascript", "application/javascript");
-    public static final MIMEType JSON = new MIMEType("json", "application/json");
-    public static final MIMEType LATEX = new MIMEType("latex", "text/latex");
+    public static final MimeType TEXT = new MimeType("text", "text/plain");
+    public static final MimeType HTML = new MimeType("html", "text/html");
+    public static final MimeType MARKDOWN = new MimeType("markdown", "text/markdown");
+    public static final MimeType JAVASCRIPT = new MimeType("javascript", "application/javascript");
+    public static final MimeType JSON = new MimeType("json", "application/json");
+    public static final MimeType LATEX = new MimeType("latex", "text/latex");
 
-    public static final MIMEType JPEG = new MIMEType("jpeg", "image/jpeg");
-    public static final MIMEType GIF = new MIMEType("gif", "image/gif");
-    public static final MIMEType PNG = new MIMEType("png", "image/png");
+    public static final MimeType JPEG = new MimeType("jpeg", "image/jpeg");
+    public static final MimeType GIF = new MimeType("gif", "image/gif");
+    public static final MimeType PNG = new MimeType("png", "image/png");
 
-    public static MIMEType fromString(String code) {
+    public static MimeType fromString(String code) {
         if (code == null) {
             return null;
         }
@@ -50,7 +50,7 @@ public final class MIMEType {
     private final String shortType;
     private final String stringType;
 
-    private MIMEType(String shortType, String stringType) {
+    private MimeType(String shortType, String stringType) {
         this.shortType = shortType;
         this.stringType = stringType;
     }

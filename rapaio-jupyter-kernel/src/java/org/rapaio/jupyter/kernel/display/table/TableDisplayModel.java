@@ -1,6 +1,6 @@
 package org.rapaio.jupyter.kernel.display.table;
 
-public interface TableDisplay {
+public interface TableDisplayModel {
 
     int getCols();
 

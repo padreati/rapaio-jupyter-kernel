@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.display.DisplayData;
-import org.rapaio.jupyter.kernel.display.Renderer;
+import org.rapaio.jupyter.kernel.display.DisplayRegistry;
 import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
 import org.rapaio.jupyter.kernel.core.java.IsCompleteResult;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -64,7 +64,7 @@ public class RapaioKernel {
     private static final Logger LOGGER = Logger.getLogger(RapaioKernel.class.getSimpleName());
     private static final AtomicInteger executionCount = new AtomicInteger(1);
 
-    private final Renderer renderer;
+    private final DisplayRegistry renderer;
     private final JavaEngine javaEngine;
     private final MagicEngine magicEngine;
     private final MimaDependencyManager dependencyManager;
@@ -88,7 +88,7 @@ public class RapaioKernel {
         this.javaEngine.initialize();
         this.magicEngine = new MagicEngine(this);
         this.dependencyManager = new MimaDependencyManager();
-        this.renderer = new Renderer();
+        this.renderer = new DisplayRegistry();
     }
 
 
@@ -112,7 +112,7 @@ public class RapaioKernel {
         return dependencyManager;
     }
 
-    public Renderer renderer() {
+    public DisplayRegistry renderer() {
         return renderer;
     }
 

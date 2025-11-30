@@ -27,7 +27,7 @@ public class DisplayData {
 
     public static DisplayData withType(String type, String data) {
         DisplayData dd = new DisplayData();
-        dd.putData(MIMEType.fromString(type).toString(), data);
+        dd.putData(type, data);
         return dd;
     }
 
@@ -94,14 +94,14 @@ public class DisplayData {
     }
 
     public void putText(String text) {
-        putData(MIMEType.TEXT, text);
+        putData(MimeType.TEXT, text);
     }
 
     public void putHTML(String html) {
-        putData(MIMEType.HTML, html);
+        putData(MimeType.HTML, html);
     }
 
-    public void putData(MIMEType mimeType, String data) {
+    public void putData(MimeType mimeType, String data) {
         putData(mimeType.toString(), data);
     }
 }

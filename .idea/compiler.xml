@@ -6,11 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
-        <module name="rapaio-jupyter-interfaces" />
         <module name="rapaio-jupyter-kernel" />
       </profile>
     </annotationProcessing>
-    <bytecodeTargetLevel target="23" />
+    <bytecodeTargetLevel target="23">
+      <module name="rapaio-jupyter-interfaces" target="17" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
