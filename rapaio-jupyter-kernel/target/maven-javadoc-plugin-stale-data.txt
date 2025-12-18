@@ -4,7 +4,7 @@
 @options
 @packages
 -classpath
-'/home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/zeromq/jeromq/0.6.0/jeromq-0.6.0.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/neilalexander/jnacl/1.0.0/jnacl-1.0.0.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/maveniverse/maven/mima/context/2.4.32/context-2.4.32.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/apache/maven/resolver/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/apache/maven/resolver/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/errorprone/error_prone_annotations/2.27.0/error_prone_annotations-2.27.0.jar'
+'/home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/zeromq/jeromq/0.6.0/jeromq-0.6.0.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/neilalexander/jnacl/1.0.0/jnacl-1.0.0.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/code/gson/gson/2.13.2/gson-2.13.2.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/errorprone/error_prone_annotations/2.41.0/error_prone_annotations-2.41.0.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/maveniverse/maven/mima/context/2.4.37/context-2.4.37.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/apache/maven/resolver/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.jar:/home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/apache/maven/resolver/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.jar'
 -encoding
 'UTF-8'
 -private
@@ -38,6 +38,7 @@ org.rapaio.jupyter.kernel.message.adapters
 org.rapaio.jupyter.kernel.display
 org.rapaio.jupyter.kernel.display.text
 org.rapaio.jupyter.kernel.display.image
+org.rapaio.jupyter.kernel.display.spi
 org.rapaio.jupyter.kernel.display.table
 org.rapaio.jupyter.kernel.display.html
 org.rapaio.jupyter.kernel.display.html.tags
@@ -52,29 +53,29 @@ org.rapaio.jupyter.kernel.core.java.io
 org.rapaio.jupyter.kernel.core.format
 /home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/zeromq/jeromq/0.6.0/jeromq-0.6.0.jar = 1707231018000
 /home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/neilalexander/jnacl/1.0.0/jnacl-1.0.0.jar = 1695445301519
-/home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/maveniverse/maven/mima/context/2.4.32/context-2.4.32.jar = 1753871698000
+/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/code/gson/gson/2.13.2/gson-2.13.2.jar = 1757536868000
+/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/errorprone/error_prone_annotations/2.41.0/error_prone_annotations-2.41.0.jar = 1753371490000
+/home/ANT.AMAZON.COM/tutuianu/.m2/repository/eu/maveniverse/maven/mima/context/2.4.37/context-2.4.37.jar = 1764852379000
 /home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/apache/maven/resolver/maven-resolver-api/1.9.24/maven-resolver-api-1.9.24.jar = 1750965068000
 /home/ANT.AMAZON.COM/tutuianu/.m2/repository/org/apache/maven/resolver/maven-resolver-util/1.9.24/maven-resolver-util-1.9.24.jar = 1750965082000
-/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/code/gson/gson/2.11.0/gson-2.11.0.jar = 1716144881000
-/home/ANT.AMAZON.COM/tutuianu/.m2/repository/com/google/errorprone/error_prone_annotations/2.27.0/error_prone_annotations-2.27.0.jar = 1714146969000
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java = 1764511505438
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/generated-sources/annotations = 1764533352336
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/member-search-index.js = 1764533374340
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/overview-tree.html = 1764533374243
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/tag-search-index.js = 1764533374341
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/help-doc.html = 1764533374428
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/jquery-ui.overrides.css = 1764533374432
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/constant-values.html = 1764533373923
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/package-search-index.js = 1764533374337
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/script.js = 1764533374430
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/serialized-form.html = 1764533373938
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/element-list = 1764533373827
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/type-search-index.js = 1764533374337
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/index-all.html = 1764533374423
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/allclasses-index.html = 1764533374334
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/index.html = 1764533374246
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/allpackages-index.html = 1764533374336
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/module-search-index.js = 1764533374337
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/stylesheet.css = 1764533374430
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/overview-summary.html = 1764533374424
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/search.js = 1764533374431
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/java = 1765059697737
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/generated-sources/annotations = 1766077466939
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/member-search-index.js = 1766077488369
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/overview-tree.html = 1766077488294
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/tag-search-index.js = 1766077488370
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/help-doc.html = 1766077488428
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/jquery-ui.overrides.css = 1766077488431
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/constant-values.html = 1766077487931
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/package-search-index.js = 1766077488367
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/script.js = 1766077488429
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/serialized-form.html = 1766077487945
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/element-list = 1766077487823
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/type-search-index.js = 1766077488367
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/index-all.html = 1766077488424
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/allclasses-index.html = 1766077488364
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/index.html = 1766077488297
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/allpackages-index.html = 1766077488366
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/module-search-index.js = 1766077488366
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/stylesheet.css = 1766077488428
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/overview-summary.html = 1766077488425
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/target/reports/apidocs/search.js = 1766077488429

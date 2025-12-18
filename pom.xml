@@ -35,26 +35,34 @@
         </developer>
     </developers>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>6.0.1</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <version>5.20.0</version>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <modules>
+        <module>rapaio-jupyter-kernel</module>
+        <module>rapaio-jupyter-display</module>
+    </modules>
+
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
-<!--        <maven.plugin.validation>VERBOSE</maven.plugin.validation>-->
+        <!--        <maven.plugin.validation>VERBOSE</maven.plugin.validation>-->
     </properties>
-
-    <modules>
-        <module>rapaio-jupyter-kernel</module>
-    </modules>
-
-    <dependencies>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.11.0</version>
-        </dependency>
-    </dependencies>
 
     <distributionManagement>
         <snapshotRepository>

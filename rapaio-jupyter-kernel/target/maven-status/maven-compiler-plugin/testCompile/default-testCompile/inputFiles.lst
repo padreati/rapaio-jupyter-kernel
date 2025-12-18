@@ -13,7 +13,7 @@
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/core/magic/handlers/LoadMagicHandlerTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/core/util/GlobTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/html/tags/TagsTest.java
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/image/ImageDisplayHandlerTest.java
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/image/DefaultImageDisplayHandlerTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/table/TableDisplayHandlerTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/text/ANSITextTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/extension/JupyterDisplayableTest.java

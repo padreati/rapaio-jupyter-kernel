@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>io.github.padreati</groupId>
+        <artifactId>rapaio-jupyter</artifactId>
+        <version>2.3.0</version>
+    </parent>
+
+    <artifactId>rapaio-jupyter-display</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>io.github.padreati</groupId>
+            <artifactId>rapaio-jupyter-kernel</artifactId>
+            <version>2.3.0</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <sourceDirectory>src/java</sourceDirectory>
+        <resources>
+            <resource>
+                <directory>src/resources</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </resource>
+        </resources>
+        <testSourceDirectory>src/test</testSourceDirectory>
+        <testResources>
+            <testResource>
+                <directory>src/test-resources</directory>
+                <excludes>
+                    <exclude>**/*.java</exclude>
+                </excludes>
+            </testResource>
+        </testResources>
+<!--        <plugins>-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <version>3.13.0</version>-->
+<!--                <configuration>-->
+<!--                    <release>${java.version}</release>-->
+<!--                    <useModulePath>true</useModulePath>-->
+<!--                    <compilerArgs>-->
+<!--                        <compilerArg>&#45;&#45;enable-preview</compilerArg>-->
+<!--                        <compilerArg>&#45;&#45;add-modules</compilerArg>-->
+<!--                        <compilerArg>rapaio.lib</compilerArg>-->
+<!--                    </compilerArgs>-->
+<!--                    <source>${java.version}</source>-->
+<!--                    <target>${java.version}</target>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+    </build>
+
+</project>

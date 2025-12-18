@@ -13,6 +13,7 @@ org.rapaio.jupyter.kernel.display
 org.rapaio.jupyter.kernel.display.html
 org.rapaio.jupyter.kernel.display.html.tags
 org.rapaio.jupyter.kernel.display.image
+org.rapaio.jupyter.kernel.display.spi
 org.rapaio.jupyter.kernel.display.table
 org.rapaio.jupyter.kernel.display.text
 org.rapaio.jupyter.kernel.global

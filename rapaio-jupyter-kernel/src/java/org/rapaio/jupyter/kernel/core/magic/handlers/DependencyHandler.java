@@ -1,19 +1,20 @@
 package org.rapaio.jupyter.kernel.core.magic.handlers;
 
-import org.eclipse.aether.repository.RepositoryPolicy;
-import org.eclipse.aether.resolution.DependencyResolutionException;
-import org.eclipse.aether.resolution.DependencyResult;
-import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.display.text.ANSI;
-import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
-import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
-import org.rapaio.jupyter.kernel.core.magic.dependencies.DependencySpec;
-
 import java.io.IOException;
 import java.text.ParseException;
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.aether.repository.RepositoryPolicy;
+import org.eclipse.aether.resolution.DependencyResolutionException;
+import org.eclipse.aether.resolution.DependencyResult;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
+import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
+import org.rapaio.jupyter.kernel.core.magic.dependencies.DependencySpec;
+import org.rapaio.jupyter.kernel.display.Display;
+import org.rapaio.jupyter.kernel.display.text.ANSI;
 
 public class DependencyHandler extends MagicHandler {
 
@@ -245,6 +246,7 @@ public class DependencyHandler extends MagicHandler {
                 kernel.channels().writeToStdOut("Add to classpath: " +
                         ANSI.start().fgGreen().text(result.getArtifact().getFile().getAbsolutePath()).reset().nl().render());
                 kernel.javaEngine().getShell().addToClasspath(result.getArtifact().getFile().getAbsolutePath());
+                Display.inst().refreshSpiDisplayHandlers();
                 kernel.dependencyManager().addLoadedArtifact(result);
             }
             kernel.dependencyManager().promoteDependencies();

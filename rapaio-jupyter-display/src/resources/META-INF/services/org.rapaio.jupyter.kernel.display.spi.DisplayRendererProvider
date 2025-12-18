@@ -1,0 +1,2 @@
+org.rapaio.jupyter.display.provider.ElementsDisplayRendererProvider
+org.rapaio.jupyter.display.provider.TableDisplayRendererProvider
