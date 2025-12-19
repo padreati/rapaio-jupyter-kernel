@@ -67,7 +67,7 @@ The project is also stored in maven central repositories and can be added as a d
 <dependency>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>2.3.0</version>
+    <version>2.2.0</version>
 </dependency>
 ```
 
