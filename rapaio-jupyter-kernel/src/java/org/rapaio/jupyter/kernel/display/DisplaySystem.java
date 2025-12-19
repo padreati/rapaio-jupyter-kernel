@@ -1,7 +1,6 @@
 package org.rapaio.jupyter.kernel.display;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.ServiceLoader;
 import java.util.UUID;
@@ -11,18 +10,21 @@ import org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider;
 import org.rapaio.jupyter.kernel.display.spi.DisplayTransformerProvider;
 import org.rapaio.jupyter.kernel.display.table.DefaultTableDisplayRenderer;
 
-public final class Display {
+/**
+ * This class is responsible with the display of objects in the notebook cell's output.
+ */
+public final class DisplaySystem {
 
-    private static final Display inst = new Display();
+    private static final DisplaySystem inst = new DisplaySystem();
 
-    public static Display inst() {
+    public static DisplaySystem inst() {
         return inst;
     }
 
     private final List<DisplayTransformer> spiDisplayTransformers = new ArrayList<>();
-    private final List<DisplayTransformer> systemDisplayTransformers = new ArrayList<>();
-
     private final List<DisplayRenderer> spiDisplayRenderers = new ArrayList<>();
+
+    private final List<DisplayTransformer> systemDisplayTransformers = new ArrayList<>();
     private final List<DisplayRenderer> systemDisplayRenderers = new ArrayList<>();
 
     private final DefaultDisplayRenderer defaultDisplayRenderer = new DefaultDisplayRenderer();
@@ -30,12 +32,14 @@ public final class Display {
     private final ServiceLoader<DisplayTransformerProvider> transformerLoader;
     private final ServiceLoader<DisplayRendererProvider> rendererLoader;
 
-    private Display() {
+    private DisplaySystem() {
         systemDisplayRenderers.add(new DefaultImageDisplayRenderer());
         systemDisplayRenderers.add(new DefaultTableDisplayRenderer());
 
         transformerLoader = ServiceLoader.load(DisplayTransformerProvider.class);
         rendererLoader = ServiceLoader.load(DisplayRendererProvider.class);
+
+        refreshSpiDisplayHandlers();
     }
 
     public void refreshSpiDisplayHandlers() {
@@ -45,10 +49,19 @@ public final class Display {
         spiDisplayTransformers.clear();
         spiDisplayRenderers.clear();
 
-        transformerLoader.stream().flatMap(provider -> provider.get().getDisplayTransformers().stream()).forEach(spiDisplayTransformers::add);
+        transformerLoader.stream()
+                .flatMap(provider -> provider.get().getDisplayTransformers().stream())
+                .forEach(spiDisplayTransformers::add);
         rendererLoader.stream().flatMap(provider -> provider.get().getDisplayRenderers().stream()).forEach(spiDisplayRenderers::add);
     }
 
+    /**
+     * Produces the display data which will be passed to the notebook cell's output
+     * from an object. The mime type is determined by the global configuration.
+     *
+     * @param o object to be rendered
+     * @return produced display data
+     */
     public DisplayData render(Object o) {
         return render(null, o);
     }
@@ -57,9 +70,9 @@ public final class Display {
      * Produces the display data which will be passed to the notebook cell's output
      * from an object and an optional mime type.
      *
-     * @param mime
-     * @param o
-     * @return
+     * @param mime desired mime type of the display data
+     * @param o    object to be rendered
+     * @return produced display data
      */
     public DisplayData render(String mime, Object o) {
 
@@ -110,24 +123,5 @@ public final class Display {
             displayData.setDisplayId(UUID.randomUUID().toString());
         }
         return displayData;
-    }
-
-    private static class ClassComparator implements Comparator<Class<?>> {
-        @Override
-        public int compare(Class<?> o1, Class<?> o2) {
-            if (o1 == null && o2 == null) {
-                return 0;
-            }
-            if (o1 == null) {
-                return -1;
-            }
-            if (o2 == null) {
-                return 1;
-            }
-            if (o1 == o2) {
-                return 0;
-            }
-            return o1.getName().compareTo(o2.getName());
-        }
     }
 }

@@ -10,7 +10,7 @@ import java.util.List;
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
-import org.rapaio.jupyter.kernel.display.Display;
+import org.rapaio.jupyter.kernel.display.DisplaySystem;
 import org.rapaio.jupyter.kernel.display.text.ANSI;
 import org.rapaio.jupyter.kernel.core.magic.MagicEvalException;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
@@ -153,7 +153,7 @@ public class JarMagicHandler extends MagicHandler {
             kernel.javaEngine().getShell().addToClasspath(file.getAbsolutePath());
             kernel.channels().writeToStdOut(ANSI.start().fgGreen().text("Add " + file.getAbsolutePath() + " to classpath").render());
         }
-        Display.inst().refreshSpiDisplayHandlers();
+        DisplaySystem.inst().refreshSpiDisplayHandlers();
     }
 
     private CompleteMatches completeLine(RapaioKernel kernel, MagicSnippet magicSnippet) {

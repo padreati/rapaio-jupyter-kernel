@@ -12,14 +12,14 @@ import javax.imageio.ImageIO;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.display.MimeType;
-import org.rapaio.jupyter.kernel.display.Display;
+import org.rapaio.jupyter.kernel.display.DisplaySystem;
 
 public class DefaultImageDisplayHandlerTest {
 
     @Test
     void testImageRender() throws IOException {
         BufferedImage image = ImageIO.read(URI.create("http://www.xmpie.com/VDPSoftware/assets/images/untitled-11-1046x547.png").toURL());
-        DisplayData dd = Display.inst().render(image);
+        DisplayData dd = DisplaySystem.inst().render(image);
         assertNotNull(dd);
         assertTrue(dd.data().containsKey(MimeType.PNG.toString()));
     }

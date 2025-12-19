@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.channels.Channels;
 import org.rapaio.jupyter.kernel.display.DisplayData;
-import org.rapaio.jupyter.kernel.display.Display;
+import org.rapaio.jupyter.kernel.display.DisplaySystem;
 import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
 import org.rapaio.jupyter.kernel.core.java.IsCompleteResult;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
@@ -157,7 +157,7 @@ public class RapaioKernel {
             if (result instanceof DisplayData dd) {
                 return dd;
             }
-            return Display.inst().render(result);
+            return DisplaySystem.inst().render(result);
         }
         return null;
     }

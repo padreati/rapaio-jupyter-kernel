@@ -13,11 +13,15 @@ public class Config {
     private static final String DEFAULT_MIME_IMAGE = "display.defaultMimeImage";
     private static final String DEFAULT_MIME_IMAGE_VALUE = MimeType.PNG.longType();
 
+    private static final String MAX_ROWS_KEY = "display.maxRows";
+    private static final String MAX_ROWS_VALUE = "12";
+
     private final HashMap<String, String> valueMap = new HashMap<>();
 
     public Config() {
         valueMap.put(DEFAULT_MIME, DEFAULT_MIME_VALUE);
         valueMap.put(DEFAULT_MIME_IMAGE, DEFAULT_MIME_IMAGE_VALUE);
+        valueMap.put(MAX_ROWS_KEY, MAX_ROWS_VALUE);
     }
 
     public String get(String key) {
@@ -58,6 +62,14 @@ public class Config {
 
         public void defaultMimeImage(String value) {
             config.set(DEFAULT_MIME_IMAGE, value);
+        }
+
+        public int maxRows() {
+            return Integer.parseInt(config.get(MAX_ROWS_KEY));
+        }
+
+        public void maxRows(int value) {
+            config.set(MAX_ROWS_KEY, Integer.toString(value));
         }
     }
 }

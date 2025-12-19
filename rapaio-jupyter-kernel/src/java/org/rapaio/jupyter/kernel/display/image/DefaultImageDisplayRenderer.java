@@ -14,6 +14,11 @@ import org.rapaio.jupyter.kernel.display.DisplayRenderer;
 import org.rapaio.jupyter.kernel.display.MimeType;
 import org.rapaio.jupyter.kernel.global.Global;
 
+/**
+ * Default renderer for images. The objects rendered must be instances of {@link RenderedImage}.
+ * <p>
+ * The renderer can render the following formats: png, gif, jpeg
+ */
 public class DefaultImageDisplayRenderer implements DisplayRenderer {
 
     private static final Map<MimeType, String> allowedFormats = Map.of(
@@ -35,7 +40,7 @@ public class DefaultImageDisplayRenderer implements DisplayRenderer {
 
     @Override
     public DisplayData render(String mime, Object o) {
-        if(!canRender(mime)) {
+        if (!canRender(mime)) {
             throw new IllegalArgumentException("Cannot render object with this renderer.");
         }
         MimeType mimeType = MimeType.from(mime, Global.config().display().defaultMimeImage());

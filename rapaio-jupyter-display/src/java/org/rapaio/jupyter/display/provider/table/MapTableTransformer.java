@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.rapaio.jupyter.kernel.display.DisplayTransformer;
 import org.rapaio.jupyter.kernel.display.table.TableDisplayModel;
+import org.rapaio.jupyter.kernel.global.Global;
 
 public class MapTableTransformer implements DisplayTransformer {
 
@@ -20,7 +21,7 @@ public class MapTableTransformer implements DisplayTransformer {
         if (o == null) {
             return false;
         }
-        return o.getClass().isAssignableFrom(Map.class);
+        return Map.class.isAssignableFrom(o.getClass());
     }
 
     @Override
@@ -30,17 +31,19 @@ public class MapTableTransformer implements DisplayTransformer {
 
     static class MapTableModel implements TableDisplayModel {
 
-        private static final int MAX = 20;
         private final List<Object> keys = new ArrayList<>();
         private final List<Object> values = new ArrayList<>();
 
         public MapTableModel(Map<?, ?> map) {
-            int len = 0;
+            if(map.isEmpty()) {
+                return;
+            }
+            keys.add("Key");
+            values.add("Value");
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 keys.add(entry.getKey());
                 values.add(entry.getValue());
-                len++;
-                if (len == MAX) {
+                if (keys.size() == Global.config().display().maxRows() + 2) {
                     keys.add("...");
                     values.add("...");
                     break;
@@ -55,27 +58,22 @@ public class MapTableTransformer implements DisplayTransformer {
 
         @Override
         public int getRows() {
-            return keys.size() + headerRows();
+            return keys.size();
         }
 
         @Override
         public int headerRows() {
-            return 1;
+            return Math.min(keys.size(), 1);
         }
 
         @Override
         public String getValue(int row, int col) {
-            if (row == 0) {
-                return col == 0 ? "Key" : "Value";
-            }
             if (col == 0) {
-                Object key = keys.get(row - 1);
-                key = key == null ? "null" : key;
-                return key.toString();
+                Object key = keys.get(row);
+                return key == null ? "null" : key.toString();
             } else {
-                Object value = values.get(row - 1);
-                value = value == null ? "null" : value;
-                return value.toString();
+                Object value = values.get(row);
+                return value == null ? "null" : value.toString();
             }
         }
     }

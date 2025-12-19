@@ -8,10 +8,13 @@ import org.rapaio.jupyter.kernel.display.DisplayRenderer;
 import org.rapaio.jupyter.kernel.display.MimeType;
 import org.rapaio.jupyter.kernel.global.Global;
 
+/**
+ * Default renderer for table display model.
+ */
 public class DefaultTableDisplayRenderer implements DisplayRenderer {
 
     private static final Set<MimeType> supportedTypes = Set.of(
-            MimeType.HTML, MimeType.MARKDOWN, MimeType.TEXT);
+            MimeType.HTML, MimeType.MARKDOWN);
 
     @Override
     public Class<?> rendererClass() {
@@ -35,8 +38,6 @@ public class DefaultTableDisplayRenderer implements DisplayRenderer {
             return displayHtml(td);
         } else if (mime.equals(MimeType.MARKDOWN)) {
             return displayMarkdown(td);
-        } else if (mime.equals(MimeType.TEXT)) {
-            return displayText(td);
         }
         return null;
     }
@@ -46,36 +47,11 @@ public class DefaultTableDisplayRenderer implements DisplayRenderer {
 
         StringBuilder sb = new StringBuilder();
 
-        // Add CSS styles
-        sb.append("<style>\n");
-        sb.append(String.format("#%s {\n", id));
-        sb.append("  border-collapse: collapse;\n");
-        sb.append("  width: 100%;\n");
-        sb.append("  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n");
-        sb.append("  font-size: 14px;\n");
-        sb.append("}\n");
-        sb.append(String.format("#%s th, #%s td {\n", id, id));
-        sb.append("  border: 1px solid #ddd;\n");
-        sb.append("  padding: 8px 12px;\n");
-        sb.append("  text-align: left;\n");
-        sb.append("}\n");
-        sb.append(String.format("#%s th {\n", id));
-        sb.append("  background-color: #f8f9fa;\n");
-        sb.append("  font-weight: 600;\n");
-        sb.append("  color: #495057;\n");
-        sb.append("}\n");
-        sb.append(String.format("#%s tr:nth-child(even) {\n", id));
-        sb.append("  background-color: #f8f9fa;\n");
-        sb.append("}\n");
-        sb.append(String.format("#%s tr:hover {\n", id));
-        sb.append("  background-color: #e9ecef;\n");
-        sb.append("}\n");
-        sb.append("</style>\n");
-
-        sb.append(String.format("<table id=\"%s\">\n", id));
+        sb.append(String.format("<table border=\"1\" class=\"dataframe\" id=\"%s\">\n", id));
         sb.append("<thead>\n");
         for (int i = 0; i < td.headerRows(); i++) {
-            sb.append("<tr>");
+            sb.append("<tr style=\"text-align: right;\">");
+            sb.append("<th></th>");
             for (int j = 0; j < td.getCols(); j++) {
                 sb.append(String.format("<th>%s</th>", td.getValue(i, j)));
             }
@@ -85,6 +61,7 @@ public class DefaultTableDisplayRenderer implements DisplayRenderer {
         sb.append("<tbody>\n");
         for (int i = td.headerRows(); i < td.getRows(); i++) {
             sb.append("<tr>");
+            sb.append(String.format("<th>%d</th>", i - td.headerRows()));
             for (int j = 0; j < td.getCols(); j++) {
                 sb.append(String.format("<td>%s</td>", td.getValue(i, j)));
             }
@@ -105,18 +82,20 @@ public class DefaultTableDisplayRenderer implements DisplayRenderer {
         if (td.headerRows() > 0) {
             for (int i = 0; i < td.headerRows(); i++) {
                 sb.append("| ");
+                sb.append(" |");
                 for (int j = 0; j < td.getCols(); j++) {
                     sb.append(String.format("%s |", td.getValue(i, j)));
                 }
                 sb.append("\n");
             }
             sb.append("| ");
-            sb.append("--- |".repeat(Math.max(0, td.getCols())));
+            sb.append("--- |".repeat(Math.max(0, td.getCols() + 1)));
             sb.append("\n");
         }
 
         for (int i = td.headerRows(); i < td.getRows(); i++) {
             sb.append("| ");
+            sb.append(String.format("**%d** |", i - td.headerRows()));
             for (int j = 0; j < td.getCols(); j++) {
                 sb.append(String.format("%s |", td.getValue(i, j)));
             }
