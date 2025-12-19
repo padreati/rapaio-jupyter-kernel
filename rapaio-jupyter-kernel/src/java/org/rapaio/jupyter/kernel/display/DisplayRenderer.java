@@ -1,28 +1,30 @@
 package org.rapaio.jupyter.kernel.display;
 
 /**
- * Handler for rendering objects to {@link DisplayData}. Implementations of this interface
- * should be able to render objects of a given class specified bu {@link #rendererClass()},
- * the supported MIME types returns `true` for {@link #canRender(String)}.
+ * Renders objects to {@link DisplayData} if the objects can be cast to the class specified by {@link #rendererClass()}
+ * and the requested MIME type is supported by the renderer.
  * <p>
- * The default handler is {@link DefaultDisplayRenderer} which renders all objects to
+ * A supported MIME type is one for which {@link #canRender(String)} returns `true`.
+ * <p>
+ * The default renderer is {@link DefaultDisplayRenderer} which renders all objects to
  * a string representation.
  * <p>
- * Implementations of this interface could be provided through SPI services.
+ * Implementations of this interface could be provided through SPI services by providing implementations
+ * of {@link org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider}.
  *
  * @see org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider
  */
 public interface DisplayRenderer {
 
     /**
-     * Parent class of the objects which can be rendered by this handler.
+     * Parent class of the objects which can be rendered by this renderer.
      *
-     * @return parent class of the objects which can be rendered by this handler
+     * @return parent class of the objects which can be rendered
      */
     Class<?> rendererClass();
 
     /**
-     * Checks if the given MIME type is supported by this handler.
+     * Checks if the given MIME type is supported by this renderer.
      *
      * @param mime MIME type to be checked
      * @return true if the MIME type is supported, false otherwise

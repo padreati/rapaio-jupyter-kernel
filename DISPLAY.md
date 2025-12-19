@@ -23,8 +23,10 @@ for output cells. This can be realized from java code cells using one of the met
 `display(String mime, Object o)`, `updateDisplay(String id, String mimeType, Object o)` or `updateDisplay(String id, Object o)`. 
 A trivial example is the following:
 
-    Map<Integer, String> numbers = Map.of(1, "one", 2, "two");
-    display("html", numbers)
+```java
+Map<Integer, String> numbers = Map.of(1, "one", 2, "two");
+display("html", numbers);
+```
 
 All those methods are statically imported into any notebook if this kernel is used, and they are actually public 
 methods provided by the `Global` class.
@@ -44,3 +46,88 @@ Also, a library is provided for this purpose: `rapaio-jupyter-display` which ser
 It provides additional display renderers and transformers, and it is an illustrative example which can
 be used by you to build your own libraries to extend the display facilities of the kernel.
 
+## Step-by-step Guide to build a display extension
+
+You can extend the kernel capacity to display your custom object types by creating a display extension library. 
+This new project needs to depend on rapaio-jupyter-kernel project and also on your library. 
+The purpose of this project is to create display renderers and/or display transformers for your types 
+and to provide them to the kernel instance using SPI (Service Provider Interface).
+
+Once the jar file of your project is built, the only thing which remains in order to use the new features is 
+to load the project artifacts into the current class path of the notebook. This can be done either if you 
+add the artifacts as dependencies or if you add the jar file to the class path. 
+
+When a new jar resource is added to the class path of the current notebook, the kernel inspects the new resource 
+for any resource providers and loads them so they are ready to be used. All display renderers and transformers
+which are provided through SPI have priority before those provided by default by the kernel.
+
+Once you set up the project the implementation has the following steps:
+
+### 1. DisplayRenderer Implementation
+
+```java
+public class MyObjectRenderer implements DisplayRenderer {
+    @Override
+    public Class<?> rendererClass() {
+        return MyObject.class;
+    }
+
+    @Override
+    public boolean canRender(String mimeType) {
+        return MIMEType.HTML.toString().equals(mimeType);
+    }
+
+    @Override
+    public DisplayData render(String mimeType, Object o) {
+        MyObject obj = (MyObject) o;
+        return DisplayData.fromHtml("<div>" + obj.toString() + "</div>");
+    }
+}
+```
+
+### 2. DisplayRendererProvider
+
+```java
+public class MyRendererProvider implements DisplayRendererProvider {
+    @Override
+    public List<DisplayRenderer> getDisplayRenderers() {
+        return List.of(new MyObjectRenderer());
+    }
+}
+```
+
+### 3. SPI Registration
+
+Create `META-INF/services/org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider`:
+
+```
+com.example.MyRendererProvider
+```
+
+### 4. DisplayTransformer (Optional)
+
+```java
+public class MyTransformer implements DisplayTransformer {
+    @Override
+    public boolean canTransform(Object o) {
+        return o instanceof ComplexObject;
+    }
+
+    @Override
+    public Object transform(Object o) {
+        return new SimpleObject(((ComplexObject) o).getData());
+    }
+}
+```
+
+Register via `DisplayTransformerProvider` and SPI.
+
+
+## rapaio-jupyter-display
+
+This is a display extension library which offers display extensions for standard Java collections like: List, Set and Map. 
+Another goal of the project is to provide an illustrative example on how you can extend the kernel display for your own 
+classes and libraries.
+
+By default the rapaio-jupyter-kernel does not provide those display extensions, but those can be enabled if the jar artifact 
+is loaded on class path. This can be done directly using jar magic commands, or using the dependency management magic commands.
