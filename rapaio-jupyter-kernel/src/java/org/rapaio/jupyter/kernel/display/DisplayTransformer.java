@@ -16,19 +16,19 @@ package org.rapaio.jupyter.kernel.display;
 public interface DisplayTransformer {
 
     /**
-     * Transformation target class type.
-     *
-     * @return class type of the transformed object
-     */
-    Class<?> transformerClass();
-
-    /**
      * Describes if the transformer can transform the given object.
      *
      * @param o object to be transformed
      * @return true if the transformer can transform the given object, false otherwise
      */
     boolean canTransform(Object o);
+
+    /**
+     * Transformation target class type.
+     *
+     * @return class type of the transformed object
+     */
+    Class<?> transformedClass();
 
     /**
      * Transforms the given object into a transformed object.

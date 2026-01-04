@@ -1,4 +1,4 @@
-package org.rapaio.jupyter.display.provider.table;
+package org.rapaio.jupyter.kernel.display.table;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -10,16 +10,16 @@ import java.util.TreeMap;
 
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.display.DisplaySystem;
-import org.rapaio.jupyter.kernel.display.table.TableDisplayModel;
 import org.rapaio.jupyter.kernel.global.Global;
 
 public class MapTableTransformerTest {
 
-    private final  MapTableTransformer transformer = new MapTableTransformer();
+    private final org.rapaio.jupyter.kernel.display.table.MapTableTransformer
+            transformer = new org.rapaio.jupyter.kernel.display.table.MapTableTransformer();
 
     @Test
     void testClass() {
-        assertEquals(TableDisplayModel.class, transformer.transformerClass());
+        assertEquals(TableDisplay.class, transformer.transformedClass());
     }
 
     @Test
@@ -33,23 +33,25 @@ public class MapTableTransformerTest {
         var model = transformer.transform(Map.of());
         assertEquals(0, model.getRows());
         assertEquals(2, model.getCols());
-        assertEquals(0, model.headerRows());
+        assertTrue(model.hasHeader());
     }
 
     @Test
     void testSmallMap() {
         SortedMap<String, Integer> map = new TreeMap<>(Map.of("a", 1, "b", 2));
         var model = transformer.transform(map);
-        assertEquals(3, model.getRows());
+        assertEquals(2, model.getRows());
         assertEquals(2, model.getCols());
-        assertEquals(1, model.headerRows());
+        assertTrue(model.hasHeader());
+        assertEquals(DataType.STRING, model.columnType(0));
+        assertEquals(DataType.INTEGER, model.columnType(1));
 
-        assertEquals("Key", model.getValue(0, 0));
-        assertEquals("a", model.getValue(1, 0));
-        assertEquals("b", model.getValue(2, 0));
-        assertEquals("Value", model.getValue(0, 1));
-        assertEquals("1", model.getValue(1, 1));
-        assertEquals("2", model.getValue(2, 1));
+        assertEquals("Key", model.columnName(0));
+        assertEquals("a", model.getFormattedValue(0, 0));
+        assertEquals("b", model.getFormattedValue(1, 0));
+        assertEquals("Value", model.columnName(1));
+        assertEquals("1", model.getFormattedValue(0, 1));
+        assertEquals("2", model.getFormattedValue(1, 1));
     }
 
     @Test
@@ -57,10 +59,10 @@ public class MapTableTransformerTest {
         DisplaySystem.inst().refreshSpiDisplayHandlers();
         var dd = DisplaySystem.inst().render(new TreeMap<>(Map.of("a", 1, "b", 2)));
 
-        String mime = Global.config().display().defaultMime();
+        String mime = Global.options().display().defaultMime();
         assertTrue(dd.data().containsKey(mime));
         assertTrue(dd.data().get(mime).toString().contains("""
-                <th>Key</th><th>Value</th></tr>
+                <th style="text-align: center;">Key</th><th style="text-align: center;">Value</th></tr>
                 </thead>
                 <tbody>"""
         ));

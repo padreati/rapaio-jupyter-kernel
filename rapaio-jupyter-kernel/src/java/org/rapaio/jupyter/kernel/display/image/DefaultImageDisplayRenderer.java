@@ -34,7 +34,7 @@ public class DefaultImageDisplayRenderer implements DisplayRenderer {
 
     @Override
     public boolean canRender(String mime) {
-        MimeType mimeType = MimeType.from(mime, Global.config().display().defaultMimeImage());
+        MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMimeImage());
         return allowedFormats.containsKey(mimeType);
     }
 
@@ -43,7 +43,7 @@ public class DefaultImageDisplayRenderer implements DisplayRenderer {
         if (!canRender(mime)) {
             throw new IllegalArgumentException("Cannot render object with this renderer.");
         }
-        MimeType mimeType = MimeType.from(mime, Global.config().display().defaultMimeImage());
+        MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMimeImage());
         if (allowedFormats.containsKey(mimeType)) {
             return renderFormat(mimeType, o);
         }

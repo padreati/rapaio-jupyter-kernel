@@ -1,7 +1,7 @@
 package org.rapaio.jupyter.display.provider.list;
 
-import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -10,26 +10,23 @@ import org.rapaio.jupyter.kernel.display.DisplayRenderer;
 import org.rapaio.jupyter.kernel.display.MimeType;
 import org.rapaio.jupyter.kernel.global.Global;
 
-public class ListDisplayRenderer implements DisplayRenderer {
+public class ExampleSetDisplayRenderer implements DisplayRenderer {
 
-    private static final Map<MimeType, Function<List<?>, DisplayData>> handlers = Map.of(
+    private static final Map<MimeType, Function<Set<?>, DisplayData>> handlers = Map.of(
             MimeType.TEXT, new TextListHandler(),
             MimeType.HTML, new HtmlListHandler()
     );
 
     @Override
     public Class<?> rendererClass() {
-        return List.class;
+        return Set.class;
     }
 
     @Override
     public boolean canRender(String mime) {
 
-        MimeType mimeType = MimeType.from(mime, Global.config().display().defaultMime());
-        if (handlers.containsKey(mimeType)) {
-            return true;
-        }
-        return false;
+        MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMime());
+        return handlers.containsKey(mimeType);
     }
 
     @Override
@@ -37,16 +34,17 @@ public class ListDisplayRenderer implements DisplayRenderer {
         if (!canRender(mime)) {
             return null;
         }
-        MimeType mimeType = MimeType.from(mime, Global.config().display().defaultMime());
+        MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMime());
         var handler = handlers.get(mimeType);
-        return handler.apply((List<?>) o);
+        return handler.apply((Set<?>) o);
     }
 
-    static class TextListHandler implements Function<List<?>, DisplayData> {
+    static class TextListHandler implements Function<Set<?>, DisplayData> {
 
         @Override
-        public DisplayData apply(List<?> collection) {
-            String sb = collection.getClass().getSimpleName() + "{"
+        public DisplayData apply(Set<?> collection) {
+            String sb = "Example renderer: "
+                    + collection.getClass().getSimpleName() + "{"
                     + "size:" + collection.size() + ",["
                     + collection.stream().limit(10).map(Object::toString).collect(Collectors.joining(","))
                     + (collection.size() > 10 ? ", ..." : "") + "]}";
@@ -54,12 +52,13 @@ public class ListDisplayRenderer implements DisplayRenderer {
         }
     }
 
-    static class HtmlListHandler implements Function<List<?>, DisplayData> {
+    static class HtmlListHandler implements Function<Set<?>, DisplayData> {
 
         @Override
-        public DisplayData apply(List<?> list) {
-            String sb = "<b>" + list.getClass().getSimpleName() + "</b>{"
-                    + "size:<b>" + list.size() + "</b>,["
+        public DisplayData apply(Set<?> list) {
+            String sb = "Example renderer: "
+                    + "<b>" + list.getClass().getSimpleName() + "</b>{"
+                    + "size:" + list.size() + ",["
                     + list.stream().limit(10).map(Object::toString).collect(Collectors.joining(","))
                     + (list.size() > 10 ? ", ..." : "") + "]}";
 

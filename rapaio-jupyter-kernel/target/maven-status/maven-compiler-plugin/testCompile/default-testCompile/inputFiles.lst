@@ -14,7 +14,8 @@
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/core/util/GlobTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/html/tags/TagsTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/image/DefaultImageDisplayHandlerTest.java
-/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/table/TableDisplayHandlerTest.java
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/table/MapTableTransformerTest.java
+/home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/table/TableDisplayTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/display/text/ANSITextTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/extension/JupyterDisplayableTest.java
 /home/ati/work/rapaio-jupyter-kernel/rapaio-jupyter-kernel/src/test/org/rapaio/jupyter/kernel/global/GlobalTest.java

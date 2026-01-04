@@ -1,0 +1,52 @@
+[
+  {
+    "key": "display.defaultMime",
+    "value": "text/html",
+    "description": "Default mime type for display data"
+  },
+  {
+    "key": "display.defaultMimeImage",
+    "value": "image/png",
+    "description": "Default mime type for display data on images"
+  },
+  {
+    "key": "display.html.border",
+    "value": "1",
+    "description": "A `border=value` attribute is inserted in the `<table>` tag for the DataFrame HTML representation."
+  },
+  {
+    "key": "display.maxRows",
+    "value": "20",
+    "description": "If maxRows is exceeded, switch to truncate view. Objects are centrally truncated. '0' value means unlimited. default: 60"
+  },
+  {
+    "key": "display.maxCols",
+    "value": "20",
+    "description": "If maxCols is exceeded, switch to truncate view. Objects are centrally truncated. '0' value means unlimited. default: 0"
+  },
+  {
+    "key": "display.maxColWidth",
+    "value": "50",
+    "description": "The maximum width in characters of a textual representation of a value. When the text overflows, a \"...\" placeholder is embedded in the output. A '0' value means unlimited."
+  },
+  {
+    "key": "display.maxSeqItems",
+    "value": "100",
+    "description": "When pretty-printing a long sequence, no more then `maxSeqItems` will be printed. If items are omitted, they will be denoted by the addition of \"...\" to the resulting string. If set to 0, the number of items to be printed is unlimited."
+  },
+  {
+    "key": "display.showIndex",
+    "value": "true",
+    "description": "Has value 'true' if the row index is displayed, any other values the row index is not displayed."
+  },
+  {
+    "key": "display.format.na",
+    "value": "",
+    "description": "The string representation for values identified as missing."
+  },
+  {
+    "key": "display.format.precision",
+    "value": "6",
+    "description": "Number of decimals for floating point numbers."
+  }
+]

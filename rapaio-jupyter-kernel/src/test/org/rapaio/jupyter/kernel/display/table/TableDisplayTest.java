@@ -4,14 +4,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
-class TableDisplayHandlerTest {
+class TableDisplayTest {
 
-    private final DefaultTableDisplayRenderer handler = new DefaultTableDisplayRenderer();
+    private final DefaultTableDisplayRenderer renderer = new DefaultTableDisplayRenderer();
 
     @Test
     void testCanRender() {
-        TableDisplay td = new TableDisplay(2, 2, 1);
-        assertTrue(handler.canRender(null));
+        TableDisplayModel td = new TableDisplayModel(2, 2, true);
+        assertTrue(renderer.canRender(null));
     }
 /*
     @Test
@@ -87,23 +87,23 @@ class TableDisplayHandlerTest {
  */
 }
 
-class TableDisplay implements TableDisplayModel {
+class TableDisplayModel implements TableDisplay {
 
     private final int rows;
     private final int cols;
-    private final int headerRows;
+    private final boolean hasHeader;
 
     private final String[][] data;
 
-    public TableDisplay(int rows, int cols, int headerRows) {
+    public TableDisplayModel(int rows, int cols, boolean hasHeader) {
         this.rows = rows;
         this.cols = cols;
-        this.headerRows = headerRows;
+        this.hasHeader = hasHeader;
         this.data = new String[rows][cols];
 
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                data[i][j] = ((i < headerRows) ? "H[" : "D[") + i + "," + j + "]";
+                data[i][j] = "D[" + i + "," + j + "]";
             }
         }
     }
@@ -119,8 +119,18 @@ class TableDisplay implements TableDisplayModel {
     }
 
     @Override
-    public int headerRows() {
-        return headerRows;
+    public boolean hasHeader() {
+        return hasHeader;
+    }
+
+    @Override
+    public String columnName(int col) {
+        return "Column[" + col + "]";
+    }
+
+    @Override
+    public DataType columnType(int col) {
+        return DataType.STRING;
     }
 
     @Override

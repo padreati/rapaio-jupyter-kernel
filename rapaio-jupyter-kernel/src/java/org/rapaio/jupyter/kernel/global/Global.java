@@ -8,14 +8,14 @@ import org.rapaio.jupyter.kernel.display.DisplaySystem;
 
 public final class Global {
 
-    private static final Config CONFIG = new Config();
+    private static final Options OPTIONS = new Options();
 
     public static DisplaySystem displaySystem() {
         return DisplaySystem.inst();
     }
 
-    public static Config config() {
-        return CONFIG;
+    public static Options options() {
+        return OPTIONS;
     }
 
     public static String display(Object o) {

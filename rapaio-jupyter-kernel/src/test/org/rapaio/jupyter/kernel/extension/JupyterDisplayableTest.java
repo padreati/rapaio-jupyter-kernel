@@ -15,7 +15,7 @@ public class JupyterDisplayableTest {
     void smokeTest() {
         var obj = "text";
 
-        var defaultMime = Global.config().display().defaultMime();
+        var defaultMime = Global.options().display().defaultMime();
         var defaultDisplay = DisplaySystem.inst().render(obj);
         assertNotNull(defaultDisplay);
         assertNotNull(defaultDisplay.data());

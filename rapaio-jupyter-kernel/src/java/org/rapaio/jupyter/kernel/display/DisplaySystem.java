@@ -6,9 +6,12 @@ import java.util.ServiceLoader;
 import java.util.UUID;
 
 import org.rapaio.jupyter.kernel.display.image.DefaultImageDisplayRenderer;
+import org.rapaio.jupyter.kernel.display.sequence.DefaultCollectionDisplayRenderer;
 import org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider;
 import org.rapaio.jupyter.kernel.display.spi.DisplayTransformerProvider;
 import org.rapaio.jupyter.kernel.display.table.DefaultTableDisplayRenderer;
+import org.rapaio.jupyter.kernel.display.table.MapTableTransformer;
+import org.rapaio.jupyter.kernel.display.table.OptionsTableTransformer;
 
 /**
  * This class is responsible with the display of objects in the notebook cell's output.
@@ -33,8 +36,12 @@ public final class DisplaySystem {
     private final ServiceLoader<DisplayRendererProvider> rendererLoader;
 
     private DisplaySystem() {
+        systemDisplayRenderers.add(new DefaultCollectionDisplayRenderer());
         systemDisplayRenderers.add(new DefaultImageDisplayRenderer());
         systemDisplayRenderers.add(new DefaultTableDisplayRenderer());
+
+        systemDisplayTransformers.add(new MapTableTransformer());
+        systemDisplayTransformers.add(new OptionsTableTransformer());
 
         transformerLoader = ServiceLoader.load(DisplayTransformerProvider.class);
         rendererLoader = ServiceLoader.load(DisplayRendererProvider.class);

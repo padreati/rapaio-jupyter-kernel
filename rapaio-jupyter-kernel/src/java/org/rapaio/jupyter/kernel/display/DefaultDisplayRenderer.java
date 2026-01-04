@@ -23,7 +23,7 @@ public class DefaultDisplayRenderer implements DisplayRenderer {
 
     @Override
     public DisplayData render(String mime, Object o) {
-        MimeType mimeType = MimeType.from(mime, Global.config().display().defaultMime());
+        MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMime());
         return DisplayData.withType(mimeType.longType(), (o == null) ? "null" : o.toString());
     }
 }

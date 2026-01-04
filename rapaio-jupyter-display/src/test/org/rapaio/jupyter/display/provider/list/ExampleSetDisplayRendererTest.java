@@ -9,13 +9,13 @@ import java.util.Set;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-public class SetDisplayRendererTest {
+public class ExampleSetDisplayRendererTest {
 
-    private SetDisplayRenderer renderer;
+    private ExampleSetDisplayRenderer renderer;
 
     @BeforeEach
     void beforeEach() {
-        renderer = new SetDisplayRenderer();
+        renderer = new ExampleSetDisplayRenderer();
     }
 
     @Test
@@ -24,11 +24,11 @@ public class SetDisplayRendererTest {
 
         var dd = renderer.render("text/plain", set);
         assertTrue(dd.data().containsKey("text/plain"));
-        assertEquals("SetN{size:0,[]}", dd.data().get("text/plain"));
+        assertEquals("Example renderer: SetN{size:0,[]}", dd.data().get("text/plain"));
 
         dd = renderer.render("text/html", set);
         assertTrue(dd.data().containsKey("text/html"));
-        assertEquals("<b>SetN</b>{size:<b>0</b>,[]}", dd.data().get("text/html"));
+        assertEquals("Example renderer: <b>SetN</b>{size:0,[]}", dd.data().get("text/html"));
     }
 
     @Test
@@ -39,10 +39,10 @@ public class SetDisplayRendererTest {
         }
         var dd = renderer.render("text/plain", numbers);
         assertTrue(dd.data().containsKey("text/plain"));
-        assertEquals("HashSet{size:100,[0,1,2,3,4,5,6,7,8,9, ...]}", dd.data().get("text/plain"));
+        assertEquals("Example renderer: HashSet{size:100,[0,1,2,3,4,5,6,7,8,9, ...]}", dd.data().get("text/plain"));
 
         dd = renderer.render("text/html", numbers);
         assertTrue(dd.data().containsKey("text/html"));
-        assertEquals("<b>HashSet</b>{size:<b>100</b>,[0,1,2,3,4,5,6,7,8,9, ...]}", dd.data().get("text/html"));
+        assertEquals("Example renderer: <b>HashSet</b>{size:100,[0,1,2,3,4,5,6,7,8,9, ...]}", dd.data().get("text/html"));
     }
 }
