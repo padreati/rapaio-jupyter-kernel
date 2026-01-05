@@ -64,15 +64,15 @@ public class Options {
         return new ArrayList<>(valueMap.values());
     }
 
-    public ConfigDisplay display() {
-        return new ConfigDisplay(this);
+    public OptionsDisplay display() {
+        return new OptionsDisplay(this);
     }
 
-    public static class ConfigDisplay {
+    public static class OptionsDisplay {
 
         private final Options options;
 
-        private ConfigDisplay(Options options) {
+        private OptionsDisplay(Options options) {
             this.options = options;
         }
 
@@ -132,20 +132,20 @@ public class Options {
             options.set(DISPLAY_MAX_COL_WIDTH_KEY, value ? "true" : "false");
         }
 
-        public ConfigDisplayFormat format() {
-            return new ConfigDisplayFormat(this.options);
+        public OptionsDisplayFormat format() {
+            return new OptionsDisplayFormat(this.options);
         }
 
-        public ConfigDisplayHtml html() {
-            return new ConfigDisplayHtml(this.options);
+        public OptionsDisplayHtml html() {
+            return new OptionsDisplayHtml(this.options);
         }
     }
 
-    public static class ConfigDisplayFormat {
+    public static class OptionsDisplayFormat {
 
         private final Options options;
 
-        private ConfigDisplayFormat(Options options) {
+        private OptionsDisplayFormat(Options options) {
             this.options = options;
         }
 
@@ -166,11 +166,11 @@ public class Options {
         }
     }
 
-    public static class ConfigDisplayHtml {
+    public static class OptionsDisplayHtml {
 
         private final Options options;
 
-        private ConfigDisplayHtml(Options options) {
+        private OptionsDisplayHtml(Options options) {
             this.options = options;
         }
 

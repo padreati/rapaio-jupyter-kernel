@@ -7,8 +7,7 @@ import java.util.UUID;
 
 import org.rapaio.jupyter.kernel.display.image.DefaultImageDisplayRenderer;
 import org.rapaio.jupyter.kernel.display.sequence.DefaultCollectionDisplayRenderer;
-import org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider;
-import org.rapaio.jupyter.kernel.display.spi.DisplayTransformerProvider;
+import org.rapaio.jupyter.kernel.display.spi.DisplayProvider;
 import org.rapaio.jupyter.kernel.display.table.DefaultTableDisplayRenderer;
 import org.rapaio.jupyter.kernel.display.table.MapTableTransformer;
 import org.rapaio.jupyter.kernel.display.table.OptionsTableTransformer;
@@ -32,8 +31,7 @@ public final class DisplaySystem {
 
     private final DefaultDisplayRenderer defaultDisplayRenderer = new DefaultDisplayRenderer();
 
-    private final ServiceLoader<DisplayTransformerProvider> transformerLoader;
-    private final ServiceLoader<DisplayRendererProvider> rendererLoader;
+    private final ServiceLoader<DisplayProvider> displayLoader;
 
     private DisplaySystem() {
         systemDisplayRenderers.add(new DefaultCollectionDisplayRenderer());
@@ -43,23 +41,23 @@ public final class DisplaySystem {
         systemDisplayTransformers.add(new MapTableTransformer());
         systemDisplayTransformers.add(new OptionsTableTransformer());
 
-        transformerLoader = ServiceLoader.load(DisplayTransformerProvider.class);
-        rendererLoader = ServiceLoader.load(DisplayRendererProvider.class);
+        displayLoader = ServiceLoader.load(DisplayProvider.class);
 
         refreshSpiDisplayHandlers();
     }
 
     public void refreshSpiDisplayHandlers() {
-        transformerLoader.reload();
-        rendererLoader.reload();
+        displayLoader.reload();
 
         spiDisplayTransformers.clear();
         spiDisplayRenderers.clear();
 
-        transformerLoader.stream()
+        displayLoader.stream()
                 .flatMap(provider -> provider.get().getDisplayTransformers().stream())
                 .forEach(spiDisplayTransformers::add);
-        rendererLoader.stream().flatMap(provider -> provider.get().getDisplayRenderers().stream()).forEach(spiDisplayRenderers::add);
+        displayLoader.stream()
+                .flatMap(provider -> provider.get().getDisplayRenderers().stream())
+                .forEach(spiDisplayRenderers::add);
     }
 
     /**

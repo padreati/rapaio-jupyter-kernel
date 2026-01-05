@@ -1,5 +1,7 @@
 package org.rapaio.jupyter.kernel.display;
 
+import org.rapaio.jupyter.kernel.display.spi.DisplayProvider;
+
 /**
  * Renders objects to {@link DisplayData} if the objects can be cast to the class specified by {@link #rendererClass()}
  * and the requested MIME type is supported by the renderer.
@@ -10,9 +12,9 @@ package org.rapaio.jupyter.kernel.display;
  * a string representation.
  * <p>
  * Implementations of this interface could be provided through SPI services by providing implementations
- * of {@link org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider}.
+ * of {@link DisplayProvider}.
  *
- * @see org.rapaio.jupyter.kernel.display.spi.DisplayRendererProvider
+ * @see DisplayProvider
  */
 public interface DisplayRenderer {
 

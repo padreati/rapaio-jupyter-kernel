@@ -17,12 +17,12 @@
   {
     "key": "display.maxRows",
     "value": "20",
-    "description": "If maxRows is exceeded, switch to truncate view. Objects are centrally truncated. '0' value means unlimited. default: 60"
+    "description": "If maxRows is exceeded, switch to truncate view. Objects are centrally truncated. '0' value means unlimited"
   },
   {
     "key": "display.maxCols",
     "value": "20",
-    "description": "If maxCols is exceeded, switch to truncate view. Objects are centrally truncated. '0' value means unlimited. default: 0"
+    "description": "If maxCols is exceeded, switch to truncate view. Objects are centrally truncated. '0' value means unlimited"
   },
   {
     "key": "display.maxColWidth",
@@ -31,7 +31,7 @@
   },
   {
     "key": "display.maxSeqItems",
-    "value": "100",
+    "value": "50",
     "description": "When pretty-printing a long sequence, no more then `maxSeqItems` will be printed. If items are omitted, they will be denoted by the addition of \"...\" to the resulting string. If set to 0, the number of items to be printed is unlimited."
   },
   {

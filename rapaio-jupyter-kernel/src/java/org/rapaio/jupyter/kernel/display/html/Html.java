@@ -2,6 +2,9 @@ package org.rapaio.jupyter.kernel.display.html;
 
 import java.util.List;
 
+/**
+ * Poor's man html encoder
+ */
 public class Html {
 
     private static final List<Pair> list = List.of(
