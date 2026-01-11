@@ -1,2 +1,2 @@
-org.rapaio.jupyter.display.provider.ElementsDisplayProvider
-org.rapaio.jupyter.display.provider.TableDisplayProvider
+org.rapaio.jupyter.display.provider.ExampleElementsDisplayProvider
+org.rapaio.jupyter.display.provider.ExampleTableDisplayProvider

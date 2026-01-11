@@ -38,24 +38,6 @@
                 </excludes>
             </testResource>
         </testResources>
-<!--        <plugins>-->
-<!--            <plugin>-->
-<!--                <groupId>org.apache.maven.plugins</groupId>-->
-<!--                <artifactId>maven-compiler-plugin</artifactId>-->
-<!--                <version>3.13.0</version>-->
-<!--                <configuration>-->
-<!--                    <release>${java.version}</release>-->
-<!--                    <useModulePath>true</useModulePath>-->
-<!--                    <compilerArgs>-->
-<!--                        <compilerArg>&#45;&#45;enable-preview</compilerArg>-->
-<!--                        <compilerArg>&#45;&#45;add-modules</compilerArg>-->
-<!--                        <compilerArg>rapaio.lib</compilerArg>-->
-<!--                    </compilerArgs>-->
-<!--                    <source>${java.version}</source>-->
-<!--                    <target>${java.version}</target>-->
-<!--                </configuration>-->
-<!--            </plugin>-->
-<!--        </plugins>-->
     </build>
 
 </project>

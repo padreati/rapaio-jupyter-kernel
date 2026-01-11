@@ -1,4 +1,4 @@
-package org.rapaio.jupyter.display.provider.list;
+package org.rapaio.jupyter.display.provider.elements;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;

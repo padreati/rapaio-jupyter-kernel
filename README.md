@@ -41,6 +41,10 @@ Below are listed some features, besides running Java code, since this is the mai
 * Display image from local file systems or URL
 * Manage dependencies (with transitivity). More details: [DEPENDENCY-MANAGEMENT.md](DEPENDENCY-MANAGEMENT.md)
 * Magic commands allows string interpolation (write stuff like `%dependency /add ${group}:${artifact}:${version}`)
+* Configuration options through which you can customize the kernel behavior. 
+More details: [OPTIONS.md](OPTIONS.md)
+* SPI display extension system which allows one to display instances of various class types with various common
+MIME types with display renderers, and display transformers. More details: [DISPLAY.md](DISPLAY.md)
 
 For a brief tour of the features check out the example notebook [here](example.ipynb).
 

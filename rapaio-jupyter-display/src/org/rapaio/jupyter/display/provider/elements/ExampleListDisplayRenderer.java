@@ -1,4 +1,4 @@
-package org.rapaio.jupyter.display.provider.list;
+package org.rapaio.jupyter.display.provider.elements;
 
 import java.util.List;
 import java.util.Map;
@@ -10,6 +10,11 @@ import org.rapaio.jupyter.kernel.display.DisplayRenderer;
 import org.rapaio.jupyter.kernel.display.MimeType;
 import org.rapaio.jupyter.kernel.global.Global;
 
+/**
+ * Example display renderer, which renders lists in different ways.
+ * <p>
+ * This is used to demonstrate how to create a display renderer.
+ */
 public class ExampleListDisplayRenderer implements DisplayRenderer {
 
     private static final Map<MimeType, Function<List<?>, DisplayData>> handlers = Map.of(

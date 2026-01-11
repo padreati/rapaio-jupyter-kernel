@@ -1,4 +1,4 @@
-package org.rapaio.jupyter.display.provider.list;
+package org.rapaio.jupyter.display.provider.elements;
 
 import java.util.Map;
 import java.util.Set;
@@ -10,6 +10,11 @@ import org.rapaio.jupyter.kernel.display.DisplayRenderer;
 import org.rapaio.jupyter.kernel.display.MimeType;
 import org.rapaio.jupyter.kernel.global.Global;
 
+/**
+ * Example display renderer, which renders a set as a list.
+ * <p>
+ * This is used to demonstrate how to create a display renderer.
+ */
 public class ExampleSetDisplayRenderer implements DisplayRenderer {
 
     private static final Map<MimeType, Function<Set<?>, DisplayData>> handlers = Map.of(
@@ -24,7 +29,6 @@ public class ExampleSetDisplayRenderer implements DisplayRenderer {
 
     @Override
     public boolean canRender(String mime) {
-
         MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMime());
         return handlers.containsKey(mimeType);
     }
@@ -32,7 +36,7 @@ public class ExampleSetDisplayRenderer implements DisplayRenderer {
     @Override
     public DisplayData render(String mime, Object o) {
         if (!canRender(mime)) {
-            return null;
+            throw new IllegalArgumentException("Can't render given mime type: " + mime);
         }
         MimeType mimeType = MimeType.from(mime, Global.options().display().defaultMime());
         var handler = handlers.get(mimeType);

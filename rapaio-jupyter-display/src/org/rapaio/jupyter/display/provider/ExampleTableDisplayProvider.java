@@ -7,7 +7,13 @@ import org.rapaio.jupyter.kernel.display.DisplayRenderer;
 import org.rapaio.jupyter.kernel.display.DisplayTransformer;
 import org.rapaio.jupyter.kernel.display.spi.DisplayProvider;
 
-public class TableDisplayProvider implements DisplayProvider {
+/**
+ * Example display provider, which provides display transformers for
+ * maps as tables.
+ * <p>
+ * This is used to demonstrate how to create a display provider.
+ */
+public class ExampleTableDisplayProvider implements DisplayProvider {
 
     @Override
     public List<DisplayRenderer> getDisplayRenderers() {
