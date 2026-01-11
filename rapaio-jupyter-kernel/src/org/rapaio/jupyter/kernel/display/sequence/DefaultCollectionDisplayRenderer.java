@@ -26,7 +26,7 @@ public class DefaultCollectionDisplayRenderer implements DisplayRenderer {
 
     @Override
     public boolean canRender(String mime) {
-        return false;
+        return handlers.containsKey(MimeType.from(mime, null));
     }
 
     @Override
@@ -36,28 +36,28 @@ public class DefaultCollectionDisplayRenderer implements DisplayRenderer {
         return handlers.get(mimeType).apply(collection);
     }
 
-    private static DisplayData renderText(Collection<?> list) {
+    private static DisplayData renderText(Collection<?> collection) {
         int limit = Global.options().display().maxSeqItems();
-        return DisplayData.fromText(list.getClass().getSimpleName() + "{"
-                + "size:" + list.size() + ",["
-                + list.stream().limit(limit).map(Object::toString).map(Html::encode).collect(Collectors.joining(","))
-                + (list.size() > limit ? ", ..." : "") + "]}");
+        return DisplayData.fromText(collection.getClass().getSimpleName() + "{"
+                + "size:" + collection.size() + ",["
+                + collection.stream().limit(limit).map(Object::toString).map(Html::encode).collect(Collectors.joining(","))
+                + (collection.size() > limit ? ", ..." : "") + "]}");
     }
 
-    private static DisplayData renderHtml(Collection<?> list) {
+    private static DisplayData renderHtml(Collection<?> collection) {
         int limit = Global.options().display().maxSeqItems();
-        return DisplayData.fromHtml(list.getClass().getSimpleName() + "{"
-                + "size:" + list.size() + ",["
-                + list.stream().limit(limit).map(Object::toString).collect(Collectors.joining(","))
-                + (list.size() > limit ? ", ..." : "") + "]}");
+        return DisplayData.fromHtml(collection.getClass().getSimpleName() + "{"
+                + "size:" + collection.size() + ",["
+                + collection.stream().limit(limit).map(Object::toString).collect(Collectors.joining(","))
+                + (collection.size() > limit ? ", ..." : "") + "]}");
     }
 
-    private static DisplayData renderMarkdown(Collection<?> list) {
+    private static DisplayData renderMarkdown(Collection<?> collection) {
         int limit = Global.options().display().maxSeqItems();
         return DisplayData.withType("md",
-                list.getClass().getSimpleName() + "{"
-                        + "size:" + list.size() + ",["
-                        + list.stream().limit(limit).map(Object::toString).collect(Collectors.joining(","))
-                        + (list.size() > limit ? ", ..." : "") + "]}");
+                collection.getClass().getSimpleName() + "{"
+                        + "size:" + collection.size() + ",["
+                        + collection.stream().limit(limit).map(Object::toString).collect(Collectors.joining(","))
+                        + (collection.size() > limit ? ", ..." : "") + "]}");
     }
 }

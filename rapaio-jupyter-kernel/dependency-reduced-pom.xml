@@ -10,11 +10,11 @@
   <name>rapaio-jupyter-kernel</name>
   <description>Rapaio Jupyter Kernel Core Implementation</description>
   <build>
-    <sourceDirectory>src/java</sourceDirectory>
-    <testSourceDirectory>src/test</testSourceDirectory>
+    <sourceDirectory>src</sourceDirectory>
+    <testSourceDirectory>test</testSourceDirectory>
     <resources>
       <resource>
-        <directory>src/resources</directory>
+        <directory>resources</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>
@@ -22,7 +22,7 @@
     </resources>
     <testResources>
       <testResource>
-        <directory>src/test-resources</directory>
+        <directory>test-resources</directory>
         <excludes>
           <exclude>**/*.java</exclude>
         </excludes>

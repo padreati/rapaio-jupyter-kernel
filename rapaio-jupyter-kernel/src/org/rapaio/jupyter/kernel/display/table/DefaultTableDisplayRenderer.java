@@ -15,9 +15,9 @@ import org.rapaio.jupyter.kernel.global.Global;
  */
 public class DefaultTableDisplayRenderer implements DisplayRenderer {
 
-    private static final Map<MimeType, Function<TableDisplay, DisplayData>> supportedTypes =
-            Map.of(MimeType.HTML, DefaultTableDisplayRenderer::displayHtml,
-                    MimeType.MARKDOWN, DefaultTableDisplayRenderer::displayMarkdown);
+    private static final Map<MimeType, Function<TableDisplay, DisplayData>> supportedTypes = Map.of(
+            MimeType.HTML, DefaultTableDisplayRenderer::displayHtml,
+            MimeType.MARKDOWN, DefaultTableDisplayRenderer::displayMarkdown);
 
     @Override
     public Class<?> rendererClass() {

@@ -27,7 +27,7 @@ public class DisplayData {
 
     public static DisplayData withType(String type, String data) {
         DisplayData dd = new DisplayData();
-        dd.putData(type, data);
+        dd.putData(MimeType.from(type, null).longType(), data);
         return dd;
     }
 

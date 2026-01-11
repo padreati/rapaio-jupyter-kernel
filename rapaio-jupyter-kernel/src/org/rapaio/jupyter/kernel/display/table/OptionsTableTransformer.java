@@ -18,9 +18,10 @@ public class OptionsTableTransformer implements DisplayTransformer {
     @Override
     public Object transform(Object o) {
         Options opt = (Options) o;
+        int size = opt.getConfigItems().size();
         return new TableDisplayWrapper()
-                .withColumn("Name", DataType.STRING, opt.getConfigItems().size(), i -> opt.getConfigItems().get(i).key())
-                .withColumn("Value", DataType.STRING, opt.getConfigItems().size(), i -> opt.getConfigItems().get(i).value())
-                .withColumn("Description", DataType.STRING, opt.getConfigItems().size(), i -> opt.getConfigItems().get(i).description());
+                .withColumn("Name", DataType.STRING, size, i -> opt.getConfigItems().get(i).key())
+                .withColumn("Value", DataType.STRING, size, i -> opt.getConfigItems().get(i).value())
+                .withColumn("Description", DataType.STRING, size, i -> opt.getConfigItems().get(i).description());
     }
 }

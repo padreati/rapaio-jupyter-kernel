@@ -29,6 +29,10 @@ public class Options {
     }
 
     public Options() {
+        reset();
+    }
+
+    public final void reset() {
         try {
             Gson gson = new Gson();
             var reader = gson.newJsonReader(new BufferedReader(new InputStreamReader(

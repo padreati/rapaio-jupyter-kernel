@@ -8,6 +8,7 @@ import org.rapaio.jupyter.kernel.global.Global;
 
 public class TableDisplayWrapper implements TableDisplay {
 
+    private boolean hasHeader = true;
     private final List<String> columnNames = new ArrayList<>();
     private final List<DataType> dataTypes = new ArrayList<>();
     private final List<Function<Integer, Object>> columnGetters = new ArrayList<>();
@@ -16,7 +17,7 @@ public class TableDisplayWrapper implements TableDisplay {
 
     @Override
     public boolean hasHeader() {
-        return columnNames.stream().anyMatch(String::isBlank);
+        return hasHeader;
     }
 
     @Override
@@ -45,11 +46,8 @@ public class TableDisplayWrapper implements TableDisplay {
         return value == null ? Global.options().display().format().na() : value.toString();
     }
 
-    public TableDisplayWrapper withColumn(String name, DataType type, List<Object> values) {
-        columnNames.add(name);
-        dataTypes.add(type);
-        columnGetters.add(values::get);
-        rows = Math.max(rows, values.size());
+    public TableDisplayWrapper withHasHeader(boolean hasHeader) {
+        this.hasHeader = hasHeader;
         return this;
     }
 

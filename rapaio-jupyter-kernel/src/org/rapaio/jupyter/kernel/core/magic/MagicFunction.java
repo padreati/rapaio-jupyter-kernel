@@ -1,6 +1,5 @@
 package org.rapaio.jupyter.kernel.core.magic;
 
-import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
 
 @FunctionalInterface

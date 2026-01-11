@@ -47,19 +47,19 @@
     </dependencies>
 
     <build>
-        <sourceDirectory>src/java</sourceDirectory>
+        <sourceDirectory>src</sourceDirectory>
         <resources>
             <resource>
-                <directory>src/resources</directory>
+                <directory>resources</directory>
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
             </resource>
         </resources>
-        <testSourceDirectory>src/test</testSourceDirectory>
+        <testSourceDirectory>test</testSourceDirectory>
         <testResources>
             <testResource>
-                <directory>src/test-resources</directory>
+                <directory>test-resources</directory>
                 <excludes>
                     <exclude>**/*.java</exclude>
                 </excludes>
