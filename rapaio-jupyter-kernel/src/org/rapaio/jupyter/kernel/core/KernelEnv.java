@@ -29,7 +29,7 @@ public class KernelEnv {
 
     public KernelEnv() {
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
-        LOGGER.info(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
+        LOGGER.finest(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
         if (envCompilerOptions == null) {
             envCompilerOptions = GeneralProperties.defaultProperties().getDefaultCompilerOptions();
         }
@@ -38,7 +38,7 @@ public class KernelEnv {
         compilerOptions = new ArrayList<>(List.of(compilerTokens));
 
         String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
-        LOGGER.info(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
+        LOGGER.finest(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
         if (envTimeoutMillis == null) {
             envTimeoutMillis = GeneralProperties.defaultProperties().getDefaultTimeoutMillis();
         }
@@ -50,24 +50,24 @@ public class KernelEnv {
         }
 
         String envInitScript = System.getenv(RJK_INIT_SCRIPT);
-        LOGGER.info(RJK_INIT_SCRIPT + " env: " + envInitScript);
+        LOGGER.finest(RJK_INIT_SCRIPT + " env: " + envInitScript);
         if (envInitScript == null) {
             envInitScript = GeneralProperties.defaultProperties().getDefaultInitScript();
         }
         initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
 
         String envClasspath = System.getenv(RJK_CLASSPATH);
-        LOGGER.info(RJK_CLASSPATH + " env: " + envClasspath);
+        LOGGER.finest(RJK_CLASSPATH + " env: " + envClasspath);
         if (envClasspath == null) {
             envClasspath = "";
         }
         classpath = envClasspath;
 
         String envMimaCache = System.getenv(RJK_MIMA_CACHE);
-        LOGGER.info(RJK_MIMA_CACHE + " env: " + envMimaCache);
+        LOGGER.finest(RJK_MIMA_CACHE + " env: " + envMimaCache);
         if (envMimaCache == null) {
             envMimaCache = GeneralProperties.defaultProperties().getDefaultMimaCache();
-            LOGGER.info("Since " + RJK_MIMA_CACHE + " is empty, default value is '" + envMimaCache + "'");
+            LOGGER.finest("Since " + RJK_MIMA_CACHE + " is empty, default value is '" + envMimaCache + "'");
         }
         mimaCache = envMimaCache;
     }
