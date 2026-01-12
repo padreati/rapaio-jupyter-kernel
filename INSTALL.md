@@ -4,20 +4,20 @@ The latest version can be found as a download in the releases section. Rapaio Ju
 installing tool which allow users to quickly install the kernel. The installer is contained in the jar distribution archive
 and can be called with:
 
-    java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto
+    java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i -auto
 
 The `-auto` option uses an automatic mode for installing the kernel.
 
-Starting with version 2.3.0 there are also installation profiles. The role of an installation profile is just to offer a predefined 
+Starting with version 2.1.0 there are also installation profiles. The role of an installation profile is just to offer a predefined 
 installation setup configured for some special situations. The same thing offered by an installation profile can be obtained by 
 manually changing the `kernel.json` file.
 
 The following profiles are defined:
 
-* `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview22` - enables preview features for Java 22 release.
-* `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview23` - enables preview features for Java 23 release.
-* `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview24` - enables preview features for Java 24 release.
-* `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview25` - enables preview features for Java 25 release.
+* `java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i -auto -preview22` - enables preview features for Java 22 release.
+* `java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i -auto -preview23` - enables preview features for Java 23 release.
+* `java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i -auto -preview24` - enables preview features for Java 24 release.
+* `java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i -auto -preview25` - enables preview features for Java 25 release.
 
 If no profile is specified, then the standard installation is performed which has a proper configurations for all Java versions >= 17. 
 
@@ -26,7 +26,7 @@ If no profile is specified, then the standard installation is performed which ha
 Without using the automatic mode, the installer asks in an interactive way various information to customize the installed kernel.
 An example of interactive installer mode:
 
-    shell: java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i
+    shell: java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i
     Installing in interactive mode.
     Select installation path:
     [1] /home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels
@@ -37,7 +37,7 @@ An example of interactive installer mode:
     
     Select mima cache folder (default 'mima_cache'):
     
-    Select display name (default 'Java (rjk 2.3.0)'):
+    Select display name (default 'Java (rjk 3.0.0)'):
     
     Select timeout in milliseconds:
     
@@ -52,10 +52,10 @@ An example of interactive installer mode:
     "argv": [
     "java",
     "-jar",
-    "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-2.3.0.jar",
+    "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-3.0.0.jar",
     "{connection_file}"
     ],
-    "display_name": "Java (rjk 2.3.0)",
+    "display_name": "Java (rjk 3.0.0)",
     "language": "java",
     "interrupt_mode": "message",
     "env": {
