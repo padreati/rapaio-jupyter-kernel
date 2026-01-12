@@ -1,22 +1,36 @@
 package org.rapaio.jupyter.kernel.display.text;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.rapaio.jupyter.kernel.TestUtils;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
 import org.rapaio.jupyter.kernel.core.java.CompilerException;
 import org.rapaio.jupyter.kernel.core.java.JavaEngine;
+import org.rapaio.jupyter.kernel.global.Global;
 
 import jdk.jshell.DeclarationSnippet;
 import jdk.jshell.Snippet;
 import jdk.jshell.SnippetEvent;
 
 public class ANSITextTest {
+
+    @BeforeEach
+    void beforeEach() {
+        Global.options().reset();
+    }
+
+    @AfterEach
+    void afterEach() {
+        Global.options().reset();
+    }
 
     @Test
     void sandboxTest() {
@@ -52,5 +66,20 @@ public class ANSITextTest {
         for(var msg : msgs) {
             System.out.println(msg);
         }
+    }
+
+
+    @Test
+    void testOptionsColored() {
+
+        Global.options().display().text().colored(true);
+
+        String colored = ANSI.start().bold().fgBlue().text("x").render();
+        assertEquals("\u001B[0m\u001B[1m\u001B[34mx\u001B[0m", colored);
+
+        Global.options().display().text().colored(false);
+
+        String plain = ANSI.start().bold().fgBlue().text("x").render();
+        assertEquals("x", plain);
     }
 }

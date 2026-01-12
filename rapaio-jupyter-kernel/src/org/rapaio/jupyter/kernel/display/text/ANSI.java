@@ -4,6 +4,8 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.rapaio.jupyter.kernel.global.Global;
+
 /**
  * This incorporates some commands for manipulation of the text output format for Jupyter
  * notebook output and error output.
@@ -137,13 +139,18 @@ public final class ANSI {
     private static final String CODE_LINE_PROMPT = "|    ";
     private static final String CODE_LINE_POINTER = "|--> ";
 
-    private final StringBuilder sb = new StringBuilder();
+    private final boolean enabled;
+    private final StringBuilder sb;
 
     private ANSI() {
+        this.enabled = Global.options().display().text().colored();
+        this.sb = new StringBuilder();
     }
 
     public ANSI codes(int... codes) {
-        sb.append(escape(codes));
+        if (enabled) {
+            sb.append(escape(codes));
+        }
         return this;
     }
 
@@ -153,42 +160,58 @@ public final class ANSI {
     }
 
     public ANSI bold() {
-        sb.append(escape(BOLD));
+        if (enabled) {
+            sb.append(escape(BOLD));
+        }
         return this;
     }
 
     public ANSI fgBlue() {
-        sb.append(escape(FG_BLUE));
+        if (enabled) {
+            sb.append(escape(FG_BLUE));
+        }
         return this;
     }
 
     public ANSI fgGreen() {
-        sb.append(escape(FG_GREEN));
+        if (enabled) {
+            sb.append(escape(FG_GREEN));
+        }
         return this;
     }
 
     public ANSI fgRed() {
-        sb.append(escape(FG_RED));
+        if (enabled) {
+            sb.append(escape(FG_RED));
+        }
         return this;
     }
 
     public ANSI fgColor(int index) {
-        sb.append(escape(FG_COLOR, COLOR_SET_8_BIT, index));
+        if (enabled) {
+            sb.append(escape(FG_COLOR, COLOR_SET_8_BIT, index));
+        }
         return this;
     }
 
     public ANSI fgColor(Color color) {
-        sb.append(escape(FG_COLOR, COLOR_SET_TRUE_COLOR, color.getRed(), color.getGreen(), color.getBlue()));
+        if (enabled) {
+            sb.append(escape(FG_COLOR, COLOR_SET_TRUE_COLOR, color.getRed(), color.getGreen(), color.getBlue()));
+        }
         return this;
     }
 
     public ANSI bgColor(int index) {
-        sb.append(escape(BG_COLOR, COLOR_SET_8_BIT, index));
+        if (enabled) {
+            sb.append(escape(BG_COLOR, COLOR_SET_8_BIT, index));
+        }
         return this;
     }
 
     public ANSI bgColor(Color color) {
-        sb.append(escape(BG_COLOR, COLOR_SET_TRUE_COLOR, color.getRed(), color.getGreen(), color.getBlue()));
+        if (enabled) {
+            sb.append(escape(BG_COLOR, COLOR_SET_TRUE_COLOR, color.getRed(), color.getGreen(), color.getBlue()));
+        }
         return this;
     }
 
@@ -198,7 +221,9 @@ public final class ANSI {
     }
 
     public ANSI reset() {
-        sb.append(escape(RESET));
+        if(enabled) {
+            sb.append(escape(RESET));
+        }
         return this;
     }
 

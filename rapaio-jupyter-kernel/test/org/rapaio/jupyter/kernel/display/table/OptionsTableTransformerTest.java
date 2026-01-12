@@ -32,7 +32,7 @@ public class OptionsTableTransformerTest {
 
         TableDisplay td = (TableDisplay) display;
         assertEquals(3, td.getCols());
-        assertEquals(10, td.getRows());
+        assertEquals(11, td.getRows());
         assertTrue(td.hasHeader());
     }
 }

@@ -22,6 +22,7 @@ public class Options {
     private static final String DISPLAY_FORMAT_NA_KEY = "display.format.na";
     private static final String DISPLAY_FORMAT_PRECISION_KEY = "DISPLAY_FORMAT_PRECISION_KEY";
     private static final String DISPLAY_HTML_BORDER_KEY = "display.html.border";
+    private static final String DISPLAY_TEXT_COLORED_KEY = "display.text.colored";
 
     private final HashMap<String, Item> valueMap = new HashMap<>();
 
@@ -143,6 +144,10 @@ public class Options {
         public OptionsDisplayHtml html() {
             return new OptionsDisplayHtml(this.options);
         }
+
+        public OptionsDisplayText text() {
+            return new OptionsDisplayText(this.options);
+        }
     }
 
     public static class OptionsDisplayFormat {
@@ -184,6 +189,22 @@ public class Options {
 
         public void border(int value) {
             options.set(DISPLAY_HTML_BORDER_KEY, String.valueOf(value));
+        }
+    }
+
+    public static class OptionsDisplayText {
+        private final Options options;
+
+        private OptionsDisplayText(Options options) {
+            this.options = options;
+        }
+
+        public boolean colored() {
+            return options.get(DISPLAY_TEXT_COLORED_KEY).equalsIgnoreCase("true");
+        }
+
+        public void colored(boolean value) {
+            options.set(DISPLAY_TEXT_COLORED_KEY, value ? "true" : "false");
         }
     }
 }

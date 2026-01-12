@@ -48,5 +48,10 @@
     "key": "display.format.precision",
     "value": "6",
     "description": "Number of decimals for floating point numbers."
+  },
+  {
+    "key": "display.text.colored",
+    "value": "true",
+    "description": "If 'true' the text representation is colored using text ASCII codes, any other value will disable ASCII code colors."
   }
 ]
