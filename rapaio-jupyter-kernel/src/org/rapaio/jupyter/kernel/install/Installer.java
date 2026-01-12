@@ -127,6 +127,7 @@ public class Installer {
 
         String installationPath = collectInstallationPath(os, autoInstall, system);
         String kernelDir = collectKernelDir(autoInstall, properties);
+        String mimaCache = collectMimaCache(autoInstall, properties);
         String displayName = collectDisplayName(autoInstall, properties);
         String timeoutMillis = collectTimeoutMillis(autoInstall, properties);
         String compilerOptions = collectCompilerOptions(autoInstall, properties);
@@ -139,6 +140,7 @@ public class Installer {
                 .withEnvTimeoutMillis(timeoutMillis)
                 .withEnvCompilerOptions(compilerOptions)
                 .withEnvInitScript(initScript)
+                .withEnvMimaCache(mimaCache)
                 .build();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -240,6 +242,19 @@ public class Installer {
         }
     }
 
+    private String collectMimaCache(boolean autoInstall, GeneralProperties properties) {
+        if (autoInstall) {
+            return properties.getDefaultMimaCache();
+        }
+        System.out.printf("Select mima cache folder (default '%s'):%n", properties.getDefaultMimaCache());
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine().trim();
+        if (line.isEmpty()) {
+            return properties.getDefaultMimaCache();
+        }
+        return line.trim();
+    }
+
     private String collectDisplayName(boolean autoInstall, GeneralProperties properties) {
         if (autoInstall) {
             return properties.getDefaultDisplayName();
@@ -285,7 +300,7 @@ public class Installer {
         if (autoInstall) {
             return properties.getDefaultInitScript();
         }
-        System.out.printf("Select init script (default '%s':%n", properties.getDefaultInitScript());
+        System.out.printf("Select init script (default '%s'):%n", properties.getDefaultInitScript());
         return new Scanner(System.in).nextLine().trim();
     }
 

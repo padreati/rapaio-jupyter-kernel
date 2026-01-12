@@ -3,6 +3,7 @@ package org.rapaio.jupyter.kernel.core;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_CLASSPATH;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_COMPILER_OPTIONS;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_INIT_SCRIPT;
+import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_MIMA_CACHE;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_TIMEOUT_MILLIS;
 
 import java.io.BufferedReader;
@@ -24,10 +25,11 @@ public class KernelEnv {
     private final long timeoutMillis;
     private final String initScriptContent;
     private final String classpath;
+    private final String mimaCache;
 
     public KernelEnv() {
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
-        LOGGER.finest(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
+        LOGGER.info(RJK_COMPILER_OPTIONS + " env: " + envCompilerOptions);
         if (envCompilerOptions == null) {
             envCompilerOptions = GeneralProperties.defaultProperties().getDefaultCompilerOptions();
         }
@@ -36,7 +38,7 @@ public class KernelEnv {
         compilerOptions = new ArrayList<>(List.of(compilerTokens));
 
         String envTimeoutMillis = System.getenv(RJK_TIMEOUT_MILLIS);
-        LOGGER.finest(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
+        LOGGER.info(RJK_TIMEOUT_MILLIS + " env: " + envTimeoutMillis);
         if (envTimeoutMillis == null) {
             envTimeoutMillis = GeneralProperties.defaultProperties().getDefaultTimeoutMillis();
         }
@@ -48,18 +50,26 @@ public class KernelEnv {
         }
 
         String envInitScript = System.getenv(RJK_INIT_SCRIPT);
-        LOGGER.finest(RJK_INIT_SCRIPT + " env: " + envInitScript);
+        LOGGER.info(RJK_INIT_SCRIPT + " env: " + envInitScript);
         if (envInitScript == null) {
             envInitScript = GeneralProperties.defaultProperties().getDefaultInitScript();
         }
         initScriptContent = envInitScript.trim().isEmpty() ? "" : loadInitScript(envInitScript);
 
         String envClasspath = System.getenv(RJK_CLASSPATH);
-        LOGGER.finest(RJK_CLASSPATH + " env: " + envClasspath);
+        LOGGER.info(RJK_CLASSPATH + " env: " + envClasspath);
         if (envClasspath == null) {
             envClasspath = "";
         }
         classpath = envClasspath;
+
+        String envMimaCache = System.getenv(RJK_MIMA_CACHE);
+        LOGGER.info(RJK_MIMA_CACHE + " env: " + envMimaCache);
+        if (envMimaCache == null) {
+            envMimaCache = GeneralProperties.defaultProperties().getDefaultMimaCache();
+            LOGGER.info("Since " + RJK_MIMA_CACHE + " is empty, default value is '" + envMimaCache + "'");
+        }
+        mimaCache = envMimaCache;
     }
 
     private String loadInitScript(String path) {
@@ -96,5 +106,9 @@ public class KernelEnv {
 
     public String classpath() {
         return classpath;
+    }
+
+    public String mimaCache() {
+        return mimaCache;
     }
 }

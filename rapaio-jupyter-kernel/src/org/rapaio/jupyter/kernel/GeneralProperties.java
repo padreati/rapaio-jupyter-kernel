@@ -53,6 +53,10 @@ public final class GeneralProperties {
         return properties.getProperty("default.init.script");
     }
 
+    public String getDefaultMimaCache() {
+        return properties.getProperty("default.mima.cache");
+    }
+
     public String[] getDefaultJavaArgv() {
         String javaArgv = properties.getProperty("default.java.argv");
         if (javaArgv == null) {

@@ -16,6 +16,7 @@ import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.rapaio.jupyter.kernel.core.KernelEnv;
 import org.rapaio.jupyter.kernel.core.magic.handlers.RepoParam;
 
 public class MimaDependencyManagerTest {
@@ -24,7 +25,7 @@ public class MimaDependencyManagerTest {
 
     @BeforeEach
     void beforeEach() {
-        dm = new MimaDependencyManager();
+        dm = new MimaDependencyManager(new KernelEnv());
     }
 
     @Test

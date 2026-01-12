@@ -58,6 +58,7 @@ public class RapaioKernel {
     public static final String RJK_COMPILER_OPTIONS = "RJK_COMPILER_OPTIONS";
     public static final String RJK_INIT_SCRIPT = "RJK_INIT_SCRIPT";
     public static final String RJK_CLASSPATH = "RJK_CLASSPATH";
+    public static final String RJK_MIMA_CACHE = "RJK_MIMA_CACHE";
 
     private static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
 
@@ -86,7 +87,7 @@ public class RapaioKernel {
                 .build();
         this.javaEngine.initialize();
         this.magicEngine = new MagicEngine(this);
-        this.dependencyManager = new MimaDependencyManager();
+        this.dependencyManager = new MimaDependencyManager(kernelEnv);
     }
 
 

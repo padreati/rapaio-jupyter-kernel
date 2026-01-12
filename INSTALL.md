@@ -17,6 +17,7 @@ The following profiles are defined:
 * `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview22` - enables preview features for Java 22 release.
 * `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview23` - enables preview features for Java 23 release.
 * `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview24` - enables preview features for Java 24 release.
+* `java -jar ./rapaio-jupyter-kernel-2.3.0.jar -i -auto -preview25` - enables preview features for Java 25 release.
 
 If no profile is specified, then the standard installation is performed which has a proper configurations for all Java versions >= 17. 
 
@@ -33,6 +34,8 @@ An example of interactive installer mode:
     [3] /usr/share/jupyter/kernels
     1
     Select kernel dir (default 'rapaio-jupyter-kernel'):
+    
+    Select mima cache folder (default 'mima_cache'):
     
     Select display name (default 'Java (rjk 2.3.0)'):
     
@@ -59,7 +62,8 @@ An example of interactive installer mode:
     "RJK_CLASSPATH": "",
     "RJK_COMPILER_OPTIONS": "",
     "RJK_INIT_SCRIPT": "",
-    "RJK_TIMEOUT_MILLIS": "-1"
+    "RJK_TIMEOUT_MILLIS": "-1",
+    "RJK_MIMA_CACHE": "mima_cache"
     }
     }
     Installer is ready. Do you want to continue [Y|y/N|n] ?

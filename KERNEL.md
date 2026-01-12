@@ -17,15 +17,16 @@ the installation process. One configuration file which I have on my host looks l
             "RJK_CLASSPATH": "",
             "RJK_COMPILER_OPTIONS": "",
             "RJK_INIT_SCRIPT": "",
-            "RJK_TIMEOUT_MILLIS": "-1"
+            "RJK_TIMEOUT_MILLIS": "-1",
+            "RJK_MIMA_CACHE": "mima_cache"
         }
     }
 
 This allows one to configure various things regarding this kernel.
 
-### Enabling preview for Java 23 release
+### Enabling preview for Java 25 release
 
-In order to enable preview features for a Java 23 release you can add options for java command line in `argv` command line. This enables
+In order to enable preview features for a Java 25 release you can add options for java command line in `argv` command line. This enables
 preview features in the java process which hosts the kernel. Additionally, you should add enable preview and release option to the
 `RJK_COMPILER_OPTIONS`. The later will add those options to the JShell instance hosted in the kernel process. To make things clearer, one
 could change the display name of the kernel on `display_name` entry. This will affect how Jupyter notebook will display this kernel.
@@ -38,19 +39,22 @@ The changed kernel file looks like the following:
             "--add-modules",
             "java.base,jdk.incubator.vector",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-2.3.0.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview25/rapaio-jupyter-kernel-2.3.0.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 2.3.0 preview24)",
+        "display_name": "Java (rjk 2.3.0 preview25)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
             "RJK_CLASSPATH": "",
             "RJK_COMPILER_OPTIONS": "--enable-preview --release 25",
             "RJK_INIT_SCRIPT": "",
-            "RJK_TIMEOUT_MILLIS": "-1"
+            "RJK_TIMEOUT_MILLIS": "-1",
+            "RJK_MIMA_CACHE": "mima_cache"
         }
     }
+
+In a similar way you can enable preview features for older versions of jvm like 22, 23, or 24.
 
 ### Altering classpath on notebook launch
 

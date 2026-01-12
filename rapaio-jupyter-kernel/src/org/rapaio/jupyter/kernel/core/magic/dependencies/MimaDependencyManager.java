@@ -17,12 +17,13 @@ import org.eclipse.aether.resolution.ArtifactResult;
 import org.eclipse.aether.resolution.DependencyRequest;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
+import org.rapaio.jupyter.kernel.core.KernelEnv;
 import org.rapaio.jupyter.kernel.core.magic.handlers.RepoParam;
+import org.rapaio.jupyter.kernel.install.Installer;
 
 import eu.maveniverse.maven.mima.context.Context;
 import eu.maveniverse.maven.mima.context.ContextOverrides;
 import eu.maveniverse.maven.mima.context.Runtimes;
-import org.rapaio.jupyter.kernel.install.Installer;
 
 public class MimaDependencyManager {
 
@@ -33,7 +34,7 @@ public class MimaDependencyManager {
     private final List<DependencySpec> resolvedDependencies = new ArrayList<>();
     private final List<ArtifactResult> loadedArtifacts = new ArrayList<>();
 
-    public MimaDependencyManager() {
+    public MimaDependencyManager(KernelEnv kernelEnv) {
 
         String kernelPath = MimaDependencyManager.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         if(Installer.findOSName()== Installer.OSName.WINDOWS) {
@@ -42,7 +43,7 @@ public class MimaDependencyManager {
             }
         }
         this.contextOverrides = ContextOverrides.create()
-                .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), "mima_cache"))
+                .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), kernelEnv.mimaCache()))
                 .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS).build();
         this.remoteRepositories = new ArrayList<>();
         remoteRepositories.add(ContextOverrides.CENTRAL);

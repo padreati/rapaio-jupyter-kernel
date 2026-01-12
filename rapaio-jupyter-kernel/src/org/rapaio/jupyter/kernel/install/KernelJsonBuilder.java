@@ -32,6 +32,7 @@ public class KernelJsonBuilder {
             put(RapaioKernel.RJK_TIMEOUT_MILLIS, properties.getDefaultTimeoutMillis());
             put(RapaioKernel.RJK_INIT_SCRIPT, properties.getDefaultInitScript());
             put(RapaioKernel.RJK_CLASSPATH, "");
+            put(RapaioKernel.RJK_MIMA_CACHE, properties.getDefaultMimaCache());
         }};
         defaultJarName = properties.getDefaultJarName();
         args = properties.getDefaultJavaArgv();
@@ -75,6 +76,10 @@ public class KernelJsonBuilder {
         return this;
     }
 
+    public KernelJsonBuilder withEnvMimaCache(String mimaCache) {
+        env.put(RapaioKernel.RJK_MIMA_CACHE, mimaCache);
+        return this;
+    }
 
     public KernelJson build() {
         validate();
