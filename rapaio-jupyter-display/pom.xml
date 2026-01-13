@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.padreati</groupId>
         <artifactId>rapaio-jupyter</artifactId>
-        <version>3.0.0</version>
+        <version>3.0.1</version>
     </parent>
 
     <artifactId>rapaio-jupyter-display</artifactId>
@@ -17,7 +17,7 @@
         <dependency>
             <groupId>io.github.padreati</groupId>
             <artifactId>rapaio-jupyter-kernel</artifactId>
-            <version>3.0.0</version>
+            <version>3.0.1</version>
         </dependency>
     </dependencies>
 

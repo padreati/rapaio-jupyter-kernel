@@ -12,6 +12,7 @@
     </annotationProcessing>
     <bytecodeTargetLevel target="23">
       <module name="rapaio-jupyter-interfaces" target="17" />
+      <module name="rapaio-jupyter-lib" target="17" />
     </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">

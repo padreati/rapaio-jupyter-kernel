@@ -16,6 +16,9 @@
     <file url="file://$PROJECT_DIR$/rapaio-jupyter-kernel/src/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rapaio-jupyter-kernel/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/rapaio-jupyter-kernel/src/main/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/rapaio-jupyter-lib/resources" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/rapaio-jupyter-lib/src" charset="UTF-8" />
+    <file url="file://$PROJECT_DIR$/rapaio-jupyter-lib/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/java" charset="UTF-8" />
     <file url="file://$PROJECT_DIR$/src/main/resources" charset="UTF-8" />

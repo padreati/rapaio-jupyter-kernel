@@ -17,16 +17,19 @@ public enum DataType {
         if (o == null) {
             return Global.options().display().format().na();
         }
-        Long value = Long.parseLong(o.toString());
-        return value.toString();
+        return o.toString();
     }),
     FLOAT(o -> {
         if (o == null) {
             return Global.options().display().format().na();
         }
-        Double value = Double.parseDouble(o.toString());
-        String format = "%." + Global.options().display().format().precision() + "f";
-        return String.format(format, value);
+        try {
+            Double value = Double.parseDouble(o.toString());
+            String format = "%." + Global.options().display().format().precision() + "f";
+            return String.format(format, value);
+        } catch (Exception e) {
+            return o.toString();
+        }
     });
 
     DataType(Function<Object, String> formatFunction) {

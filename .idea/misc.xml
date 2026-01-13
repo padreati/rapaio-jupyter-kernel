@@ -14,10 +14,11 @@
     <option name="ignoredFiles">
       <set>
         <option value="$PROJECT_DIR$/rapaio-jupyter-interfaces/pom.xml" />
+        <option value="$PROJECT_DIR$/rapaio-jupyter-lib/pom.xml" />
       </set>
     </option>
   </component>
-  <component name="ProjectRootManager" version="2" languageLevel="JDK_16" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_17" project-jdk-name="corretto-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
   </component>
 </project>
