@@ -55,7 +55,7 @@ installing tool which allows users to quickly set up the kernel. The installer i
 and can be called with:
 
 ```sh
-java -jar ./rapaio-jupyter-kernel-3.0.0.jar -i -auto
+java -jar ./rapaio-jupyter-kernel-3.0.1.jar -i -auto
 ```
 
 The `-auto` option uses an automatic mode for installing the kernel. The installer has also an interactive mode, and the kernel installation can be realized manually, also. 
@@ -71,7 +71,7 @@ The project is also stored in maven central repositories and can be added as a d
 <dependency>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter-kernel</artifactId>
-    <version>3.0.0</version>
+    <version>3.0.1</version>
 </dependency>
 ```
 
