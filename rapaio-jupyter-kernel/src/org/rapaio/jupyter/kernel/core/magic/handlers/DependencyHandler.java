@@ -9,6 +9,7 @@ import org.eclipse.aether.repository.RepositoryPolicy;
 import org.eclipse.aether.resolution.DependencyResolutionException;
 import org.eclipse.aether.resolution.DependencyResult;
 import org.rapaio.jupyter.kernel.core.RapaioKernel;
+import org.rapaio.jupyter.kernel.core.javadoc.JavadocJarParser;
 import org.rapaio.jupyter.kernel.core.magic.MagicHandler;
 import org.rapaio.jupyter.kernel.core.magic.MagicSnippet;
 import org.rapaio.jupyter.kernel.core.magic.SnippetMagicHandler;
@@ -243,10 +244,21 @@ public class DependencyHandler extends MagicHandler {
             var artifactsResults = resolveReport.getArtifactResults();
             kernel.channels().writeToStdOut("Resolved artifacts count: " + artifactsResults.size() + "\n");
             for (var result : artifactsResults) {
-                kernel.channels().writeToStdOut("Add to classpath: " +
-                        ANSI.start().fgGreen().text(result.getArtifact().getFile().getAbsolutePath()).reset().nl().render());
-                kernel.javaEngine().getShell().addToClasspath(result.getArtifact().getFile().getAbsolutePath());
-                DisplaySystem.inst().refreshSpiDisplayHandlers();
+
+                String absolutePath = result.getArtifact().getFile().getAbsolutePath();
+
+                if(JavadocJarParser.checkIfJavadoc(absolutePath)) {
+                    // if the resource is a javadoc file we parse it and add the parsed elements to javadoc search engine
+                    kernel.channels()
+                            .writeToStdOut(ANSI.start().text("Add to javadoc: ").fgGreen().text(absolutePath).reset().nl().render());
+                    kernel.javadocEngine().add(absolutePath);
+                } else {
+                    // normal jar dependency, we add it to classpath
+                    kernel.channels()
+                            .writeToStdOut(ANSI.start().text("Add to classpath: ").fgGreen().text(absolutePath).reset().nl().render());
+                    kernel.javaEngine().getShell().addToClasspath(absolutePath);
+                    DisplaySystem.inst().refreshSpiDisplayHandlers();
+                }
                 kernel.dependencyManager().addLoadedArtifact(result);
             }
             kernel.dependencyManager().promoteDependencies();
