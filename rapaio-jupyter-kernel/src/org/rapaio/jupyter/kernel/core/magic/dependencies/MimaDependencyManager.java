@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 import org.eclipse.aether.collection.CollectRequest;
@@ -26,6 +27,8 @@ import eu.maveniverse.maven.mima.context.ContextOverrides;
 import eu.maveniverse.maven.mima.context.Runtimes;
 
 public class MimaDependencyManager {
+
+    private static final Logger LOGGER = Logger.getLogger(MimaDependencyManager.class.getSimpleName());
 
     private final ContextOverrides contextOverrides;
     private final List<RemoteRepository> remoteRepositories;

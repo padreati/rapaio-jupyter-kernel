@@ -51,7 +51,11 @@ public class Tags {
         return new TagTexts("&nbsp;".repeat(repeat));
     }
 
-    public static TagIf iif(boolean cond, Supplier<Tag[]> supplier) {
-        return new TagIf(cond, supplier);
+    public static TagIf iif(boolean cond, Supplier<Tag[]> positive) {
+        return new TagIf(cond, positive);
+    }
+
+    public static TagIf iif(boolean cond, Supplier<Tag[]> positive, Supplier<Tag[]> negative) {
+        return new TagIf(cond, positive, negative);
     }
 }

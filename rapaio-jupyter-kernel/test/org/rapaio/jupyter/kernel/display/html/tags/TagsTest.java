@@ -12,7 +12,7 @@ import static org.rapaio.jupyter.kernel.display.html.Tags.texts;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
-import org.rapaio.jupyter.kernel.display.html.JavadocTools;
+import org.rapaio.jupyter.kernel.core.javadoc.JavadocJarParser;
 import org.rapaio.jupyter.kernel.display.html.Tag;
 
 import jdk.jshell.SourceCodeAnalysis;
@@ -30,7 +30,7 @@ public class TagsTest {
                 each(documentations, doc -> p(join(
                         b(texts(doc.signature())),
                         iif(doc.javadoc() != null,
-                                () -> new Tag[] {br(), texts(JavadocTools.javadocPreprocess(doc.javadoc()))}
+                                () -> new Tag[] {br(), texts(JavadocJarParser.javadocPreprocess(doc.javadoc()))}
                         )
                 )))
         ).render();

@@ -140,6 +140,12 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.jsoup</groupId>
+      <artifactId>jsoup</artifactId>
+      <version>1.22.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>eu.maveniverse.maven.mima</groupId>
       <artifactId>context</artifactId>
       <version>2.4.37</version>

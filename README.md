@@ -29,6 +29,9 @@ and it is a general-purpose Java kernel.
 Below are listed some features, besides running Java code, since this is the main purpose of the kernel:
 
 * Display Javadoc documentation (need styling and HTML postprocessing to make it nicer)
+* Ability to parse and provide javadoc documentation from the javadoc resources. In order to use javadoc they 
+have to be added as dependency (for example `%dependency /add io.github.padreati:rapaio-lib:jar:javadoc:8.1.0` 
+and `%dependency /resolve`) 
 * Console output with ANSI code colors
 * Autocompletion and documentation
 * Magic help function to facilitate navigation through the magic functions

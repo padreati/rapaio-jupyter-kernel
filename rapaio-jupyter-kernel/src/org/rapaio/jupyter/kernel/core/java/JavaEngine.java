@@ -29,10 +29,11 @@ import java.util.stream.Collectors;
 
 import org.rapaio.jupyter.kernel.core.CompleteMatches;
 import org.rapaio.jupyter.kernel.core.ExecutionContext;
+import org.rapaio.jupyter.kernel.core.RapaioKernel;
 import org.rapaio.jupyter.kernel.core.java.io.JShellConsole;
+import org.rapaio.jupyter.kernel.core.javadoc.JavadocJarParser;
 import org.rapaio.jupyter.kernel.core.util.Glob;
 import org.rapaio.jupyter.kernel.display.DisplayData;
-import org.rapaio.jupyter.kernel.display.html.JavadocTools;
 import org.rapaio.jupyter.kernel.display.html.Tag;
 import org.rapaio.jupyter.kernel.display.text.ANSI;
 import org.rapaio.jupyter.kernel.message.messages.ShellIsCompleteReply;
@@ -165,12 +166,6 @@ public class JavaEngine {
 
     private boolean allowedOutputs(SnippetEvent event) {
 
-//        System.out.println("--------");
-//        System.out.println("source: " + event.snippet().source());
-//        System.out.println("subkind: " + event.snippet().subKind());
-//        System.out.println("prev status: " + event.previousStatus());
-//        System.out.println("status: " + event.status());
-
         Snippet.SubKind subkind = event.snippet().subKind();
         if (subkind == Snippet.SubKind.VAR_VALUE_SUBKIND) {
             return true;
@@ -221,7 +216,7 @@ public class JavaEngine {
         return new CompleteMatches(options, anchor[0], at);
     }
 
-    public DisplayData inspect(String source, int pos) {
+    public DisplayData inspect(RapaioKernel kernel, String source, int pos) {
 
         while (pos + 1 < source.length() && Character.isJavaIdentifierPart(source.charAt(pos + 1))) {
             pos++;
@@ -243,7 +238,13 @@ public class JavaEngine {
         String html = join(
                 each(documentations, doc -> p(join(
                                 b(texts(doc.signature())),
-                                iif(doc.javadoc() != null, () -> new Tag[] {br(), texts(JavadocTools.javadocPreprocess(doc.javadoc()))})
+                                iif(
+                                        doc.javadoc() != null,
+                                        // first we try to use the javadoc from jshell provider; this works for jdk classes
+                                        () -> new Tag[] {br(), texts(JavadocJarParser.javadocPreprocess(doc.javadoc()))},
+                                        // if not available, we try to search in our own javadoc database
+                                        () -> new Tag[] {br(), texts(JavadocJarParser.javadocPreprocess((kernel.javadocEngine().search(doc.signature()))))}
+                                )
                         )
                 ))
         ).render();

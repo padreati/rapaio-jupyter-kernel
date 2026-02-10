@@ -11,6 +11,7 @@ import java.util.logging.Logger;
 
 import org.rapaio.jupyter.kernel.GeneralProperties;
 import org.rapaio.jupyter.kernel.channels.Channels;
+import org.rapaio.jupyter.kernel.core.javadoc.JavadocSearchEngine;
 import org.rapaio.jupyter.kernel.display.DisplayData;
 import org.rapaio.jupyter.kernel.display.DisplaySystem;
 import org.rapaio.jupyter.kernel.core.format.ErrorFormatters;
@@ -67,6 +68,7 @@ public class RapaioKernel {
 
     private final JavaEngine javaEngine;
     private final MagicEngine magicEngine;
+    private final JavadocSearchEngine javadocEngine;
     private final MimaDependencyManager dependencyManager;
     private final JShellConsole shellConsole;
     private final ExecutionContext ctx;
@@ -86,10 +88,10 @@ public class RapaioKernel {
                 .withClasspath(kernelEnv.classpath())
                 .build();
         this.javaEngine.initialize();
+        this.javadocEngine = new JavadocSearchEngine();
         this.magicEngine = new MagicEngine(this);
         this.dependencyManager = new MimaDependencyManager(kernelEnv);
     }
-
 
     public Channels channels() {
         return channels;
@@ -101,6 +103,10 @@ public class RapaioKernel {
 
     public MagicEngine magicEngine() {
         return magicEngine;
+    }
+
+    public JavadocSearchEngine javadocEngine() {
+        return javadocEngine;
     }
 
     public ExecutionContext executionContext() {
@@ -259,7 +265,7 @@ public class RapaioKernel {
 
             // request.detailLevel() is not used since we do not get the source as required
             // for detail level above 0
-            DisplayData inspection = javaEngine.inspect(request.code(), request.cursorPos());
+            DisplayData inspection = javaEngine.inspect(this, request.code(), request.cursorPos());
             channels.reply(new ShellInspectReply(inspection != null, inspection));
         } catch (Exception e) {
             channels.replyError(MessageType.SHELL_INSPECT_REPLY.newError(), ErrorReply.of(this, e, 0));
