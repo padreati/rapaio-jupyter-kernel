@@ -10,7 +10,7 @@ the installation process. One configuration file which I have on my host looks l
             "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-3.0.1.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.1)",
+        "display_name": "Java (rjk 3.0.2)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
@@ -42,7 +42,7 @@ The changed kernel file looks like the following:
             "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview25/rapaio-jupyter-kernel-3.0.1.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.1 preview25)",
+        "display_name": "Java (rjk 3.0.2 preview25)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
@@ -73,7 +73,7 @@ An illustrative example you can found below:
             "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-3.0.1.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.1)",
+        "display_name": "Java (rjk 3.0.2)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
