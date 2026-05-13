@@ -60,6 +60,7 @@ public class RapaioKernel {
     public static final String RJK_INIT_SCRIPT = "RJK_INIT_SCRIPT";
     public static final String RJK_CLASSPATH = "RJK_CLASSPATH";
     public static final String RJK_MIMA_CACHE = "RJK_MIMA_CACHE";
+    public static final String RJK_MIMA_USER_SETTINGS = "RJK_MIMA_USER_SETTINGS";
 
     private static final String SHELL_INIT_RESOURCE_PATH = "init.jshell";
 

@@ -4,6 +4,7 @@ import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_CLASSPATH;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_COMPILER_OPTIONS;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_INIT_SCRIPT;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_MIMA_CACHE;
+import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_MIMA_USER_SETTINGS;
 import static org.rapaio.jupyter.kernel.core.RapaioKernel.RJK_TIMEOUT_MILLIS;
 
 import java.io.BufferedReader;
@@ -26,6 +27,7 @@ public class KernelEnv {
     private final String initScriptContent;
     private final String classpath;
     private final String mimaCache;
+    private final boolean mimaUserSettings;
 
     public KernelEnv() {
         String envCompilerOptions = System.getenv(RJK_COMPILER_OPTIONS);
@@ -70,6 +72,14 @@ public class KernelEnv {
             LOGGER.finest("Since " + RJK_MIMA_CACHE + " is empty, default value is '" + envMimaCache + "'");
         }
         mimaCache = envMimaCache;
+
+        String envMimaUserSettings = System.getenv(RJK_MIMA_USER_SETTINGS);
+        LOGGER.finest(RJK_MIMA_USER_SETTINGS + " env: " + envMimaUserSettings);
+        if (envMimaUserSettings == null) {
+            mimaUserSettings = GeneralProperties.defaultProperties().getDefaultMimaUserSettings();
+        } else {
+            mimaUserSettings = Boolean.parseBoolean(envMimaUserSettings);
+        }
     }
 
     private String loadInitScript(String path) {
@@ -110,5 +120,9 @@ public class KernelEnv {
 
     public String mimaCache() {
         return mimaCache;
+    }
+
+    public boolean mimaUserSettings() {
+        return mimaUserSettings;
     }
 }

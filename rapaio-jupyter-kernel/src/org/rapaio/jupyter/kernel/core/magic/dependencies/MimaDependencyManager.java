@@ -32,6 +32,7 @@ public class MimaDependencyManager {
 
     private final ContextOverrides contextOverrides;
     private final List<RemoteRepository> remoteRepositories;
+    private final boolean userSettingsEnabled;
 
     private final List<DependencySpec> proposedDependencies = new ArrayList<>();
     private final List<DependencySpec> resolvedDependencies = new ArrayList<>();
@@ -45,8 +46,10 @@ public class MimaDependencyManager {
                 kernelPath = kernelPath.substring(1);
             }
         }
+        this.userSettingsEnabled = kernelEnv.mimaUserSettings();
         this.contextOverrides = ContextOverrides.create()
                 .withLocalRepositoryOverride(Path.of(kernelPath.substring(0, kernelPath.lastIndexOf('/')), kernelEnv.mimaCache()))
+                .withUserSettings(this.userSettingsEnabled)
                 .snapshotUpdatePolicy(ContextOverrides.SnapshotUpdatePolicy.ALWAYS).build();
         this.remoteRepositories = new ArrayList<>();
         remoteRepositories.add(ContextOverrides.CENTRAL);
@@ -99,6 +102,7 @@ public class MimaDependencyManager {
         try (Context context = Runtimes.INSTANCE.getRuntime().create(
                 contextOverrides.toBuilder()
                         .repositories(remoteRepositories)
+                        .withUserSettings(userSettingsEnabled)
                         .addRepositoriesOp(ContextOverrides.AddRepositoriesOp.REPLACE)
                         .build())) {
             List<Dependency> dependencies = new ArrayList<>();
