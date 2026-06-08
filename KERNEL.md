@@ -7,10 +7,10 @@ the installation process. One configuration file which I have on my host looks l
         "argv": [
             "java",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-3.0.1.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-3.0.3.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.2)",
+        "display_name": "Java (rjk 3.0.3)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
@@ -39,22 +39,22 @@ The changed kernel file looks like the following:
             "--add-modules",
             "java.base,jdk.incubator.vector",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview25/rapaio-jupyter-kernel-3.0.1.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview25/rapaio-jupyter-kernel-3.0.3.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.2 preview25)",
+        "display_name": "Java (rjk 3.0.3 preview26)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
             "RJK_CLASSPATH": "",
-            "RJK_COMPILER_OPTIONS": "--enable-preview --release 25",
+            "RJK_COMPILER_OPTIONS": "--enable-preview --release 26",
             "RJK_INIT_SCRIPT": "",
             "RJK_TIMEOUT_MILLIS": "-1",
             "RJK_MIMA_CACHE": "mima_cache"
         }
     }
 
-In a similar way you can enable preview features for older versions of jvm like 22, 23, or 24.
+In a similar way you can enable preview features for older versions of jvm like 22, 23, 24, 25, and 26.
 
 ### Altering classpath on notebook launch
 
@@ -70,10 +70,10 @@ An illustrative example you can found below:
         "argv": [
             "java",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-3.0.1.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-3.0.3.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.2)",
+        "display_name": "Java (rjk 3.0.3)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
