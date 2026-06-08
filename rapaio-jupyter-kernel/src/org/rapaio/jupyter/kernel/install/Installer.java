@@ -26,7 +26,8 @@ public class Installer {
             "preview22",
             "preview23",
             "preview24",
-            "preview25"
+            "preview25",
+            "preview26",
     };
 
     public enum OSName {
