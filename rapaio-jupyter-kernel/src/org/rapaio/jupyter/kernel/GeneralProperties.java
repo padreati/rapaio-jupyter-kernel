@@ -57,6 +57,10 @@ public final class GeneralProperties {
         return properties.getProperty("default.mima.cache");
     }
 
+    public boolean getDefaultMimaUserSettings() {
+        return Boolean.parseBoolean(properties.getProperty("default.mima.user.settings", "false"));
+    }
+
     public String[] getDefaultJavaArgv() {
         String javaArgv = properties.getProperty("default.java.argv");
         if (javaArgv == null) {
