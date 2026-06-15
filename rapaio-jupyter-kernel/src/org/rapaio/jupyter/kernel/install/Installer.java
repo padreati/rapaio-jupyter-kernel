@@ -133,6 +133,7 @@ public class Installer {
         String timeoutMillis = collectTimeoutMillis(autoInstall, properties);
         String compilerOptions = collectCompilerOptions(autoInstall, properties);
         String initScript = collectInitScript(autoInstall, properties);
+        String mimaUserSetting = collectMimaUserSettings(autoInstall, properties);
 
         KernelJson kj = new KernelJsonBuilder(properties)
                 .withJarPath(installationPath)
@@ -142,6 +143,7 @@ public class Installer {
                 .withEnvCompilerOptions(compilerOptions)
                 .withEnvInitScript(initScript)
                 .withEnvMimaCache(mimaCache)
+                .withEnvMimaUserSettings(mimaUserSetting)
                 .build();
 
         Gson gson = new GsonBuilder().setPrettyPrinting().create();
@@ -252,6 +254,19 @@ public class Installer {
         String line = scanner.nextLine().trim();
         if (line.isEmpty()) {
             return properties.getDefaultMimaCache();
+        }
+        return line.trim();
+    }
+
+    private String collectMimaUserSettings(boolean autoInstall, GeneralProperties properties) {
+        if(autoInstall) {
+            return Boolean.toString(properties.getDefaultMimaUserSettings());
+        }
+        System.out.printf("Select mima user settings (default '%s'):%n", Boolean.toString(properties.getDefaultMimaUserSettings()));
+        Scanner scanner = new Scanner(System.in);
+        String line = scanner.nextLine().trim();
+        if(line.isEmpty()) {
+            return Boolean.toString(properties.getDefaultMimaUserSettings());
         }
         return line.trim();
     }

@@ -7,10 +7,10 @@ the installation process. One configuration file which I have on my host looks l
         "argv": [
             "java",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-3.0.3.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel/rapaio-jupyter-kernel-3.0.4.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.3)",
+        "display_name": "Java (rjk 3.0.4)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
@@ -39,10 +39,10 @@ The changed kernel file looks like the following:
             "--add-modules",
             "java.base,jdk.incubator.vector",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview25/rapaio-jupyter-kernel-3.0.3.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview25/rapaio-jupyter-kernel-3.0.4.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.3 preview26)",
+        "display_name": "Java (rjk 3.0.4 preview26)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {
@@ -70,10 +70,10 @@ An illustrative example you can found below:
         "argv": [
             "java",
             "-jar",
-            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-3.0.3.jar",
+            "/home/ANT.AMAZON.COM/tutuianu/.local/share/jupyter/kernels/rapaio-jupyter-kernel-preview23/rapaio-jupyter-kernel-3.0.4.jar",
             "{connection_file}"
         ],
-        "display_name": "Java (rjk 3.0.3)",
+        "display_name": "Java (rjk 3.0.4)",
         "language": "java",
         "interrupt_mode": "message",
         "env": {

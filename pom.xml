@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.github.padreati</groupId>
     <artifactId>rapaio-jupyter</artifactId>
-    <version>3.0.3</version>
+    <version>3.0.4</version>
     <packaging>pom</packaging>
     <name>rapaio-jupyter</name>
 
@@ -89,4 +89,27 @@
         </repository>
     </distributionManagement>
 
+    <!-- release only -->
+    <!--    <build>-->
+    <!--        <plugins>-->
+    <!--            <plugin>-->
+    <!--                <groupId>org.apache.maven.plugins</groupId>-->
+    <!--                <artifactId>maven-gpg-plugin</artifactId>-->
+    <!--                <version>3.2.8</version>-->
+    <!--                <configuration>-->
+    <!--                    &lt;!&ndash; Use the hex value as the key identifier &ndash;&gt;-->
+    <!--                    <keyname>F500497B36823073</keyname>-->
+    <!--                </configuration>-->
+    <!--                <executions>-->
+    <!--                    <execution>-->
+    <!--                        <id>sign-artifacts</id>-->
+    <!--                        <phase>verify</phase>-->
+    <!--                        <goals>-->
+    <!--                            <goal>sign</goal>-->
+    <!--                        </goals>-->
+    <!--                    </execution>-->
+    <!--                </executions>-->
+    <!--            </plugin>-->
+    <!--        </plugins>-->
+    <!--    </build>-->
 </project>
